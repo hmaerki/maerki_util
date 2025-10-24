@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4a4a930d-a4c1-45e6-8561-43f97794cbde}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>wxHttpUpload.pyw</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId>Global|PythonCore|3.7-32</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.7-32" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="wxHttpUpload.pyw" />
+    <Compile Include="wxHttpUpload\HttpUpload.py" />
+    <Compile Include="wxHttpUpload\wxHttpUpload_wdr.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wxHttpUpload\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="wxHttpUpload\http_upload_config.txt" />
+    <Content Include="wxHttpUpload\wxHttpUpload_wdr.xrc" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>

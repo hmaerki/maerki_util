@@ -1,0 +1,23 @@
+2003-06-17, Hans Maerki
+
+Intstallation Guide
+  PYTHON
+    www.python.org
+      Python-2.2.2exe
+    www.wxpython.org
+      wxPythonWIN32-2.4.0.7-Py22.exe
+
+  WXHTTPUPLOAD
+    Install one instance of HttpUpload
+    Files:
+      <wxhttpupload>/wxHttpUpload.pyw
+      <wxhttpupload>/wxHttpUpload/wxHttpUpload_wdr.py
+      <wxhttpupload>/wxHttpUpload/wxHttpUpload_config.txt
+      <wxhttpupload>/wxHttpUpload/HttpUpload.py
+      <wxhttpupload>/wxHttpUpload/*.ico
+
+Run wxHttpUpload
+  Edit and all you instances for zulu and upload
+    <wxhttpupload>/wxHttpUpload_config.txt
+  Doubleclick
+    wxHttpUpload.pyw
