@@ -1,0 +1,2 @@
+wxPyScanConsole.py
+pause

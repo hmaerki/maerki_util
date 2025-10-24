@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resource>
+	<object class="wxPanel" name="tabbedDialogFunc">
+		<size>600,373</size>
+		<object class="wxFlexGridSizer">
+			<cols>1</cols>
+			<growablecols>0</growablecols>
+			<growablerows>3</growablerows>
+			<object class="sizeritem">
+				<object class="wxFlexGridSizer">
+					<cols>2</cols>
+					<growablecols>1</growablecols>
+					<object class="sizeritem">
+						<object class="wxButton" name="ID_BUTTON_UPLOAD_CONFIG">
+							<label>Configfile:</label>
+						</object>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+					</object>
+					<object class="sizeritem">
+						<object class="wxChoice" name="ID_CHOICE_UPLOAD_CONFIGURATIONS">
+							<size>100,-1</size>
+						</object>
+						<flag>wxEXPAND</flag>
+					</object>
+					<object class="sizeritem">
+						<object class="wxButton" name="ID_BUTTON_UPLOAD_CONFIGFOLDER">
+							<label>{CONFIG}</label>
+						</object>
+						<flag>wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+					</object>
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_TEXT_UPLOAD_CONFIGFOLDER">
+							<label>....X....</label>
+						</object>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+					</object>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>10</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxStaticBoxSizer">
+					<label>Zulu</label>
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<object class="wxFlexGridSizer">
+							<cols>1</cols>
+							<growablecols>0</growablecols>
+							<growablerows>0</growablerows>
+							<object class="sizeritem">
+								<object class="wxFlexGridSizer">
+									<cols>2</cols>
+									<growablecols>1</growablecols>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_ZULU_FOLDER">
+											<label>Folder:</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxTextCtrl" name="ID_TEXTCTRL_ZULU_FOLDER" />
+										<flag>wxALL|wxEXPAND</flag>
+									</object>
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+							</object>
+							<object class="sizeritem">
+								<object class="wxStaticLine" name="ID_LINE" />
+								<flag>wxALL|wxEXPAND</flag>
+							</object>
+							<object class="sizeritem">
+								<object class="wxFlexGridSizer">
+									<rows>1</rows>
+									<growablecols>2</growablecols>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_ZULU_ERRORLOG">
+											<label>Show ErrorLog</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+										<border>5</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxCheckBox" name="ID_CHECKBOX_AUTOZULU">
+											<label>Autozulu</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxStaticLine" name="ID_STATICLINE1">
+											<size>-1,20</size>
+											<style>wxLI_VERTICAL</style>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
+										<border>5</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_ZULU_GO">
+											<label>ZULU</label>
+											<default>1</default>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+										<border>5</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_ZULU_UPLOAD_GO">
+											<label>==&gt; ZULU + Upload &lt;==</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+										<border>5</border>
+									</object>
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+							</object>
+						</object>
+						<flag>wxEXPAND</flag>
+					</object>
+				</object>
+				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
+				<border>5</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxStaticBoxSizer">
+					<label>wxhttpupload (WebDAV)</label>
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<object class="wxFlexGridSizer">
+							<cols>1</cols>
+							<growablecols>0</growablecols>
+							<growablerows>0</growablerows>
+							<object class="sizeritem">
+								<object class="wxFlexGridSizer">
+									<cols>2</cols>
+									<growablecols>1</growablecols>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_LOCAL">
+											<label>Local:</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxTextCtrl" name="ID_TEXTCTRL_UPLOAD_LOCAL" />
+										<flag>wxALL|wxEXPAND</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_REMOTE">
+											<label>Remote:</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxTextCtrl" name="ID_TEXTCTRL_UPLOAD_REMOTE" />
+										<flag>wxALL|wxEXPAND</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxStaticText" name="ID_TEXT">
+											<label>User:</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxTextCtrl" name="ID_TEXTCTRL_UPLOAD_USER" />
+										<flag>wxALL|wxEXPAND</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxStaticText" name="ID_STATICTEXT1">
+											<label>Password:</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxTextCtrl" name="ID_TEXTCTRL_UPLOAD_PASSWORD">
+											<style>wxTE_PASSWORD</style>
+										</object>
+										<flag>wxALL|wxEXPAND</flag>
+									</object>
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+							</object>
+							<object class="sizeritem">
+								<object class="wxStaticLine" name="ID_STATICLINE2">
+									<size>20,-1</size>
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+							</object>
+							<object class="sizeritem">
+								<object class="wxFlexGridSizer">
+									<rows>1</rows>
+									<growablecols>2</growablecols>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_UPLOAD_ERRORLOG">
+											<label>Show ErrorLog</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+										<border>5</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxCheckBox" name="ID_CHECKBOX_AUTOUPLOAD">
+											<label>Autoupload</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxStaticLine" name="ID_STATICLINE3">
+											<size>-1,20</size>
+											<style>wxLI_VERTICAL</style>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+										<border>5</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_UPLOAD_WEBDRIVE">
+											<label>Mount</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+										<border>5</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxTextCtrl" name="ID_TEXTCTRL_UPLOAD_WEBDRIVE">
+											<size>28,-1</size>
+										</object>
+										<flag>wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									</object>
+									<object class="sizeritem">
+										<object class="wxStaticLine" name="ID_STATICLINE4">
+											<size>-1,20</size>
+											<style>wxLI_VERTICAL</style>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
+										<border>5</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_UPLOAD_FORCE">
+											<label>Force Upload</label>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+										<border>5</border>
+									</object>
+									<object class="sizeritem">
+										<object class="wxButton" name="ID_BUTTON_UPLOAD_GO">
+											<label>==&gt; Upload &lt;==</label>
+											<default>1</default>
+										</object>
+										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+										<border>5</border>
+									</object>
+								</object>
+								<flag>wxALL|wxEXPAND</flag>
+							</object>
+						</object>
+						<flag>wxEXPAND</flag>
+						<border>35</border>
+					</object>
+				</object>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>5</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxTextCtrl" name="ID_TEXTCTRL_LOG">
+					<style>wxTE_MULTILINE|wxVSCROLL|wxHSCROLL</style>
+				</object>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_TEXT_STATUS">
+					<label></label>
+				</object>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+			</object>
+		</object>
+	</object>
+</resource>

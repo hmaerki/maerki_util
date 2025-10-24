@@ -19,6 +19,21 @@
             "cwd": "${workspaceFolder}/src/pyimages2pdf/samplefolder",
             "console": "integratedTerminal",
             "justMyCode": false,
+        },
+        {
+            "name": "alpuma.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/alpuma/alpuma.py",
+            "justMyCode": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "wxhttpupload.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/wxhttpupload/wxhttpupload.py",
+            "console": "integratedTerminal"
         }
     ]
 }

@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+#
+# ALPUMA Configuration File
+#
+
+alpuma_config_version = '1.0.0'
+
+input_path = 'images_orig'
+
+conversions = (
+  {
+    'output_path'      : 'thumbs',
+    'size_max_height'  : 300,
+    'size_max_width'   : 200,
+  },
+  {
+    'output_path'      : 'images',
+    'size_max_height'  : 800,
+    'size_max_width'   : 1000,
+    'quality'          : 80,
+    'annotation'       : {
+      'text'           :'© Aldo Mustardo',
+      'position'       : 'bottomright',   # Default 'bottomright': The position of the annotation: 'topleft' or 'bottomright'
+      'spaceing_h'     : 10,              # Default 10: The horizontal space in pixels between the annotation and the border
+      'spaceing_v'     : 3,               # Default 3: The vertical space in pixels between the annotation and the border
+      'font'           : 'arial.ttf',     # Default 'arial.ttf'. See C:\WINDOWS\Fonts.
+      'size'           : 12,              # Default 12: The font size.
+    }
+  }
+)
+
+
+recurse = {
+  'top_directory': 'top',
+}
+
+html_filename = 'index.zulu_content.html'
+
+html_img_files = (
+                       'thumbs/{fileroot}_alpuma_override{fileext}',
+                       'thumbs/{file}',
+                     )
+
+html_template_file = '''
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<body>
+<!--ZuluMarkerStart-->
+
+
+<h1>Titel</h1>
+
+<table border="0" cellpadding="0" cellspacing="10" width="95%">
+  <!--AlpumaInsert-->
+</table>
+
+
+<!--ZuluMarkerEnd-->
+</body>
+</html>
+'''
+
+html_template_image = '''
+    <tr>
+      <td width="50%">
+        Hier Text einfügen... ({file})
+      </td>
+      <td><a href="images/{file}"><img src="thumbs/{file}" alt="Grossformat" border="0" width="xxx" height="xxx"></a></td>
+    </tr>
+'''
+

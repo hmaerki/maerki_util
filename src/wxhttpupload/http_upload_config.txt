@@ -1,0 +1,13 @@
+#
+# HTTPUPLOAD Configuration File
+#
+
+httpupload_config_version = '1.0.0'
+
+httpupload_configuration = {
+    'local'    : '../htdocs',
+    'remote'   : 'https://www.maerki.com/hans/dav_test',
+    'user'     : 'dav',
+    'password' : '',
+}
+

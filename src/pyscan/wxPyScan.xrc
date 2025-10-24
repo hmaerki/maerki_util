@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resource version="2.3.0.1" xmlns="http://www.wxwidgets.org/wxxrc">
+	<object class="wxFrame" name="ID_WXFRAME">
+		<title>wxPyScan</title>
+		<icon>wxPyScan.ico</icon>
+		<size>580,260</size>
+		<style>wxCAPTION|wxDEFAULT_FRAME_STYLE|wxSYSTEM_MENU|wxRESIZE_BORDER|wxCLOSE_BOX</style>
+		<object class="wxPanel" name="ID_PANEL">
+			<object class="wxFlexGridSizer">
+				<cols>2</cols>
+				<rows>8</rows>
+				<growablecols>1</growablecols>
+				<object class="sizeritem">
+					<object class="wxStaticText" name="wxID_STATIC">
+						<label>Scanner</label>
+					</object>
+					<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxChoice" name="ID_CHOICE_SCANNER" />
+					<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxStaticText" name="wxID_STATIC">
+						<label>Paper Size</label>
+					</object>
+					<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxChoice" name="ID_CHOICE_PAPER_SIZE" />
+					<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxStaticText" name="wxID_STATIC">
+						<label>Template</label>
+					</object>
+					<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxChoice" name="ID_CHOICE_TEMPLATE" />
+					<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxStaticLine" name="wxID_STATIC" />
+					<flag>wxALL|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxStaticLine" name="wxID_STATIC" />
+					<flag>wxALL|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxStaticText" name="wxID_STATIC">
+						<label>Folder</label>
+					</object>
+					<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxTextCtrl" name="ID_TEXTCTRL_FOLDER">
+						<value>c:\\</value>
+					</object>
+					<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxStaticText" name="wxID_STATIC">
+						<label>Filename</label>
+					</object>
+					<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxTextCtrl" name="ID_TEXTCTRL_FILEBASE">
+						<value>filename</value>
+					</object>
+					<flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxStaticText" name="wxID_STATIC">
+						<label>Simple Scan</label>
+					</object>
+					<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxFlexGridSizer">
+						<cols>3</cols>
+						<rows>2</rows>
+						<growablecols>0</growablecols>
+						<object class="sizeritem">
+							<object class="wxStaticText" name="ID_STATIC_FILENAME_SIMPLESCAN">
+								<label>Static text</label>
+							</object>
+							<flag>wxALL|wxEXPAND</flag>
+							<border>5</border>
+						</object>
+						<object class="sizeritem">
+							<object class="wxButton" name="ID_BUTTON_SCAN">
+								<label>Scan</label>
+							</object>
+							<flag>wxLEFT|wxRIGHT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL</flag>
+							<border>5</border>
+						</object>
+					</object>
+					<flag>wxTOP|wxBOTTOM|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxStaticText" name="wxID_STATIC">
+						<label></label>
+					</object>
+					<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+					<border>5</border>
+				</object>
+				<object class="sizeritem">
+					<object class="wxFlexGridSizer">
+						<cols>3</cols>
+						<rows>2</rows>
+						<growablecols>0</growablecols>
+						<object class="sizeritem">
+							<object class="wxStaticText" name="wxID_STATIC">
+								<label></label>
+							</object>
+							<flag>wxALL|wxEXPAND</flag>
+							<border>5</border>
+						</object>
+						<object class="sizeritem">
+							<object class="wxStaticText" name="wxID_STATIC">
+								<label></label>
+							</object>
+							<flag>wxLEFT|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+							<border>5</border>
+						</object>
+						<object class="sizeritem">
+							<object class="wxButton" name="ID_BUTTON_MULTISCAN">
+								<label>Multiscan</label>
+							</object>
+							<flag>wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
+							<border>5</border>
+						</object>
+					</object>
+					<flag>wxTOP|wxBOTTOM|wxEXPAND</flag>
+					<border>5</border>
+				</object>
+			</object>
+		</object>
+		<object class="wxStatusBar" name="ID_STATUSBAR">
+			<fields>3</fields>
+			<widths>100,50,300</widths>
+			<styles>wxSB_NORMAL,wxSB_NORMAL,wxSB_NORMAL</styles>
+			<style>wxST_SIZEGRIP|wxNO_BORDER</style>
+		</object>
+	</object>
+</resource>
