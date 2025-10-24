@@ -18,6 +18,8 @@ classifiers = [
 
 dependencies = [
     "typer-slim",
+    "reportlab>=4.0",
+    "pillow>=12.0.0",
 ]
 
 [project.optional-dependencies]
@@ -31,7 +33,7 @@ dev = [
 
 
 [project.scripts]
-zulu = "itooth_xiao.diagram:app"
+pyimages2pdf = "pyimages2pdf:pyimages2pdf"
 
 [project.urls]
 Homepage = "https://github.com/hmaerki/maerki_util"
@@ -39,7 +41,7 @@ Documentation = "https://github.com/hmaerki/maerki_util"
 Repository = "https://github.com/hmaerki/maerki_util"
 
 [tool.pdm]
-version = { source = "file", path = "src/itooth_xiao/__init__.py" }
+version = { source = "file", path = "src/pyimages2pdf/__init__.py" }
 distribution = true
 
 [tool.pdm.build]
