@@ -39,6 +39,7 @@ dev = [
 wxpyscan = "pyscan.wxPyScan:main"
 wxhttpupload = "wxhttpupload.wxhttpupload:main"
 zulu = "zulu.zulu:main"
+alpuma = "alpuma.alpuma:main"
 
 [project.urls]
 Homepage = "https://github.com/hmaerki/maerki_util"

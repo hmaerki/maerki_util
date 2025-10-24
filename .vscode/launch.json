@@ -30,10 +30,11 @@
             "justMyCode": false,
         },
         {
-            "name": "alpuma.py",
+            "name": "alpuma.alpuma",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/alpuma/alpuma.py",
+            "module": "alpuma.alpuma",
+            "cwd": "${workspaceFolder}/src/alpuma_tests",
             "console": "integratedTerminal",
             "justMyCode": false,
         },

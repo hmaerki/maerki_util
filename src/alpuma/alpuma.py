@@ -1,110 +1,109 @@
-#! /usr/bin/env python
-
 """
-  2005-2019, Hans Maerki, License LGPL
+2005-2019, Hans Maerki, License LGPL
 
-  Doubleclicking this file will loop over all
-  image files in the current folder and create
-  image-files and index.zulu_content.html.
+Doubleclicking this file will loop over all
+image files in the current folder and create
+image-files and index.zulu_content.html.
 
-  Installation:
-    Now move this script into the folder with the images and
-    double click it.
-    If there is an error - you have about half a millisecond to
-    see it. If this is to quick, open a dos-window, cd to the
-    directory with your image-files and type "alpuma.py". Now
-    you will see the error message.
+Installation:
+  Now move this script into the folder with the images and
+  double click it.
+  If there is an error - you have about half a millisecond to
+  see it. If this is to quick, open a dos-window, cd to the
+  directory with your image-files and type "alpuma.py". Now
+  you will see the error message.
 
-   Pseudocode:
-     for each *.jpg|*.gif|*.png
-       convert image
-       Get size of image
-       if 'index.zulu_content.html' does not exist: create it from template.
-       replace in 'index.zulu_content.html'
-         href="bilder/06.jpg"
-            <img src="bilder/06k.jpg" alt="Grossformat" border="0" width="200" height="150">
-         if not found
-            Add template at begin of page
+ Pseudocode:
+   for each *.jpg|*.gif|*.png
+     convert image
+     Get size of image
+     if 'index.zulu_content.html' does not exist: create it from template.
+     replace in 'index.zulu_content.html'
+       href="bilder/06.jpg"
+          <img src="bilder/06k.jpg" alt="Grossformat" border="0" width="200" height="150">
+       if not found
+          Add template at begin of page
 
-  Kurzanleitung:
-    Ordnerstruktur bereitstellen:
-      base/alpuma_v2.0.0.py       (von Hans)
-      base/alpuma_config.txt      (von Hans)
-      base/orig/IMAGE123.JPG      (Hier die Bilder hineinkopieren
-    'base/alpuma_v2.0.0.py' doppelklicken. Es entstehen folgende Files:
-      'base/images/IMAGE123.JPG'
-      'base/thumbs/IMAGE123.JPG'
-      'base/index.zulu_content.html'
+Kurzanleitung:
+  Ordnerstruktur bereitstellen:
+    base/alpuma_v2.0.0.py       (von Hans)
+    base/alpuma_config.txt      (von Hans)
+    base/orig/IMAGE123.JPG      (Hier die Bilder hineinkopieren
+  'base/alpuma_v2.0.0.py' doppelklicken. Es entstehen folgende Files:
+    'base/images/IMAGE123.JPG'
+    'base/thumbs/IMAGE123.JPG'
+    'base/index.zulu_content.html'
 
-  Features:
-    Imageverarbeitung:
-      Ordner werden kreiert, falls noetig.
-      Die Datei 'index.zulu_content.html' wird kreiert, falls noetig.
-      Images werden nur dann neu geschrieben, falls sie inhaltlich geaendert haben.
-      Die Breite des Images wird angepasst. Falls zu hoch, wird anhand der
-      maximalen Hoehe skaliert.
+Features:
+  Imageverarbeitung:
+    Ordner werden kreiert, falls noetig.
+    Die Datei 'index.zulu_content.html' wird kreiert, falls noetig.
+    Images werden nur dann neu geschrieben, falls sie inhaltlich geaendert haben.
+    Die Breite des Images wird angepasst. Falls zu hoch, wird anhand der
+    maximalen Hoehe skaliert.
 
-    HTML aktualisieren:
-      Falls 'html_filename' fehlt in 'alpuma_config.txt', wird kein
-      HTML-File bearbeitet.
-      width/height wird eingesetzt, falls nicht vorhanden.
-      Entry für image wird eingesetzt, falls nicht vorhanden.
-      Falls ein File 'thumbs/IMAGE123_alpuma_override.JPG' existiert, wird
-      auf dieses File referenziert statt auf 'thumbs/IMAGE123.JPG'.
-      Falls ein File 'images/IMAGE123_alpuma_override.JPG' existiert und statt
-      'images/IMAGE123.JPG' verwendet werden soll, so muss der neue Filename
-      manuell im html-File nachgetragen werden.
+  HTML aktualisieren:
+    Falls 'html_filename' fehlt in 'alpuma_config.txt', wird kein
+    HTML-File bearbeitet.
+    width/height wird eingesetzt, falls nicht vorhanden.
+    Entry für image wird eingesetzt, falls nicht vorhanden.
+    Falls ein File 'thumbs/IMAGE123_alpuma_override.JPG' existiert, wird
+    auf dieses File referenziert statt auf 'thumbs/IMAGE123.JPG'.
+    Falls ein File 'images/IMAGE123_alpuma_override.JPG' existiert und statt
+    'images/IMAGE123.JPG' verwendet werden soll, so muss der neue Filename
+    manuell im html-File nachgetragen werden.
 
-    Annotations:
-      In 'alpuma_config.txt' kann eine Annotation definiert werden. Dies
-      ist zum Beispiel ein Copyright-Vermerk "© Aldo Mustardo".
-      Diese Annotation wird auf alle Bilder plaziert, auf welcher der
-      Text Platz hat.
+  Annotations:
+    In 'alpuma_config.txt' kann eine Annotation definiert werden. Dies
+    ist zum Beispiel ein Copyright-Vermerk "© Aldo Mustardo".
+    Diese Annotation wird auf alle Bilder plaziert, auf welcher der
+    Text Platz hat.
 
-    Recursion:
-      Es werden alle Ordner unterhalb des Verzeichnisses
-        recurse = {'top_directory': 'top',}
-      durchsucht. Falls 'recurse=' nicht definiert ist, so wird
-      der aktuelle Ordner verwendet.
+  Recursion:
+    Es werden alle Ordner unterhalb des Verzeichnisses
+      recurse = {'top_directory': 'top',}
+    durchsucht. Falls 'recurse=' nicht definiert ist, so wird
+    der aktuelle Ordner verwendet.
 
-    Recursion2
-      Es werden alle Ordner unterhalb diesem File rekursiv durchlaufen.
-      Wird ein 'alpuma_config.txt' gefunden, so wir dieses verarbeitet.
+  Recursion2
+    Es werden alle Ordner unterhalb diesem File rekursiv durchlaufen.
+    Wird ein 'alpuma_config.txt' gefunden, so wir dieses verarbeitet.
 
-  History:
-    2003-04-03, Hans Maerki. Python rules!
-    2003-04-28, v2.0.0, Hans Maerki. Many new features.
-    2003-04-28, v2.0.1, Hans Maerki. Minor bugfixes.
-    2003-05-24, v2.0.2, Hans Maerki. Figaros Feature Request: Never enlarge images.
-    2003-09-28, v2.0.3, Hans Maerki. 'Thumbs.db' wird ignoriert.
-    2003-11-01, v2.0.4, Hans Maerki. Quality of the compression choosable now.
-    2003-10-14, v2.0.5, Hans Maerki. Tested with Python 2.3
-    2005-05-22, v2.0.6, Hans Maerki. Minor bugfixes.
-    2005-09-10, v2.0.7, Hans Maerki. Refactoring - better structured. Added comments.
-                                     Added Annotations.
-    2005-09-13, v2.0.8, Hans Maerki. Fixed bugs introduced in v2.0.7.
-    2006-12-24, v2.0.8, Hans Maerki. Tested on Ubuntu 6.10 and OsX Tiger
-    2009-07-27, v2.1.0, Hans Maerki. Skips update of the image-files if date is newer
-    2011-01-09, v2.2.0, Hans Maerki. Recurse over directory structure.
-    2019-01-17, v2.2.1, Hans Maerki. Ported to python 3.7.2
-    2019-01-17, v2.3.0, Hans Maerki. Recursion2: Now recurses down the filesytem
-                                     to find 'alpuma_config.txt'
-    2019-06-16, v2.3.1, Hans Maerki. config is not global anymmore
-    2020-12-19, v2.3.2, Hans Maerki. Now rotates the image according to EXIF-transponse.
-    2022-05-21, v2.3.3, Hans Maerki. Black. Replace % string fromatting by f strings.
+History:
+  2003-04-03, Hans Maerki. Python rules!
+  2003-04-28, v2.0.0, Hans Maerki. Many new features.
+  2003-04-28, v2.0.1, Hans Maerki. Minor bugfixes.
+  2003-05-24, v2.0.2, Hans Maerki. Figaros Feature Request: Never enlarge images.
+  2003-09-28, v2.0.3, Hans Maerki. 'Thumbs.db' wird ignoriert.
+  2003-11-01, v2.0.4, Hans Maerki. Quality of the compression choosable now.
+  2003-10-14, v2.0.5, Hans Maerki. Tested with Python 2.3
+  2005-05-22, v2.0.6, Hans Maerki. Minor bugfixes.
+  2005-09-10, v2.0.7, Hans Maerki. Refactoring - better structured. Added comments.
+                                   Added Annotations.
+  2005-09-13, v2.0.8, Hans Maerki. Fixed bugs introduced in v2.0.7.
+  2006-12-24, v2.0.8, Hans Maerki. Tested on Ubuntu 6.10 and OsX Tiger
+  2009-07-27, v2.1.0, Hans Maerki. Skips update of the image-files if date is newer
+  2011-01-09, v2.2.0, Hans Maerki. Recurse over directory structure.
+  2019-01-17, v2.2.1, Hans Maerki. Ported to python 3.7.2
+  2019-01-17, v2.3.0, Hans Maerki. Recursion2: Now recurses down the filesytem
+                                   to find 'alpuma_config.txt'
+  2019-06-16, v2.3.1, Hans Maerki. config is not global anymmore
+  2020-12-19, v2.3.2, Hans Maerki. Now rotates the image according to EXIF-transponse.
+  2022-05-21, v2.3.3, Hans Maerki. Black. Replace % string fromatting by f strings.
+  2025-10-24, v2.3.5, Hans Maerki. Moved to git and uv.
 """
 
-VERSION = "2.3.3"
-
+import filecmp
 import os
 import stat
-import filecmp
-import PIL.Image
-import PIL.ImageFont
-import PIL.ImageDraw
-import PIL.ImageStat
-import PIL.ImageOps
 
+import PIL.Image
+import PIL.ImageDraw
+import PIL.ImageFont
+import PIL.ImageOps
+import PIL.ImageStat
+
+VERSION = "2.3.4"
 
 CONFIG_DEFAULT = {
     "html_filename": None,
@@ -114,7 +113,7 @@ CONFIG_DEFAULT = {
 CONFIG_FILENAME = "alpuma_config.txt"
 
 
-def go_recurse2():
+def main():
     strTopDirectory = os.path.abspath(os.curdir)
 
     listAlpumaDirectories = []
@@ -139,26 +138,26 @@ def go():
     Precondition
       go_recurse2() set cwd to the directory where 'CONFIG_FILENAME'
     """
-    with open(CONFIG_FILENAME, "r") as f:
+    with open(CONFIG_FILENAME, encoding='utf-8') as f:
         code = compile(f.read(), CONFIG_FILENAME, "exec")
     global_vars = {}
     config = CONFIG_DEFAULT.copy()
     exec(code, global_vars, config)
     if config.get("alpuma_config_version", None) != "1.0.0":
-        raise Exception(
-            "This Alpuma-Version is too old for this '%s'" % CONFIG_FILENAME
+        raise ValueError(
+            f"This Alpuma-Version is too old for this '{CONFIG_FILENAME}'"
         )
 
     html_filename = config.get("html_filename")
     if html_filename != os.path.basename(html_filename):
-        raise Exception(
+        raise ValueError(
             f'ERROR: "{os.path.abspath(os.path.curdir)}/{CONFIG_FILENAME}": Expecting just a simple filename but gut "html_filename = \'{html_filename}\'"!'
         )
 
     iModificationTimeConfig = os.stat(CONFIG_FILENAME)[stat.ST_MTIME]
 
     dictRecurse = config.get("recurse", None)
-    if dictRecurse != None:
+    if dictRecurse is not None:
         go_recurse(config, iModificationTimeConfig, dictRecurse["top_directory"])
         return
 
@@ -193,16 +192,16 @@ def go_recurse(config, iModificationTimeConfig, strTop):
 def goDirectory(config, iModificationTimeConfig, strDirectory):
     # Open the content-html file. If any or needed...
     if not os.path.exists(strDirectory):
-        raise Exception(
-            'ERROR: Directory does not exist "%s".' % os.path.abspath(strDirectory)
+        raise FileNotFoundError(
+            f'ERROR: Directory does not exist "{os.path.abspath(strDirectory)}".'
         )
     strFilenameHTML = os.path.join(strDirectory, config.get("html_filename"))
     strContent = config.get("html_template_file")
-    if strFilenameHTML != None:
+    if strFilenameHTML is not None:
         try:
-            with open(strFilenameHTML, "r") as fileContent:
+            with open(strFilenameHTML, encoding='utf-8') as fileContent:
                 strContent = fileContent.read()
-        except IOError as _e:
+        except OSError as _e:
             print(
                 f'Template "{config.get("html_filename")}" not found: Use template from "{CONFIG_FILENAME}".'
             )
@@ -210,8 +209,8 @@ def goDirectory(config, iModificationTimeConfig, strDirectory):
     # Loop over all files in the images directory
     strOrigDirectory = os.path.join(strDirectory, config.get("input_path"))
     if not os.path.exists(strOrigDirectory):
-        raise Exception(
-            'ERROR: Directory does not exist "%s".' % os.path.abspath(strOrigDirectory)
+        raise FileNotFoundError(
+            f'ERROR: Directory does not exist "{os.path.abspath(strOrigDirectory)}".'
         )
     for strFileRoot, strFileExt in getFiles(strOrigDirectory):
         strFilename = strFileRoot + strFileExt
@@ -234,15 +233,15 @@ def goDirectory(config, iModificationTimeConfig, strDirectory):
                 config, iModificationTimeConfig, strDirectory, strFilename, conversion
             )
 
-        if strFilenameHTML != None:
+        if strFilenameHTML is not None:
             # Update the HTML-File if needed
             strContent = updateContent(
                 config, strContent, strDirectory, strFilename, dictParams
             )
 
-    if strFilenameHTML != None:
+    if strFilenameHTML is not None:
         print(f"  Write {strDirectory}\\{strFilenameHTML} ...")
-        with open(strFilenameHTML, "w") as fileContent:
+        with open(strFilenameHTML, "w", encoding='utf-8') as fileContent:
             fileContent.write(strContent)
 
 
@@ -316,7 +315,7 @@ def updateEntryInContent(
     return strContent[:iStart] + strEntry + strContent[iEnd:]
 
 
-def updateEntry(strEntry, strFullImagePath, dictParams):
+def updateEntry(strEntry, strFullImagePath, _dictParams):
     image = loadImage(strFullImagePath)
     iWidth, iHeight = image.size
     strEntry = replaceSize(strEntry, "width=", iWidth)
@@ -335,8 +334,8 @@ def addEntry(config, strContent, dictParams):
 
 
 def getTemplate(strTemplate, dictParams):
-    for (strTag, strValue) in dictParams.items():
-        strTemplate = strTemplate.replace("{%s}" % strTag, str(strValue))
+    for strTag, strValue in dictParams.items():
+        strTemplate = strTemplate.replace(f"{{{strTag}}}", str(strValue))
     return strTemplate
 
 
@@ -346,9 +345,9 @@ def replaceSize(strEntry, strPattern, iValue):
         strValue, strEnd = strValue.split('"', 1)
     except ValueError:
         # strPattern not found. Add it at the end.
-        return '%s %s"%d"' % (strEntry, strPattern, iValue)
+        return f'{strEntry} {strPattern}"{iValue}"'
     # Pattern found. Update the size.
-    return '%s%s"%d"%s' % (strStart, strPattern, iValue, strEnd)
+    return f'{strStart}{strPattern}"{iValue}"{strEnd}'
 
 
 def loadImage(strFilename):
@@ -421,7 +420,7 @@ def resize(image, conversion, strPathOutput):
 
     # Resize the image
     # return image.resize((iOutputWidth, iOutputHeight), PIL.Image.BILINEAR)
-    return image.resize((iOutputWidth, iOutputHeight), PIL.Image.ANTIALIAS)
+    return image.resize((iOutputWidth, iOutputHeight), PIL.Image.Resampling.LANCZOS)
 
 
 def replace_file_if_changed_obsolete(strPathOutput, strPathOutputTmp):
@@ -449,7 +448,7 @@ def annotate(image, conversion, strPathOutput):
     """
     # Get prepared
     dictAnnotation = conversion.get("annotation", None)
-    if dictAnnotation == None:
+    if dictAnnotation is None:
         # No Annotation is requried
         return
 
@@ -466,7 +465,9 @@ def annotate(image, conversion, strPathOutput):
     # Prepare Annoation and calculate it's size inclusive spaceing
     while iSize >= 9:  # Solange die Schrift eine vernuenftige Groessse hat
         font = PIL.ImageFont.truetype(strFont, iSize)
-        iAnnotationWidth, iAnnotationHeight = font.getsize(strText)
+        bbox = font.getbbox(strText)
+        iAnnotationWidth = bbox[2] - bbox[0]
+        iAnnotationHeight = bbox[3] - bbox[1]
         iAnnotationWidth += iSpaceingH
         iAnnotationHeight += iSpaceingV
         iWidth, iHeight = image.size
@@ -533,4 +534,4 @@ def annotate(image, conversion, strPathOutput):
 
 
 if __name__ == "__main__":
-    go_recurse2()
+    main()
