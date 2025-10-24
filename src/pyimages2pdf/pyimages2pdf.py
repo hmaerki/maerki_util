@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+﻿
 """
 Dieses Modul erstellt die PDF-Dokumente.
 Es wird 'reportlab' von http://www.reportlab.org/rl_toolkit.html verwendet.

@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# -*- coding: utf-8 -*-
+
 """
   2005-2019, Hans Maerki, License LGPL
 

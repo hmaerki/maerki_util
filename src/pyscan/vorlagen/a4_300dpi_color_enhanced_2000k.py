@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 import os
 import pyscan.utils as utils
 import pyscan.algorithms_pil_enhance as algorithms_pil_enhance

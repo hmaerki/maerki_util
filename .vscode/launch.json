@@ -21,6 +21,14 @@
             "justMyCode": false,
         },
         {
+            "name": "pyscan.wxPyScan",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pyscan.wxPyScan",
+            "justMyCode": false,
+            "console": "integratedTerminal"
+        },
+         {
             "name": "alpuma.py",
             "type": "debugpy",
             "request": "launch",

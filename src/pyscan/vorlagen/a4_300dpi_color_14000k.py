@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
   Configurationfile for scanning.
   Doubleclick this file to scan using a given configuration.

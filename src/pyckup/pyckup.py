@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
   2004-02-08, Hans Maerki, License LGPL
 

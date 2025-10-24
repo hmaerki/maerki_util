@@ -1,3 +1,0 @@
-wxPyScan.py
-pause
-
