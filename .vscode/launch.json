@@ -9,7 +9,8 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false,
         },
         {
             "name": "samplefolder/belege2pdf.py",
@@ -25,23 +26,25 @@
             "type": "debugpy",
             "request": "launch",
             "module": "pyscan.wxPyScan",
+            "console": "integratedTerminal",
             "justMyCode": false,
-            "console": "integratedTerminal"
         },
-         {
+        {
             "name": "alpuma.py",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/alpuma/alpuma.py",
+            "console": "integratedTerminal",
             "justMyCode": false,
-            "console": "integratedTerminal"
         },
         {
-            "name": "wxhttpupload.py",
+            "name": "wxhttpupload.wxhttpupload",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/wxhttpupload/wxhttpupload.py",
-            "console": "integratedTerminal"
+            "module": "wxhttpupload.wxhttpupload",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src/wxhttpupload_test",
+            "justMyCode": false,
         }
     ]
 }
