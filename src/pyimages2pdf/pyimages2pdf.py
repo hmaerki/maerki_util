@@ -1,8 +1,8 @@
-﻿
-"""
+﻿"""
 Dieses Modul erstellt die PDF-Dokumente.
 Es wird 'reportlab' von http://www.reportlab.org/rl_toolkit.html verwendet.
 """
+
 bDebugDrawGrid = False
 
 import os
@@ -10,6 +10,7 @@ import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import types
 
@@ -26,6 +27,7 @@ import reportlab.lib.styles
 import reportlab.lib.units
 import reportlab.platypus
 import reportlab.platypus.flowables
+
 
 # See: http://two.pairlist.net/pipermail/reportlab-users/2004-April/002917.html
 class Bookmark(reportlab.platypus.flowables.Flowable):
@@ -291,7 +293,6 @@ class PdfRenderer:
         )
 
     def __dumpPages(self, doc, story):
-
         for (
             strFilenameFull,
             strHeaderLinks,
@@ -341,7 +342,11 @@ def convertPdf2Jpg(strFilenameFullWithUnicode):
         strFilenameFull = os.path.join(strTempDir, os.path.basename(strFilenameFull))
         shutil.copyfile(strFilenameFullWithUnicode, strFilenameFull)
 
-    strGsExe = r"C:\Program Files\gs\gs9.54.0\bin\gswin64c.exe"
+    if sys.platform == "win":
+        strGsExe = r"C:\Program Files\gs\gs9.54.0\bin\gswin64c.exe"
+    else:
+        strGsExe = "gs"
+
     strFilenamePng = os.path.basename(strFilenameFull)
     strFilenamePng = strFilenamePng.replace(".pdf", ".png")
     # http://stackoverflow.com/questions/20078816/replace-non-ascii-characters-with-a-single-space
