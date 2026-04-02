@@ -51,9 +51,9 @@
             "name": "httpupload",
             "type": "debugpy",
             "request": "launch",
-            "module": "wxhttpupload.httpupload",
+            "module": "httpupload.httpupload",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/src/wxhttpupload_test",
+            "cwd": "/tmp/luetzelsee/luetzelsee.ch",
             "justMyCode": false,
         },
         {
