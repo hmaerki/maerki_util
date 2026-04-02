@@ -1,0 +1,18 @@
+#
+# HTTPUPLOAD Configuration File
+#
+
+httpupload_config_version = '1.0.0'
+
+httpupload_configuration = {
+    'name'     : 'zulu_test',
+    'local'    : '{CONFIG}/htdocs',
+    'remote'   : 'https://www.maerki.com/hans/dav_test',
+    'user'     : 'dav',
+    'password' : '',
+    'zulu'     : '{CONFIG}/../zulu_templates',
+    'exclude'  : [     # Define the files to be skipped
+      r'\\Thumbs.db$', # '\Thumbs.db' at the end of the filename
+      r'\\.svn\\',     # All Files in folder '\.svn\'
+    ],
+}

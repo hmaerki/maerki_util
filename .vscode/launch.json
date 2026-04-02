@@ -39,7 +39,7 @@
             "justMyCode": false,
         },
         {
-            "name": "alpuma.alpuma",
+            "name": "alpuma",
             "type": "debugpy",
             "request": "launch",
             "module": "alpuma.alpuma",
@@ -48,7 +48,16 @@
             "justMyCode": false,
         },
         {
-            "name": "wxhttpupload.wxhttpupload",
+            "name": "httpupload",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "wxhttpupload.httpupload",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src/wxhttpupload_test",
+            "justMyCode": false,
+        },
+        {
+            "name": "wxhttpupload",
             "type": "debugpy",
             "request": "launch",
             "module": "wxhttpupload.wxhttpupload",
