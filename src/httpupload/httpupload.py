@@ -9,6 +9,7 @@ import pathlib
 import re
 import socket
 import ssl
+import typing
 from urllib import parse as urlparse
 
 import typer
@@ -83,18 +84,67 @@ class HttpUploadConfig:
 
 # ----------------------------------------------------------------------------
 
-#
-# The command-line-interface and the user-interface each use
-# a Mediator-Class as an interface to HttpUpload.
-#
-
-
-# ----------------------------------------------------------------------------
-
-
-# ----------------------------------------------------------------------------
-
 UPLOAD_ROUNDS = 4
+
+
+class CacheModificationTimes:
+    def __init__(self, filename_timestamps: pathlib.Path, force_upload: bool) -> None:
+        self.filename_timestamps = filename_timestamps
+        self.files_uploaded = 0
+        self.dict_last_modification_times: dict[str, int] = {}
+        self.dict_file_time_cache: dict[str, int] = {}
+
+        if force_upload:
+            self.file_timestamps = self.filename_timestamps.open("w")
+            return
+
+        if self.filename_timestamps.is_file():
+            with self.filename_timestamps.open("r") as f:
+                for line in f:
+                    line = line.strip()
+                    if len(line) == 0:
+                        continue
+                    time_ms, _, relative_path = line.partition("\t")
+                    self.dict_last_modification_times[relative_path] = int(time_ms)
+
+        self.file_timestamps = self.filename_timestamps.open("a+")
+
+    def get(self, relative_path: str) -> int:
+        return self.dict_last_modification_times.get(relative_path, 0)
+
+    def add(self, relative_path: str) -> None:
+        assert isinstance(relative_path, str)
+        time_file_ms = self.dict_file_time_cache[relative_path]
+        self.files_uploaded += 1
+        self.file_timestamps.write(f"{time_file_ms}\t{relative_path}\n")
+        self.dict_last_modification_times[relative_path] = time_file_ms
+
+    def flush(self) -> None:
+        self.file_timestamps.flush()
+
+    def needs_upload(self, relative_path: str, current_path: pathlib.Path) -> bool:
+        """Return True if the file needs uploading (not in cache or changed)."""
+        time_file_ms = int(1000 * current_path.stat().st_mtime)
+        self.dict_file_time_cache[relative_path] = time_file_ms
+        time_cached_ms = self.get(relative_path)
+        # If daylight savings (Sommerzeit), has an influence
+        # on the POSIX time. I couldn't figure out, which
+        # mechanism is used.
+        # We use some fuzzy logic now.
+        changed = time_file_ms not in (
+            time_cached_ms - 3600_000,
+            time_cached_ms,
+            time_cached_ms + 3600_000,
+        )
+        return changed
+
+    def close(self) -> None:
+        self.file_timestamps.close()
+        if self.files_uploaded > 0:
+            # Purge duplicated entries
+            with self.filename_timestamps.open("w") as f:
+                for path in sorted(self.dict_last_modification_times.keys()):
+                    f.write(f"{self.dict_last_modification_times[path]}\t{path}\n")
 
 
 class HttpUpload:
@@ -118,7 +168,6 @@ class HttpUpload:
             typer.Abort()
 
         self.dict_file_size_cache: dict[str, int] = {}
-        self.dict_file_time_cache: dict[str, int] = {}
         self.objConnection = None
         (
             self.remote_protocol,
@@ -135,8 +184,6 @@ class HttpUpload:
         self.filename_timestamps = (
             self.directory_local_top / "tmp_httpupload_timestamps_cache.txt"
         )
-
-        self.iFilesUploaded = 0
 
         # Compile the regular expressions
         self.listRegexpExclude = [
@@ -265,33 +312,17 @@ class HttpUpload:
 
         if self.skip_file(current_path):
             return 0
-        relative_path = current_path.relative_to(self.directory_local_top)
-        # url = f"{self.remote_protocol}://{self.remote_host}{self.remote_path}/{relative_path}"
-        # url = f"{self.remote_protocol}://{self.remote_host}{self.remote_path}/{relative_path}"
-        time_cached_ms = self.get_cache(str(relative_path))
 
-        time_file_ms = self.dict_file_time_cache.setdefault(
-            str(relative_path), int(1000*current_path.stat().st_mtime)
-        )
+        relative_path = str(current_path.relative_to(self.directory_local_top))
 
-        # If daylight savings (Sommerzeit), has an influence
-        # on the POSIX time. I couldn't figure out, which
-        # mechanism is used.
-        # We used some fuzzy logic now.
-        # if time_cached_ms >= 1000*attr.st_mtime:
-        # if time_cached_ms >= time_file_ms:
-        assert isinstance(time_cached_ms, int), time_cached_ms
-        assert isinstance(time_file_ms, int), time_file_ms
-        if time_file_ms in (time_cached_ms - 3600_000, time_cached_ms, time_cached_ms + 3600_000):
-            # File hasn't changed
+        if not self.cache.needs_upload(relative_path, current_path):
             return 0
 
-        logger.debug(f"{self.iFilesUploaded + 1}: File '{relative_path}'")
+        logger.debug(f"{self.cache.files_uploaded + 1}: {relative_path}")
 
         error_count = self.http_upload_file(current_path)
         if error_count == 0:
-            # self.dict_last_modification_times[strPath] = attr.st_mtime
-            self.add_cache(str(relative_path), time_file_ms)
+            self.cache.add(relative_path=relative_path)
 
         return error_count
 
@@ -345,26 +376,7 @@ class HttpUpload:
         return error_count
 
     def upload_1(self, force_upload: bool) -> int:
-        self.dict_last_modification_times: dict[str, int] = {}
-        if force_upload:
-            self.file_timestamps = self.filename_timestamps.open("w")
-        else:
-            if self.filename_timestamps.exists():
-                self.file_timestamps = self.filename_timestamps.open("r")
-                for strLine in self.file_timestamps:
-                    strLine = strLine.strip()
-                    if len(strLine) == 0:
-                        # Skip empty lines
-                        continue
-                    part = strLine.partition("\t")
-                    strTime = part[0]
-                    strPath = part[2]
-                    # self.objLogger.info("-%d-%s-%s-" % (int(strTime), strPath, strLine))
-                    self.dict_last_modification_times[strPath] = int(strTime)
-            self.file_timestamps = self.filename_timestamps.open("a+")
-
-        # for strPath, iTime in self.dict_last_modification_times.items():
-        #  self.objLogger.warning("'%s':%i" % (strPath, iTime))
+        self.cache = CacheModificationTimes(self.filename_timestamps, force_upload)
 
         error_count = 0
         for round in range(UPLOAD_ROUNDS):
@@ -372,21 +384,17 @@ class HttpUpload:
             if self.objConnection is not None:
                 # After a run, we might run into a timeout.
                 # Closing the connection could be a bit more stable
-                self.file_timestamps.flush()
+                self.cache.flush()
                 self.objConnection.close()
                 self.objConnection = None
             if error_count > 0:
                 break
 
-        self.file_timestamps.close()
-        if self.iFilesUploaded > 0:
-            # Purge duplicated entries
-            self.file_timestamps = open(self.filename_timestamps, "w")
-            for strPath in sorted(self.dict_last_modification_times.keys()):
-                iTime = self.dict_last_modification_times[strPath]
-                self.file_timestamps.write(f"{iTime}\t{strPath}\n")
+        self.cache.close()
 
-        logger.info(f"{self.iFilesUploaded} Files uploaded.")
+        logger.info(
+            f"{self.cache.files_uploaded} of total {len(self.cache.dict_last_modification_times)} files uploaded."
+        )
 
         if error_count == 0:
             logger.info("---- SUCCESS")
@@ -394,16 +402,6 @@ class HttpUpload:
             logger.error("---- FAILED")
 
         return error_count
-
-    def get_cache(self, relative_path: str) -> int:
-        return self.dict_last_modification_times.get(relative_path, 0)
-
-    def add_cache(self, relative_path: str, time_file_ms: int) -> None:
-        assert isinstance(relative_path, str)
-        assert isinstance(time_file_ms, int)
-        self.iFilesUploaded = self.iFilesUploaded + 1
-        self.file_timestamps.write(f"{time_file_ms}\t{relative_path}\n")
-        self.dict_last_modification_times[relative_path] = time_file_ms
 
     def upload(self, force_upload: bool) -> int:
         try:
@@ -421,16 +419,21 @@ class HttpUpload:
 
 # ----------------------------------------------------------------------------
 
+app = typer.Typer()
 
-def main(
-    force: bool = typer.Option(
-        False,
-        "--force",
-        "-f",
-        help="Force upload of all files",
-    ),
+
+@app.command()
+def httpupload(
+    force: typing.Annotated[
+        bool,
+        typer.Option(
+            help="Force upload of all files",
+        ),
+    ] = False,
 ) -> None:
-    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
+
+    assert isinstance(force, bool), force
 
     assert FILENAME_HTTP_UPLOAD_CREDENTIALS.is_file(), FILENAME_HTTP_UPLOAD_CREDENTIALS
     assert FILENAME_HTTP_UPLOAD_CONFIG.is_file(), FILENAME_HTTP_UPLOAD_CONFIG
@@ -443,4 +446,4 @@ def main(
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    app()

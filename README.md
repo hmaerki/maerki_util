@@ -16,8 +16,8 @@ uv run --with=git+https://github.com/hmaerki/maerki_util.git@main zulu
 
 Available commands are:
 
-* wxpyscan
-* wxhttpupload
+* wxpyscan - removed
+* wxhttpupload - removed
 * httpupload
 * zulu
 * alpuma
