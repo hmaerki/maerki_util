@@ -21,7 +21,7 @@ dependencies = [
     "reportlab==4.4.10",
     "pillow==12.2.0",
     "openpyxl==3.1.5",
-    "wxPython==4.2.5",
+    # "wxPython==4.2.5",
     "python-sane==2.9.2; sys_platform == 'linux'",
     "pywin32==311; sys_platform == 'win32'",
 ]
@@ -35,10 +35,16 @@ dev = [
     "ruff",
 ]
 
+wx = [
+    # "-e .
+    "pytest",
+    "mypy",
+    "ruff",
+]
 
 [project.scripts]
-wxpyscan = "pyscan.wxPyScan:main"
-wxhttpupload = "wxhttpupload.wxhttpupload:main"
+# wxpyscan = "pyscan.wxPyScan:main"
+# wxhttpupload = "wxhttpupload.wxhttpupload:main"
 httpupload = "wxhttpupload.httpupload:main"
 zulu = "zulu.zulu:main"
 alpuma = "alpuma.alpuma:main"
