@@ -52,17 +52,15 @@ class Mediator:
             exec(code, {}, self.dictConfig)
         except OSError as e:
             self.writeLine(
-                "Configuration File '%s not found in Folder '%s'."
-                % (strConfigFilename, os.getcwd())
+                f"Configuration File '{strConfigFilename}' not found in Folder '{os.getcwd()}'."
             )
         if self.dictConfig.get("httpupload_config_version", None) != "1.0.0":
             self.writeLine(
-                "This Configuration-Version is too old for this '%s'"
-                % strConfigFilename
+                f"This Configuration-Version is too old for this '{strConfigFilename}'"
             )
         self.dictArguments = self.dictConfig.get("httpupload_configuration", {})
         self.dictArguments["FilenameHtmlLog"] = os.path.normpath(
-            "%s/tmp_httpupload_log.html" % self.dictArguments["local"]
+            f"{self.dictArguments['local']}/tmp_httpupload_log.html"
         )
         self.dictArguments["ForceUpload"] = False
         try:
@@ -81,14 +79,14 @@ class Mediator:
                 self.dictArguments["ForceUpload"] = True
 
     def usage(self):
-        print("Usage: %s --force" % sys.argv[0])
+        print(f"Usage: {sys.argv[0]} --force")
         sys.exit()
 
     def writeLine(self, strLine):
         print(strLine)
 
     def setStatus(self, strLine):
-        print("   %s" % strLine)
+        print(f"   {strLine}")
 
     def keepRunning(self):
         return True
@@ -104,7 +102,7 @@ class Mediator:
         if iErrors == 0:
             print("Success!")
         else:
-            print("Failed (iErrors==%d)." % iErrors)
+            print(f"Failed (iErrors=={iErrors}).")
         # print("Hit return to close...")
         # raw_input()
 
@@ -142,16 +140,13 @@ class http_upload_core:
         ) = urlparse.urlparse(objMediator.getArgument("remote"))
         self.strLocal = os.path.normpath(objMediator.getArgument("local"))
 
-        strUserPassword = "%s:%s" % (
-            objMediator.getArgument("user"),
-            objMediator.getArgument("password"),
-        )
+        strUserPassword = f"{objMediator.getArgument('user')}:{objMediator.getArgument('password')}"
         strUserPassword = base64.encodebytes(bytes(strUserPassword, "utf-8"))
         strUserPassword = strUserPassword.decode("utf-8").replace("\n", "")
-        self.strAuthorization = "Basic %s" % strUserPassword
+        self.strAuthorization = f"Basic {strUserPassword}"
 
         self.strFilenameTimestamps = os.path.normpath(
-            "%s/tmp_httpupload_timestamps_cache.txt" % objMediator.getArgument("local")
+            f"{objMediator.getArgument('local')}/tmp_httpupload_timestamps_cache.txt"
         )
         self.iFilesUploaded = 0
         self.objLogger = Logger(
@@ -217,7 +212,7 @@ class http_upload_core:
             self.objConnection.close()
             self.objConnection = None
             self.objLogger.print_exception()
-            raise Exception('"%s", "%s": "%s"' % (strVerb, strRelativePath, str(e)))
+            raise Exception(f'"{strVerb}", "{strRelativePath}": "{e}"')
         return response.status, response.reason
 
     def http_create_folder(self, strRelativePath):
@@ -259,13 +254,7 @@ class http_upload_core:
             )
             if errorcode == 201 or errorcode == 204:
                 return 0
-        strMessage = "%d %s:   %s  ://  %s  %s" % (
-            errorcode,
-            errormessage,
-            self.strRemoteProtocol,
-            self.strRemoteHost,
-            strRelativePath,
-        )
+        strMessage = f"{errorcode} {errormessage}:   {self.strRemoteProtocol}  ://  {self.strRemoteHost}  {strRelativePath}"
         self.objLogger.warning(strMessage)
         raise UserWarning(strMessage)
 
@@ -331,7 +320,7 @@ class http_upload_core:
             return 0
 
         objMediator.setStatus(
-            "%d: File '%s'" % (self.iFilesUploaded + 1, strRelativePath)
+            f"{self.iFilesUploaded + 1}: File '{strRelativePath}'"
         )
 
         iErrors = self.http_upload_file(strPath)
@@ -383,8 +372,7 @@ class http_upload_core:
             if iErrors == 0:
                 return 0
             self.mediator_write_info(
-                "%d errors occurred during this loop! Trying a %d'd time."
-                % (iErrors, i + 2)
+                f"{iErrors} errors occurred during this loop! Trying a {i + 2}'d time."
             )
             iErrors = self.recurse_folder(strPath, round=round)
         return iErrors
@@ -430,9 +418,9 @@ class http_upload_core:
             self.objFileTimestamps = open(self.strFilenameTimestamps, "w")
             for strPath in sorted(self.dictLastModifiedTimes.keys()):
                 iTime = self.dictLastModifiedTimes[strPath]
-                self.objFileTimestamps.write("%d\t%s\n" % (iTime, strPath))
+                self.objFileTimestamps.write(f"{iTime}\t{strPath}\n")
 
-        self.mediator_write_info("%d Files uploaded." % self.iFilesUploaded)
+        self.mediator_write_info(f"{self.iFilesUploaded} Files uploaded.")
 
         if iErrors == 0:
             self.objLogger.info("---- SUCCESS")
@@ -446,7 +434,7 @@ class http_upload_core:
 
     def add_cache(self, strPath, iTime):
         self.iFilesUploaded = self.iFilesUploaded + 1
-        self.objFileTimestamps.write("%d\t%s\n" % (iTime, strPath))
+        self.objFileTimestamps.write(f"{iTime}\t{strPath}\n")
         self.dictLastModifiedTimes[strPath] = iTime
 
     def upload(self):
@@ -457,7 +445,7 @@ class http_upload_core:
             self.mediator_write_error(s)
             return 1
         except socket.gaierror as e:
-            s = '    Error: Host "%s" not found! %s' % (self.strRemoteHost, str(e))
+            s = f'    Error: Host "{self.strRemoteHost}" not found! {e}'
             self.mediator_write_error(s)
             return 1
         except Exception as e:
@@ -495,19 +483,18 @@ class Logger:
         self.sFilenameStructure = sFilenameStructure
         self.file = codecs.open(sFilenameLog, "w", "utf-8")
         self.file.write(
-            """<html>
+            f"""<html>
               <style>
               <!--
-                .info { COLOR: green }
-                .warning { COLOR: orange }
-                .error { COLOR: red }
+                .info {{ COLOR: green }}
+                .warning {{ COLOR: orange }}
+                .error {{ COLOR: red }}
               -->
               </style>
               <body>
-              <h1>%s %s</h1>
-              running on %s<br>
-              from \"%s\"<br>"""
-            % (sProduct, sVersion, self.get_now(), self.sFilenameStructure)
+              <h1>{sProduct} {sVersion}</h1>
+              running on {self.get_now()}<br>
+              from \"{self.sFilenameStructure}\"<br>"""
         )
 
     def warning(self, sWarning, sFilename=None):
@@ -526,13 +513,8 @@ class Logger:
     def generic(self, sClass, sInfo, sFilename):
         if sFilename is None:
             sFilename = self.sFilenameStructure
-        strMessage = '<a href="%s">%s</a>: <code class="%s">%s</code><br>' % (
-            sFilename,
-            sFilename,
-            sClass,
-            html.escape(sInfo),
-        )
-        strMessage = '<code class="%s">%s</code><br>' % (sClass, html.escape(sInfo))
+        strMessage = f'<a href="{sFilename}">{sFilename}</a>: <code class="{sClass}">{html.escape(sInfo)}</code><br>'
+        strMessage = f'<code class="{sClass}">{html.escape(sInfo)}</code><br>'
         if not strMessage in self.dictMessages:
             self.file.write(strMessage)
             self.dictMessages[strMessage] = ""
@@ -550,11 +532,7 @@ class Logger:
             type, value
         )
         self.file.write(
-            "<PRE>%s<B>%s</B></PRE>"
-            % (
-                html.escape("".join(list[:-1])),
-                html.escape(list[-1]),
-            )
+            f"<PRE>{html.escape(''.join(list[:-1]))}<B>{html.escape(list[-1])}</B></PRE>"
         )
         self.file.flush()
         del tb
