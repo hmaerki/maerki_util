@@ -1,5 +1,5 @@
 """
-2005-2019, Hans Maerki, License LGPL
+2005-2026, Hans Maerki, License LGPL
 
 Doubleclicking this file will loop over all
 image files in the current folder and create
@@ -91,11 +91,14 @@ History:
   2020-12-19, v2.3.2, Hans Maerki. Now rotates the image according to EXIF-transponse.
   2022-05-21, v2.3.3, Hans Maerki. Black. Replace % string fromatting by f strings.
   2025-10-24, v2.3.5, Hans Maerki. Moved to git and uv.
+  2026-04-02, v2.3.6, Hans Maerki. Add typehints and use pathlib.
 """
 
 import filecmp
 import os
-import stat
+from collections.abc import Mapping
+from pathlib import Path
+from typing import Any
 
 import PIL.Image
 import PIL.ImageDraw
@@ -103,7 +106,7 @@ import PIL.ImageFont
 import PIL.ImageOps
 import PIL.ImageStat
 
-VERSION = "2.3.4"
+VERSION = "2.3.6"
 
 CONFIG_DEFAULT = {
     "html_filename": None,
@@ -113,149 +116,187 @@ CONFIG_DEFAULT = {
 CONFIG_FILENAME = "alpuma_config.txt"
 
 
-def main():
-    strTopDirectory = os.path.abspath(os.curdir)
+def main() -> None:
+    topDirectory = Path.cwd().resolve()
 
-    listAlpumaDirectories = []
-    for strDirectory, _listDirectories, listFilenames in os.walk(strTopDirectory):
+    listAlpumaDirectories: list[Path] = []
+    for strDirectory, _listDirectories, listFilenames in os.walk(topDirectory):
         if CONFIG_FILENAME in listFilenames:
-            listAlpumaDirectories.append(strDirectory)
+            listAlpumaDirectories.append(Path(strDirectory))
 
     listAlpumaDirectories.sort()
 
     for strAlpumaDirectory in listAlpumaDirectories:
-        print(f'Found "{CONFIG_FILENAME}" in "{strAlpumaDirectory}"')
+        print(f"Found: {strAlpumaDirectory / CONFIG_FILENAME}")
 
     for strAlpumaDirectory in listAlpumaDirectories:
         print(f'PROCESSING "{strAlpumaDirectory}"')
-        os.chdir(os.path.join(strTopDirectory, strAlpumaDirectory))
-        go()
+        os.chdir(strAlpumaDirectory)
+        go(strAlpumaDirectory)
 
 
-def go():
+def read_text(filename: Path) -> str:
+    for encoding, mandatory in (("utf-8", False), ("iso-8859-1", True)):
+        try:
+            return filename.read_text(encoding=encoding)
+        except UnicodeDecodeError:
+            if mandatory:
+                raise
+            continue
+    raise NotImplementedError()
+
+
+def go(strAlpumaDirectory: Path) -> None:
     """
     Album assembler
     Precondition
       go_recurse2() set cwd to the directory where 'CONFIG_FILENAME'
     """
-    with open(CONFIG_FILENAME, encoding='utf-8') as f:
-        code = compile(f.read(), CONFIG_FILENAME, "exec")
+    config_file = strAlpumaDirectory / CONFIG_FILENAME
+    try:
+        config_file_text = read_text(config_file)
+    except UnicodeDecodeError as e:
+        print(f"ERROR processing: {config_file}")
+        print(repr(e))
+        return
+    try:
+        code = compile(config_file_text, config_file, "exec")
+    except Exception as e:
+        print(f"ERROR processing: {config_file}")
+        print(repr(e))
+        return
+
     global_vars = {}
     config = CONFIG_DEFAULT.copy()
     exec(code, global_vars, config)
     if config.get("alpuma_config_version", None) != "1.0.0":
-        raise ValueError(
-            f"This Alpuma-Version is too old for this '{CONFIG_FILENAME}'"
-        )
+        raise ValueError(f"This Alpuma-Version is too old for this '{CONFIG_FILENAME}'")
 
     html_filename = config.get("html_filename")
-    if html_filename != os.path.basename(html_filename):
+    if (html_filename is None) or (html_filename != Path(html_filename).name):
         raise ValueError(
-            f'ERROR: "{os.path.abspath(os.path.curdir)}/{CONFIG_FILENAME}": Expecting just a simple filename but gut "html_filename = \'{html_filename}\'"!'
+            f'ERROR: "{Path.cwd().resolve() / CONFIG_FILENAME}": Expecting just a simple filename but gut "html_filename = \'{html_filename}\'"!'
         )
 
-    iModificationTimeConfig = os.stat(CONFIG_FILENAME)[stat.ST_MTIME]
+    iModificationTimeConfig = Path(CONFIG_FILENAME).stat().st_mtime
 
     dictRecurse = config.get("recurse", None)
     if dictRecurse is not None:
-        go_recurse(config, iModificationTimeConfig, dictRecurse["top_directory"])
+        go_recurse(
+            config,
+            iModificationTimeConfig,
+            strAlpumaDirectory / dictRecurse["top_directory"],
+        )
         return
 
-    goDirectory(config, iModificationTimeConfig, ".")
+    goDirectory(config, iModificationTimeConfig, strAlpumaDirectory)
 
 
-def go_recurse(config, iModificationTimeConfig, strTop):
+def go_recurse(
+    config: dict[str, Any],
+    iModificationTimeConfig: float,
+    topDirectory: Path,
+) -> None:
     """
     If there is a directory "input_path" (typically "images") in the current directory,
     we process this directory.
     Otherwise we recurse down into the subdirectories.
     """
-    listDirectories = list(os.listdir(strTop))
-    if config["input_path"] in listDirectories:
-        goDirectory(config, iModificationTimeConfig, strTop)
+    listDirectories = list(topDirectory.iterdir())
+    if any(path.name == config["input_path"] for path in listDirectories):
+        goDirectory(config, iModificationTimeConfig, topDirectory)
         return
 
-    listDirectoriesFull = []
-    for strDirectory in listDirectories:
-        if strDirectory.startswith("."):
+    listDirectoriesFull: list[Path] = []
+    for directory in listDirectories:
+        if directory.name.startswith("."):
             continue
-        directoryFull = os.path.join(strTop, strDirectory)
-        if not os.path.isdir(directoryFull):
+        if not directory.is_dir():
             continue
-        listDirectoriesFull.append(directoryFull)
+        listDirectoriesFull.append(directory)
 
-    listDirectories = filter(lambda f: not f.startswith("."), listDirectories)
-    for strDirectoryFull in listDirectoriesFull:
-        go_recurse(config, iModificationTimeConfig, strDirectoryFull)
+    for directoryFull in listDirectoriesFull:
+        go_recurse(config, iModificationTimeConfig, directoryFull)
 
 
-def goDirectory(config, iModificationTimeConfig, strDirectory):
+def goDirectory(
+    config: dict[str, Any],
+    iModificationTimeConfig: float,
+    directory: Path,
+) -> None:
     # Open the content-html file. If any or needed...
-    if not os.path.exists(strDirectory):
+    if not directory.exists():
         raise FileNotFoundError(
-            f'ERROR: Directory does not exist "{os.path.abspath(strDirectory)}".'
+            f'ERROR: Directory does not exist "{directory.resolve()}".'
         )
-    strFilenameHTML = os.path.join(strDirectory, config.get("html_filename"))
-    strContent = config.get("html_template_file")
-    if strFilenameHTML is not None:
+    html_filename = config.get("html_filename")
+    FilenameHTML = directory / html_filename if html_filename is not None else None
+    strContent: str = config.get("html_template_file", "")
+    if FilenameHTML is not None:
         try:
-            with open(strFilenameHTML, encoding='utf-8') as fileContent:
-                strContent = fileContent.read()
+            strContent = FilenameHTML.read_text()
         except OSError as _e:
             print(
                 f'Template "{config.get("html_filename")}" not found: Use template from "{CONFIG_FILENAME}".'
             )
 
     # Loop over all files in the images directory
-    strOrigDirectory = os.path.join(strDirectory, config.get("input_path"))
-    if not os.path.exists(strOrigDirectory):
-        raise FileNotFoundError(
-            f'ERROR: Directory does not exist "{os.path.abspath(strOrigDirectory)}".'
-        )
-    for strFileRoot, strFileExt in getFiles(strOrigDirectory):
-        strFilename = strFileRoot + strFileExt
+    OrigDirectory = directory / str(config.get("input_path"))
+    if not OrigDirectory.exists():
+        raise FileNotFoundError(f'ERROR: Directory does not exist "{OrigDirectory}".')
+    for filePath in getFiles(OrigDirectory):
+        strFileRoot = filePath.stem
+        strFileExt = filePath.suffix
+        strFilename = filePath.name
         dictParams = {
             "file": strFilename,
             "fileroot": strFileRoot,
             "fileext": strFileExt,
         }
-        print(
-            f"Processing {os.path.join(os.path.abspath(strDirectory), strFilename)} ..."
-        )
+        print(f"Processing {directory.resolve() / strFilename} ...")
 
         # Convert the images
-        for conversion in config.get("conversions"):
-            strOutputPath = os.path.join(strDirectory, conversion["output_path"])
-            if not os.path.exists(strOutputPath):
+        for conversion in config.get("conversions", []):
+            strOutputPath = directory / str(conversion["output_path"])
+            if not strOutputPath.exists():
                 print(f"  Create folder {strOutputPath} ...")
-                os.mkdir(strOutputPath)
+                strOutputPath.mkdir()
             convert_image(
-                config, iModificationTimeConfig, strDirectory, strFilename, conversion
+                config, iModificationTimeConfig, directory, strFilename, conversion
             )
 
-        if strFilenameHTML is not None:
+        if FilenameHTML is not None:
             # Update the HTML-File if needed
             strContent = updateContent(
-                config, strContent, strDirectory, strFilename, dictParams
+                config,
+                strContent,
+                str(directory),
+                strFilename,
+                dictParams,
             )
 
-    if strFilenameHTML is not None:
-        print(f"  Write {strDirectory}\\{strFilenameHTML} ...")
-        with open(strFilenameHTML, "w", encoding='utf-8') as fileContent:
-            fileContent.write(strContent)
+    if FilenameHTML is not None:
+        print(f"  Write {FilenameHTML} ...")
+        FilenameHTML.write_text(strContent)
 
 
-def getFiles(strPath):
+def getFiles(path: Path) -> list[Path]:
     # Loop over all files in the images directory
-    files = os.listdir(strPath)
-    files.sort(reverse=True)
-    files = filter(lambda f: os.path.isfile(os.path.join(strPath, f)), files)
-    files = map(os.path.splitext, files)
-    files = filter(lambda f: f[1] in (".gif", ".jpg", ".png"), files)
-    return files
+    files = sorted(path.iterdir(), reverse=True)
+    return [
+        entry
+        for entry in files
+        if entry.is_file() and entry.suffix in (".gif", ".jpg", ".png")
+    ]
 
 
-def updateContent(config, strContent, strDirectory, strFilename, dictParams):
+def updateContent(
+    config: dict[str, Any],
+    strContent: str,
+    strDirectory: str,
+    strFilename: str,
+    dictParams: Mapping[str, Any],
+) -> str:
     strContentLower = strContent.lower()
     iStart = 0
     while 1:
@@ -271,16 +312,16 @@ def updateContent(config, strContent, strDirectory, strFilename, dictParams):
                 strFilename,
                 dictParams,
             )
-        for strFullPath in config.get("html_img_files"):
+        for strFullPath in config.get("html_img_files", []):
             strFullPath = getTemplate(strFullPath, dictParams)
             iPathStart = strContentLower.find(strFullPath.lower(), iStart, iEnd)
             if iPathStart != -1:
                 # We found the entry we are looking for. Update it
                 # Get the first image in the list
-                for strFullImagePath in config.get("html_img_files"):
+                for strFullImagePath in config.get("html_img_files", []):
                     strHrefImagePath = getTemplate(strFullImagePath, dictParams)
-                    strFullImagePath = os.path.join(strDirectory, strHrefImagePath)
-                    if os.path.exists(strFullImagePath):
+                    strFullImagePath = str(Path(strDirectory) / strHrefImagePath)
+                    if Path(strFullImagePath).exists():
                         return updateEntryInContent(
                             strContent,
                             strFullPath,
@@ -292,18 +333,19 @@ def updateContent(config, strContent, strDirectory, strFilename, dictParams):
                             iEnd,
                         )
         iStart = iEnd
+    return strContent
 
 
 def updateEntryInContent(
-    strContent,
-    strFullPath,
-    strHrefImagePath,
-    strFullImagePath,
-    strFilename,
-    dictParams,
-    iStart,
-    iEnd,
-):
+    strContent: str,
+    strFullPath: str,
+    strHrefImagePath: str,
+    strFullImagePath: str,
+    strFilename: str,
+    dictParams: Mapping[str, Any],
+    iStart: int,
+    iEnd: int,
+) -> str:
     strEntry = strContent[iStart:iEnd]
     if strFullPath != strHrefImagePath:
         strEntry = strEntry.replace(strFullPath, strHrefImagePath)
@@ -315,7 +357,11 @@ def updateEntryInContent(
     return strContent[:iStart] + strEntry + strContent[iEnd:]
 
 
-def updateEntry(strEntry, strFullImagePath, _dictParams):
+def updateEntry(
+    strEntry: str,
+    strFullImagePath: str,
+    _dictParams: Mapping[str, Any],
+) -> str:
     image = loadImage(strFullImagePath)
     iWidth, iHeight = image.size
     strEntry = replaceSize(strEntry, "width=", iWidth)
@@ -323,23 +369,27 @@ def updateEntry(strEntry, strFullImagePath, _dictParams):
     return strEntry
 
 
-def addEntry(config, strContent, dictParams):
+def addEntry(
+    config: dict[str, Any],
+    strContent: str,
+    dictParams: Mapping[str, Any],
+) -> str:
     if strContent.find("<!--AlpumaInsert-->") >= 0:
         strLeft, strRight = strContent.split("<!--AlpumaInsert-->", 1)
     else:
         strLeft = ""
         strRight = strContent
-    strEntry = getTemplate(config.get("html_template_image"), dictParams)
+    strEntry = getTemplate(config.get("html_template_image", ""), dictParams)
     return strLeft + "<!--AlpumaInsert-->" + strEntry + strRight
 
 
-def getTemplate(strTemplate, dictParams):
+def getTemplate(strTemplate: str, dictParams: Mapping[str, Any]) -> str:
     for strTag, strValue in dictParams.items():
         strTemplate = strTemplate.replace(f"{{{strTag}}}", str(strValue))
     return strTemplate
 
 
-def replaceSize(strEntry, strPattern, iValue):
+def replaceSize(strEntry: str, strPattern: str, iValue: int) -> str:
     try:
         strStart, strValue = strEntry.split(strPattern + '"', 1)
         strValue, strEnd = strValue.split('"', 1)
@@ -350,7 +400,7 @@ def replaceSize(strEntry, strPattern, iValue):
     return f'{strStart}{strPattern}"{iValue}"{strEnd}'
 
 
-def loadImage(strFilename):
+def loadImage(strFilename: str | Path) -> PIL.Image.Image:
     with open(strFilename, "rb") as fp:
         image = PIL.Image.open(fp)
         image.load()
@@ -359,25 +409,29 @@ def loadImage(strFilename):
 
 
 def convert_image(
-    config, iModificationTimeConfig, strDirectory, strFilename, conversion
-):
+    config: dict[str, Any],
+    iModificationTimeConfig: float,
+    directory: Path,
+    strFilename: str,
+    conversion: Mapping[str, Any],
+) -> None:
     # Get default/configuration values
     iQuality = conversion.get("quality", 100)  # Default for quality if not defined.
-    strPathInput = os.path.join(strDirectory, config.get("input_path"))
-    strPathOutput = os.path.join(strDirectory, conversion["output_path"], strFilename)
+    strPathInput = directory / str(config.get("input_path"))
+    strPathOutput = directory / str(conversion["output_path"]) / strFilename
 
-    if os.path.exists(strPathOutput):
-        iModificationTimeOutput = os.stat(strPathOutput)[stat.ST_MTIME]
+    if strPathOutput.exists():
+        iModificationTimeOutput = strPathOutput.stat().st_mtime
         if iModificationTimeOutput > iModificationTimeConfig:
             # The configuration-file is older
-            iModificationTimeInput = os.stat(strPathInput)[stat.ST_MTIME]
+            iModificationTimeInput = strPathInput.stat().st_mtime
             if iModificationTimeOutput > iModificationTimeInput:
                 # The input-file hasn't changed
                 print(f'  ... "{strPathOutput}" not changed')
                 return
 
     # open the image file
-    image = loadImage(strPathInput + "/" + strFilename)
+    image = loadImage(strPathInput / strFilename)
 
     # Resize
     image = resize(image, conversion, strPathOutput)
@@ -394,7 +448,11 @@ def convert_image(
     return
 
 
-def resize(image, conversion, strPathOutput):
+def resize(
+    image: PIL.Image.Image,
+    conversion: Mapping[str, Any],
+    strPathOutput: str | Path,
+) -> PIL.Image.Image:
     """
     Resize the image
     """
@@ -423,26 +481,32 @@ def resize(image, conversion, strPathOutput):
     return image.resize((iOutputWidth, iOutputHeight), PIL.Image.Resampling.LANCZOS)
 
 
-def replace_file_if_changed_obsolete(strPathOutput, strPathOutputTmp):
+def replace_file_if_changed_obsolete(strPathOutput: str, strPathOutputTmp: str) -> None:
     """
     Do not change timestamps if file didn't change:
     The Ouput-Image is always written in a tmp-file
     and the existing file is replaced only if changed.
     """
-    if not os.path.exists(strPathOutput):
+    path_output = Path(strPathOutput)
+    path_output_tmp = Path(strPathOutputTmp)
+    if not path_output.exists():
         # File didn't exist yet
-        os.rename(strPathOutputTmp, strPathOutput)
+        path_output_tmp.rename(path_output)
         return
-    if filecmp.cmp(strPathOutputTmp, strPathOutput):
+    if filecmp.cmp(path_output_tmp, path_output):
         # file didn't change
-        os.remove(strPathOutputTmp)
+        path_output_tmp.unlink()
         return
     # file changed
-    os.remove(strPathOutput)
-    os.rename(strPathOutputTmp, strPathOutput)
+    path_output.unlink()
+    path_output_tmp.rename(path_output)
 
 
-def annotate(image, conversion, strPathOutput):
+def annotate(
+    image: PIL.Image.Image,
+    conversion: Mapping[str, Any],
+    strPathOutput: str | Path,
+) -> None:
     """
     Write an annotation to the image
     """
@@ -462,9 +526,27 @@ def annotate(image, conversion, strPathOutput):
     color = dictAnnotation.get("color", "inverse")
     difference = int(dictAnnotation.get("difference", 126))
 
-    # Prepare Annoation and calculate it's size inclusive spaceing
-    while iSize >= 9:  # Solange die Schrift eine vernuenftige Groessse hat
-        font = PIL.ImageFont.truetype(strFont, iSize)
+    def load_font(font_name: str, size: int) -> PIL.ImageFont.FreeTypeFont:
+        # Arial is often missing on Linux; try common alternatives before fallback.
+        for candidate in (font_name, "DejaVuSans.ttf", "LiberationSans-Regular.ttf"):
+            try:
+                font = PIL.ImageFont.truetype(candidate, size)
+                assert isinstance(font, PIL.ImageFont.FreeTypeFont)
+                return font
+            except OSError:
+                continue
+        print(
+            f"Font '{font_name}' not found for '{strPathOutput}'. "
+            "Using Pillow default font."
+        )
+        font= PIL.ImageFont.load_default()
+        assert isinstance(font, PIL.ImageFont.FreeTypeFont)
+        return font
+
+    # Prepare Annotation and calculate it's size inclusive spaceing
+    while iSize >= 9:
+        # Solange die Schrift eine vernuenftige Groessse hat
+        font = load_font(strFont, iSize)
         bbox = font.getbbox(strText)
         iAnnotationWidth = bbox[2] - bbox[0]
         iAnnotationHeight = bbox[3] - bbox[1]
@@ -473,7 +555,8 @@ def annotate(image, conversion, strPathOutput):
         iWidth, iHeight = image.size
         if not (iAnnotationWidth > iWidth) | (
             iAnnotationHeight > iHeight
-        ):  # Genuegend Platz
+        ):
+            # Genuegend Platz
             break
         iSize = iSize - 1
         print(f"Text too large; Try with smaller Font; Size {iSize}")

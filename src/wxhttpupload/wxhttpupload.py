@@ -317,7 +317,6 @@ class HttpUploadFrame(wx.Frame):
 
 class wxhttpuploadApp(wx.App):
     def OnInit(self):
-        wx.InitAllImageHandlers()
         self.frameMain = HttpUploadFrame(
             None,
             -1,
