@@ -88,7 +88,8 @@ source = { editable = "." }
 dependencies = [
     { name = "openpyxl" },
     { name = "pillow" },
-    { name = "pywin32" },
+    { name = "python-sane", marker = "sys_platform == 'linux'" },
+    { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "reportlab" },
     { name = "typer-slim" },
     { name = "wxpython" },
@@ -107,7 +108,8 @@ requires-dist = [
     { name = "openpyxl", specifier = "==3.1.5" },
     { name = "pillow", specifier = "==12.0.0" },
     { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pywin32", specifier = "==311" },
+    { name = "python-sane", marker = "sys_platform == 'linux'", specifier = "==2.9.2" },
+    { name = "pywin32", marker = "sys_platform == 'win32'", specifier = "==311" },
     { name = "reportlab", specifier = "==4.4.4" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "typer-slim", specifier = "==0.20.0" },
@@ -271,6 +273,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
 ]
+
+[[package]]
+name = "python-sane"
+version = "2.9.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/e9/e8baff69fc2347606c547201204d4b4843c7ad8ecb9164eceee42016eff6/python_sane-2.9.2.tar.gz", hash = "sha256:50ab8e0b033cececad26c7231a7254f80ad8fe9ec6b5c25add2493d7e2a07bbe", size = 22513, upload-time = "2025-07-21T21:20:21.735Z" }
 
 [[package]]
 name = "pywin32"

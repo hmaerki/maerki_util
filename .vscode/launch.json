@@ -46,6 +46,24 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/src/wxhttpupload_test",
             "justMyCode": false,
+        },
+        {
+            "name": "pyscan_linux.discover",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pyscan_linux.discover",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src/pyscan_linux",
+            "justMyCode": false,
+        },
+        {
+            "name": "pyscan_linux.scan",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pyscan_linux.scan",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src/pyscan_linux",
+            "justMyCode": false,
         }
     ]
 }

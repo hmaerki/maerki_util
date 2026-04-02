@@ -22,7 +22,8 @@ dependencies = [
     "pillow==12.0.0",
     "openpyxl==3.1.5",
     "wxPython==4.2.3",
-    "pywin32==311",
+    "python-sane==2.9.2; sys_platform == 'linux'",
+    "pywin32==311; sys_platform == 'win32'",
 ]
 
 [project.optional-dependencies]
