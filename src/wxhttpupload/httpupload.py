@@ -10,6 +10,7 @@ import re
 import socket
 import ssl
 import sys
+from pathlib import Path
 from time import localtime, strftime
 from urllib import parse as urlparse
 
@@ -28,7 +29,7 @@ from urllib import parse as urlparse
 # ----------------------------------------------------------------------------
 
 sCopyright = "Copyright Hans Maerki. LGPL."
-sVersion = "v1.1.6"
+sVersion = "v1.1.7"
 sProduct = "HTTP Upload"
 
 # ----------------------------------------------------------------------------
@@ -46,12 +47,10 @@ class Mediator:
         strConfigFilename = "http_upload_config.txt"
         self.dictConfig = {}
         try:
-            execfile(strConfigFilename, self.dictConfig)
-            with open(strConfigFilename) as f:
-                code = compile(f.read(), strConfigFilename, "exec")
-                global_vars = {}
-                exec(code, global_vars, self.dictConfig)
-        except IOError as e:
+            config_text = Path(strConfigFilename).read_text(encoding="utf-8")
+            code = compile(config_text, strConfigFilename, "exec")
+            exec(code, {}, self.dictConfig)
+        except OSError as e:
             self.writeLine(
                 "Configuration File '%s not found in Folder '%s'."
                 % (strConfigFilename, os.getcwd())
@@ -95,7 +94,10 @@ class Mediator:
         return True
 
     def getArgument(self, strName, objDefault=None):
-        return self.dictArguments.get(strName, objDefault)
+        value = self.dictArguments.get(strName, objDefault)
+        if isinstance(value, str):
+            value = value.replace("{CONFIG}", ".")
+        return value
 
     def end(self, iErrors):
         print
@@ -103,8 +105,8 @@ class Mediator:
             print("Success!")
         else:
             print("Failed (iErrors==%d)." % iErrors)
-        print("Hit return to close...")
-        raw_input()
+        # print("Hit return to close...")
+        # raw_input()
 
 
 # ----------------------------------------------------------------------------
@@ -570,6 +572,8 @@ class Logger:
 
 # ----------------------------------------------------------------------------
 
+def main():
+    HttpUpload(Mediator())
 
 if __name__ == "__main__":
-    HttpUpload(Mediator())
+    main()

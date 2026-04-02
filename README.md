@@ -18,5 +18,6 @@ Available commands are:
 
 * wxpyscan
 * wxhttpupload
+* httpupload
 * zulu
 * alpuma
