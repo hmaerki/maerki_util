@@ -30,6 +30,15 @@
             "justMyCode": false,
         },
         {
+            "name": "zulu",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "zulu.zulu",
+            "cwd": "/tmp/luetzelsee/luetzelsee.ch/zulu_templates",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
             "name": "alpuma.alpuma",
             "type": "debugpy",
             "request": "launch",
