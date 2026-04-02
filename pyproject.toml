@@ -17,12 +17,13 @@ classifiers = [
 ]
 
 dependencies = [
-    "typer-slim==0.20.0",
-    "reportlab==4.4.4",
-    "pillow==12.0.0",
+    "typer-slim==0.24.0",
+    "reportlab==4.4.10",
+    "pillow==12.2.0",
     "openpyxl==3.1.5",
-    "wxPython==4.2.3",
-    "pywin32==311",
+    "wxPython==4.2.5",
+    "python-sane==2.9.2; sys_platform == 'linux'",
+    "pywin32==311; sys_platform == 'win32'",
 ]
 
 [project.optional-dependencies]
