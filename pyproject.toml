@@ -45,7 +45,7 @@ wx = [
 [project.scripts]
 # wxpyscan = "pyscan.wxPyScan:main"
 # wxhttpupload = "wxhttpupload.wxhttpupload:main"
-httpupload = "httpupload.httpupload:main"
+httpupload = "httpupload.httpupload:app"
 zulu = "zulu.zulu:main"
 alpuma = "alpuma.alpuma:main"
 
