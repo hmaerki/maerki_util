@@ -64,7 +64,7 @@ class HttpUploadCredentials(list[HttpUploadCredential]):
         for credential in self:
             if credential.name == name:
                 return credential
-        raise KeyError(f"No credential found for {name!r}")
+        raise KeyError()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -109,7 +109,14 @@ class HttpUpload:
         self.config_file = config_file
         self.config = HttpUploadConfig.load(config_file=config_file)
         credentials = HttpUploadCredentials.load(credentials_file=credentials_file)
-        self.credential = credentials.get_credential(self.config.name)
+        try:
+            self.credential = credentials.get_credential(self.config.name)
+        except KeyError:
+            logger.error(
+                f"File '{config_file}' refers to '{self.config.name}' which is not found in: {credentials_file}"
+            )
+            typer.Abort()
+
         self.dict_file_size_cache: dict[str, int] = {}
         self.dict_file_time_cache: dict[str, int] = {}
         self.objConnection = None
@@ -152,17 +159,15 @@ class HttpUpload:
                 sslContext.check_hostname = False
                 sslContext.verify_mode = ssl.CERT_NONE
                 self.objConnection = http.client.HTTPSConnection(
-                    self.remote_host, context=sslContext, timeout=30
+                    self.remote_host,
+                    context=sslContext,
+                    timeout=30,
                 )
             else:
                 self.objConnection = http.client.HTTPConnection(
-                    self.remote_host, timeout=30
+                    self.remote_host,
+                    timeout=30,
                 )
-            # Need to comment, to allow access to the socket below
-        #      self.objConnection.connect()
-        # Set the socket timeout
-        # self.objConnection._conn.sock.set_timeout(300)
-        #      socket.setdefaulttimeout(300.0)
 
         headers = {
             "Accept": "text/html",
@@ -173,13 +178,11 @@ class HttpUpload:
         }
 
         try:
-            #
             full_relative_path = f"{self.remote_path}/{relative_path}"
             full_relative_path = full_relative_path.replace(" ", "%20")
             self.objConnection.request(verb, full_relative_path, f_page, headers)
             response = self.objConnection.getresponse()
             _data = response.read()
-            # self.objConnection.close()
         except Exception as e:
             self.objConnection.close()
             self.objConnection = None
@@ -265,20 +268,21 @@ class HttpUpload:
         relative_path = current_path.relative_to(self.directory_local_top)
         # url = f"{self.remote_protocol}://{self.remote_host}{self.remote_path}/{relative_path}"
         # url = f"{self.remote_protocol}://{self.remote_host}{self.remote_path}/{relative_path}"
-        time_cached = self.get_cache(str(relative_path))
+        time_cached_ms = self.get_cache(str(relative_path))
 
-        time_file = self.dict_file_time_cache.setdefault(
-            str(relative_path), int(current_path.stat().st_mtime)
+        time_file_ms = self.dict_file_time_cache.setdefault(
+            str(relative_path), int(1000*current_path.stat().st_mtime)
         )
 
         # If daylight savings (Sommerzeit), has an influence
         # on the POSIX time. I couldn't figure out, which
         # mechanism is used.
         # We used some fuzzy logic now.
-        # if timeCached >= attr.st_mtime:
-        # if timeCached >= timeFile:
-        assert isinstance(time_file, int), time_file
-        if time_file in (time_cached - 3600, time_cached, time_cached + 3600):
+        # if time_cached_ms >= 1000*attr.st_mtime:
+        # if time_cached_ms >= time_file_ms:
+        assert isinstance(time_cached_ms, int), time_cached_ms
+        assert isinstance(time_file_ms, int), time_file_ms
+        if time_file_ms in (time_cached_ms - 3600_000, time_cached_ms, time_cached_ms + 3600_000):
             # File hasn't changed
             return 0
 
@@ -287,7 +291,7 @@ class HttpUpload:
         error_count = self.http_upload_file(current_path)
         if error_count == 0:
             # self.dict_last_modification_times[strPath] = attr.st_mtime
-            self.add_cache(str(relative_path), time_file)
+            self.add_cache(str(relative_path), time_file_ms)
 
         return error_count
 
@@ -391,15 +395,15 @@ class HttpUpload:
 
         return error_count
 
-    def get_cache(self, strPath: str) -> int:
-        return self.dict_last_modification_times.get(strPath, 0)
+    def get_cache(self, relative_path: str) -> int:
+        return self.dict_last_modification_times.get(relative_path, 0)
 
-    def add_cache(self, relative_path: str, time_file: int) -> None:
+    def add_cache(self, relative_path: str, time_file_ms: int) -> None:
         assert isinstance(relative_path, str)
-        assert isinstance(time_file, int)
+        assert isinstance(time_file_ms, int)
         self.iFilesUploaded = self.iFilesUploaded + 1
-        self.file_timestamps.write(f"{time_file}\t{relative_path}\n")
-        self.dict_last_modification_times[relative_path] = time_file
+        self.file_timestamps.write(f"{time_file_ms}\t{relative_path}\n")
+        self.dict_last_modification_times[relative_path] = time_file_ms
 
     def upload(self, force_upload: bool) -> int:
         try:
