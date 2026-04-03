@@ -31,6 +31,7 @@
 #                                    OpenOffice Write is not supported in this version.
 #   2022-05-21, Hans Maerki, v4.0.1: Everything is UTF-8. Default encoding was Latin-1..
 #   2025-10-24, Hans Maerki, v4.0.2: Moved to git and uv
+#   2026-04-03, Hans Maerki, v4.0.3: Logfile refactored from html to text console output.
 #
 
 import os
@@ -38,16 +39,19 @@ import re
 import stat
 import sys
 import time
+import logging
 from html import escape
 
 from zulu import zulu_excel_reader
+
+logger = logging.getLogger(__file__)
 
 # This is needed to find zulu-modules which are stored in the current directory
 sys.path.insert(0, os.path.join(os.path.abspath(os.getcwd())))
 
 sCopyright = "Copyright Hans und Peter Maerki. LGPL."
-sVersion = "v4.0.2"
-sDate = "2025-10-24a"
+sVersion = "v4.0.3"
+sDate = "2026-04-03a"
 sProduct = "Zulu Website-Assembler"
 
 
@@ -144,7 +148,7 @@ class Zulu:
 
         sLogFilename = "zulu_errorlog.html"
         print("Zulu: {} -> {}".format(self.sFilenameStructure, sLogFilename))
-        self.objLogger = Logger(sLogFilename, self.sFilenameStructure)
+        self.objLogger = Logger(self.sFilenameStructure)
         self.objLogger.info("python version: " + sys.version)
         try:
             self.objLogger.info('Assembling structure "%s".' % self.sFilenameStructure)
@@ -845,85 +849,41 @@ class Template:
 
 
 class Logger:
-    "A HTML Logger"
+    "A HTML Logger - Now just using python loggin"
 
-    def __init__(self, sFilenameLog, sFilenameStructure):
+    def __init__(self, sFilenameStructure):
         self.iErrors = 0
         self.iWarnings = 0
         self.iInfos = 0
-        self.dictMessages = {}
         self.sFilenameStructure = sFilenameStructure
-        self.file = open(sFilenameLog, "w", encoding="utf-8")
-        self.file.write(
-            """<html>
-              <style>
-              <!--
-                .info { COLOR: green }
-                .warning { COLOR: orange }
-                .error { COLOR: red }
-              -->
-              </style>
-              <body>
-              <h1>%s %s</h1>
-              running on %s<br>
-              from \"%s\"<br>"""
-            % (sProduct, sVersion, self.get_now(), self.sFilenameStructure)
-        )
+        logger.info(f"{sProduct} {sVersion} {self.sFilenameStructure}")
 
     def warning(self, sWarning, sFilename=None):
         self.iWarnings = self.iWarnings + 1
-        self.generic("warning", sWarning, sFilename)
+        self.generic(logger.warning, sWarning, sFilename)
 
     def error(self, sError, sFilename=None):
         self.iErrors = self.iErrors + 1
-        self.generic("error", sError, sFilename)
-        self.print_exception()
+        self.generic(logger.error, sError, sFilename)
+        logger.exception(sys.exc_info())
 
     def info(self, sInfo, sFilename=None):
         self.iInfos = self.iInfos + 1
-        self.generic("info", sInfo, sFilename)
+        self.generic(logger.info, sInfo, sFilename)
 
-    def generic(self, sClass, sInfo, sFilename):
+    def generic(self, logger_func, sInfo, sFilename):
         if sFilename is None:
             sFilename = self.sFilenameStructure
-        strMessage = '<a href="%s">%s</a>: <code class="%s">%s</code><br>' % (
-            sFilename,
-            sFilename,
-            sClass,
-            escape(sInfo),
-        )
-        if not strMessage in self.dictMessages:
-            self.file.write(strMessage)
-            self.dictMessages[strMessage] = ""
 
-    def print_exception(self, type=None, value=None, tb=None, limit=None):
-        if type is None:
-            type, value, tb = sys.exc_info()
-        import traceback
-
-        self.file.write("<H3>Traceback (most recent call last):</H3>")
-        list = traceback.format_tb(tb, limit) + traceback.format_exception_only(
-            type, value
-        )
-        self.file.write(
-            "<PRE>%s<B>%s</B></PRE>"
-            % (
-                escape("".join(list[:-1])),
-                escape(list[-1]),
-            )
-        )
-        del tb
-
-    def get_now(self):
-        return time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+        logger_func(f"{sFilename}: {sInfo}")
 
     def close(self):
-        self.file.write(
-            """</body>
-              </html>"""
-        )
-        self.file.close()
-
+        f = logger.info
+        if self.iWarnings > 0:
+            f = logger.warning
+        if self.iErrors > 0:
+            f = logger.error
+        f(f"Errors: {self.iErrors}, Warnings: {self.iWarnings}")
 
 #
 # PageNavigation
@@ -1149,6 +1109,7 @@ class menu_level:
 
 
 def main_():
+    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
     if True:
         zulu = Zulu()
         zulu.open()
