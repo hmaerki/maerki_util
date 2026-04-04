@@ -39,6 +39,14 @@
             "justMyCode": false,
         },
         {
+            "name": "zulup",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "zulup.zulup",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
             "name": "alpuma",
             "type": "debugpy",
             "request": "launch",

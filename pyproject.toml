@@ -35,19 +35,13 @@ dev = [
     "ruff",
 ]
 
-wx = [
-    # "-e .
-    "pytest",
-    "mypy",
-    "ruff",
-]
-
 [project.scripts]
 # wxpyscan = "pyscan.wxPyScan:main"
 # wxhttpupload = "wxhttpupload.wxhttpupload:main"
 httpupload = "httpupload.httpupload:app"
-zulu = "zulu.zulu:main"
 alpuma = "alpuma.alpuma:main"
+zulu = "zulu.zulu:main"
+zulup = "zulup.zulup:app"
 
 [project.urls]
 Homepage = "https://github.com/hmaerki/maerki_util"
