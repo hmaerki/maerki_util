@@ -6,19 +6,11 @@
         "directory_name_include": true,
         "select": [
             {
-                "tags": [
-                    "exclude",
-                    "name"
-                ],
-                "pattern": "README.md"
+                "name": "README.md"
             },
             {
-                "tags": [
-                    "exclude",
-                    "ignorecase",
-                    "path"
-                ],
-                "text": ".git"
+                "path": ".git",
+                "matching": "nocase"
             }
         ]
     }

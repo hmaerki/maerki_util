@@ -7,10 +7,10 @@ import pathlib
 
 @dataclasses.dataclass(frozen=True)
 class ZulupSelectEntry:
-    tags: list[str]
-    pattern: str | None = None
-    text: str | None = None
+    name: str | None = None
     path: str | None = None
+    matching: str = "literal"
+    logic: str = "exclude"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -65,6 +65,8 @@ class ZulupJson:
                         k: v
                         for k, v in dataclasses.asdict(entry).items()
                         if v is not None
+                        and not (k == "matching" and v == "literal")
+                        and not (k == "logic" and v == "exclude")
                     }
                     for entry in self.backup.select
                 ]

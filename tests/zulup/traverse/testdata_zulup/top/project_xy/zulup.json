@@ -6,16 +6,16 @@
         "directory_name_include": true,
         "select": [
             {
-                "text": "README.md",
-                "tags": ["include", "name"]
+                "name": "README.md",
+                "logic": "include"
             },
             {
-                "path": "project_xy/sub/task.txt",
-                "tags": ["include", "name"]
+                "name": "project_xy/sub/task.txt",
+                "logic": "include"
             },
             {
-                "text": "_git",
-                "tags": ["exclude", "ignorecase", "name"]
+                "name": "_git",
+                "matching": "nocase"
             }
         ]
     }

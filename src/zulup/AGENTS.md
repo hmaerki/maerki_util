@@ -74,18 +74,16 @@ This file contains instructions.
   ```json
   "select": [
     {
-        "pattern": "README.md",
-        "tags": ["exclude", "name"]
+        "name": "README.md",
+        "matching": "literal",
+        "logic": "exclude"
     }
   ]
   ```
 
-  * `pattern` for regexp matching
-  * `text` for literal substring matching
-  * `tags`
-    * "exclude" or "include" (default)
-    * "ignorecase" or "case" (default)
-    * "path" or "name" (default)
+  * `path`/`name`: If the pattern should match the file path or just the file name.
+  * `matching`: One of `literal`(default), `nocase`(for case insensitive) or `regexp`.
+  * `logic`: One of `exclude`(default) or `include`.
 
   The select default behaviour is to select everything.
 
