@@ -1,8 +1,22 @@
 from __future__ import annotations
 
 import dataclasses
+import enum
 import json
 import pathlib
+
+from zulup.util_json import check_enum
+
+
+class EnumMatching(enum.StrEnum):
+    LITERAL = "literal"
+    NOCASE = "nocase"
+    REGEXP = "regexp"
+
+
+class EnumLogic(enum.StrEnum):
+    EXCLUDE = "exclude"
+    INCLUDE = "include"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -11,6 +25,10 @@ class ZulupSelectEntry:
     path: str | None = None
     matching: str = "literal"
     logic: str = "exclude"
+
+    def __post_init__(self) -> None:
+        check_enum(EnumMatching, self.matching)
+        check_enum(EnumLogic, self.logic)
 
 
 @dataclasses.dataclass(frozen=True)
