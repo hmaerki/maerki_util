@@ -29,11 +29,10 @@ def test_traverse_project_xy_files() -> None:
         "project_xy/README.md",
         "project_xy/sub/README.md",
         "project_xy/sub/task.txt",
-        "project_xy/task.txt",
     ]
 
 
 def test_traverse_project_xy_excludes_git() -> None:
     backup = _get_entry("project_xy")
-    # _git directory should be excluded by select rule
-    assert all("_git" not in f for f in backup.files)
+    # sub/_git directory should be excluded by select rule (nocase match for "_git")
+    assert all("_git" not in f.lower() for f in backup.files)

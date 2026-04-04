@@ -19,15 +19,16 @@ def _matches(entry: ZulupSelectEntry, name: str, rel_path: str) -> bool:
     if entry.matching == "nocase":
         return value.lower() == pattern.lower()
     if entry.matching == "regexp":
-        return re.search(pattern, value) is not None
+        return re.match(pattern, value) is not None
     return False
 
 
 def _is_excluded(select: list[ZulupSelectEntry], name: str, rel_path: str) -> bool:
+    excluded = False
     for entry in select:
-        if _matches(entry, name, rel_path) and entry.logic == "exclude":
-            return True
-    return False
+        if _matches(entry, name, rel_path):
+            excluded = entry.logic == "exclude"
+    return excluded
 
 
 class TraverseBackup:

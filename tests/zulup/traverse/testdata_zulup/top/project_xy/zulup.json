@@ -6,11 +6,19 @@
         "directory_name_include": true,
         "select": [
             {
+                "name": ".*\\.md",
+                "matching": "regexp"
+            },
+            {
+                "name": ".*\\.txt",
+                "matching": "regexp"
+            },
+            {
                 "name": "README.md",
                 "logic": "include"
             },
             {
-                "name": "project_xy/sub/task.txt",
+                "path": "project_xy/sub/task.txt",
                 "logic": "include"
             },
             {
