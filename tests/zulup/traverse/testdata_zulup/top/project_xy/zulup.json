@@ -1,0 +1,22 @@
+{
+    "backup": {
+        "backup_name": "project_xy",
+        "directory_target": "/mnt/backup",
+        "directory_src": ".",
+        "directory_name_include": true,
+        "select": [
+            {
+                "text": "README.md",
+                "tags": ["include", "name"]
+            },
+            {
+                "path": "project_xy/sub/task.txt",
+                "tags": ["include", "name"]
+            },
+            {
+                "text": "_git",
+                "tags": ["exclude", "ignorecase", "name"]
+            }
+        ]
+    }
+}
