@@ -6,6 +6,7 @@ import socket
 from .util_backup_directory import BackupDirectory, SnapshotEntry
 from .util_constants import ZULUP_JSON, now_text
 from .util_json_metafile import (
+    CurrentFileEntries,
     CurrentFileEntry,
     Metafile,
     MetafileBackup,
@@ -62,17 +63,19 @@ class TraverseBackup:
         return pathlib.Path(self.backup.directory_target)
 
     @property
-    def current_files(self) -> list[CurrentFileEntry]:
+    def current_files(self) -> CurrentFileEntries:
         directory_src = self.directory_src
         if self.backup.directory_name_include:
             directory_src = directory_src.parent
-        return [
-            CurrentFileEntry.from_file(
-                filepath=directory_src / rel_path,
-                root=self.directory_src,
-            )
-            for rel_path in self.files
-        ]
+        return CurrentFileEntries(
+            [
+                CurrentFileEntry.from_file(
+                    filepath=directory_src / rel_path,
+                    root=self.directory_src,
+                )
+                for rel_path in self.files
+            ]
+        )
 
     def verify_history(self) -> None:
         backup_directory = self.backup_directory
@@ -106,9 +109,8 @@ class TraverseBackup:
 
         # Merge
         snapshot_datetime = now_text()
-        merged_files = Metafile.merge_files(
+        merged_files = self.current_files.merge_files(
             last_files=last_files,
-            current_files=self.current_files,
             snapshot_datetime=snapshot_datetime,
         )
 

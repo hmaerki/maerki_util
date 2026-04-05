@@ -35,6 +35,75 @@ class MetafileFileEntry:
 
 
 @dataclasses.dataclass(frozen=True)
+class CurrentFileEntry:
+    path: str
+    size: int
+    modified: str
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.path, str)
+        assert isinstance(self.size, int)
+        assert isinstance(self.modified, str)
+
+    @staticmethod
+    def from_file(filepath: pathlib.Path, root: pathlib.Path) -> CurrentFileEntry:
+        try:
+            stat = filepath.stat()
+        except FileNotFoundError:
+            raise
+        return CurrentFileEntry(
+            path=str(filepath.relative_to(root)),
+            size=stat.st_size,
+            modified=_format_modified(stat.st_mtime),
+        )
+
+
+class CurrentFileEntries(list[CurrentFileEntry]):
+    def merge_files(
+        self,
+        last_files: list[MetafileFileEntry],
+        snapshot_datetime: str,
+    ) -> list[MetafileFileEntry]:
+        last_by_path: dict[str, MetafileFileEntry] = {f.path: f for f in last_files}
+        current_by_path: dict[str, CurrentFileEntry] = {f.path: f for f in self}
+
+        result: list[MetafileFileEntry] = []
+
+        for current in self:
+            last = last_by_path.get(current.path)
+            if last is None:
+                verb = EnumVerb.ADDED
+            elif last.size == current.size and last.modified == current.modified:
+                verb = EnumVerb.UNTOUCHED
+            else:
+                verb = EnumVerb.MODIFIED
+            result.append(
+                MetafileFileEntry(
+                    path=current.path,
+                    size=current.size,
+                    modified=current.modified,
+                    verb=verb,
+                    snapshot_datetime=snapshot_datetime,
+                )
+            )
+
+        for last in last_files:
+            if last.path not in current_by_path:
+                result.append(
+                    MetafileFileEntry(
+                        path=last.path,
+                        size=last.size,
+                        modified=last.modified,
+                        verb=EnumVerb.REMOVED,
+                        snapshot_datetime=snapshot_datetime,
+                    )
+                )
+
+        result.sort(key=lambda e: e.path)
+        return result
+
+
+@dataclasses.dataclass(frozen=True)
 class MetafileBackup:
     backup_name: str
     parent: str
@@ -110,77 +179,7 @@ class Metafile:
         }
         filename.write_text(json.dumps(data, indent=4, sort_keys=True) + "\n")
 
-    @staticmethod
-    def merge_files(
-        last_files: list[MetafileFileEntry],
-        current_files: list[CurrentFileEntry],
-        snapshot_datetime: str,
-    ) -> list[MetafileFileEntry]:
-        last_by_path: dict[str, MetafileFileEntry] = {f.path: f for f in last_files}
-        current_by_path: dict[str, CurrentFileEntry] = {
-            f.path: f for f in current_files
-        }
-
-        result: list[MetafileFileEntry] = []
-
-        for current in current_files:
-            last = last_by_path.get(current.path)
-            if last is None:
-                verb = EnumVerb.ADDED
-            elif last.size == current.size and last.modified == current.modified:
-                verb = EnumVerb.UNTOUCHED
-            else:
-                verb = EnumVerb.MODIFIED
-            result.append(
-                MetafileFileEntry(
-                    path=current.path,
-                    size=current.size,
-                    modified=current.modified,
-                    verb=verb,
-                    snapshot_datetime=snapshot_datetime,
-                )
-            )
-
-        for last in last_files:
-            if last.path not in current_by_path:
-                result.append(
-                    MetafileFileEntry(
-                        path=last.path,
-                        size=last.size,
-                        modified=last.modified,
-                        verb=EnumVerb.REMOVED,
-                        snapshot_datetime=snapshot_datetime,
-                    )
-                )
-
-        result.sort(key=lambda e: e.path)
-        return result
-
 
 def _format_modified(mtime: float) -> str:
     dt = datetime.datetime.fromtimestamp(mtime)
     return dt.strftime("%Y-%m-%d_%H-%M-%S.") + f"{dt.microsecond // 1000:03d}"
-
-
-@dataclasses.dataclass(frozen=True)
-class CurrentFileEntry:
-    path: str
-    size: int
-    modified: str
-
-    def __post_init__(self) -> None:
-        assert isinstance(self.path, str)
-        assert isinstance(self.size, int)
-        assert isinstance(self.modified, str)
-
-    @staticmethod
-    def from_file(filepath: pathlib.Path, root: pathlib.Path) -> CurrentFileEntry:
-        try:
-            stat = filepath.stat()
-        except FileNotFoundError:
-            raise
-        return CurrentFileEntry(
-            path=str(filepath.relative_to(root)),
-            size=stat.st_size,
-            modified=_format_modified(stat.st_mtime),
-        )
