@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 import pathlib
 import typing
 
 from zulup.util_constants import ZULUP_JSON
 from zulup.util_json_zulup import ZulupJson
+
+logger = logging.getLogger(__name__)
 
 if typing.TYPE_CHECKING:
     from zulup.util_traverse_backup import TraverseBackup

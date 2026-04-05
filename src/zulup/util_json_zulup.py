@@ -65,8 +65,9 @@ class ZulupFilter:
 
         return f
 
-    def matches(self, path: pathlib.Path, is_dir: bool) -> bool:
-        assert isinstance(path, pathlib.Path)
+    def matches(self, name: str, rel_path: str, is_dir: bool) -> bool:
+        assert isinstance(name, str)
+        assert isinstance(rel_path, str)
         assert isinstance(is_dir, bool)
 
         if is_dir and self.kind != EnumKind.DIRECTORY:
@@ -74,10 +75,10 @@ class ZulupFilter:
         if not is_dir and self.kind != EnumKind.FILE:
             return False
 
-        name_or_path = path.name
+        name_or_path = name
         pattern = self.name
         if self.path is not None:
-            name_or_path = str(path)
+            name_or_path = rel_path
             pattern = self.path
         assert pattern is not None
 
@@ -93,9 +94,9 @@ class ZulupFilter:
 
 
 class ZulupFilters(list[ZulupFilter]):
-    def is_included(self, path: pathlib.Path, is_dir: bool) -> bool:
+    def is_included(self, name: str, rel_path: str, is_dir: bool) -> bool:
         for entry in self:
-            if entry.matches(path, is_dir):
+            if entry.matches(name, rel_path, is_dir):
                 return entry.logic == EnumLogic.INCLUDE
         return True
 

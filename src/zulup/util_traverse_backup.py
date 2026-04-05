@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import pathlib
 import socket
 import subprocess
@@ -35,7 +36,6 @@ class TraverseBackup:
 
         self._collect(
             directory=self.directory_src,
-            directory_top=self.directory_src,
             filters=filters,
         )
         self.files.sort()
@@ -183,23 +183,29 @@ class TraverseBackup:
     def _collect(
         self,
         directory: pathlib.Path,
-        directory_top: pathlib.Path,
         filters: ZulupFilters,
     ) -> None:
-        assert isinstance(directory, pathlib.Path)
-        assert isinstance(directory_top, pathlib.Path)
-        assert isinstance(filters, ZulupFilters)
+        top = str(directory)
+        top_len = len(top) + 1  # +1 for trailing separator
 
-        for directory_sub in sorted(directory.iterdir()):
-            rel_path = directory_sub.relative_to(directory_top)
-            if directory_sub.is_dir():
-                if filters.is_included(path=rel_path, is_dir=True):
-                    self._collect(directory_sub, directory_top, filters)
-            elif directory_sub.is_file():
-                if directory_sub.name == ZULUP_JSON:
+        for dirpath, dirnames, filenames in os.walk(top):
+            rel_prefix = dirpath[top_len:] + "/" if len(dirpath) > top_len - 1 else ""
+
+            # Filter directories in-place (sorted) to control os.walk traversal
+            dirnames[:] = [
+                d
+                for d in sorted(dirnames)
+                if filters.is_included(
+                    d, f"{rel_prefix}{d}" if rel_prefix else d, is_dir=True
+                )
+            ]
+
+            for name in sorted(filenames):
+                if name == ZULUP_JSON:
                     continue
-                if filters.is_included(path=rel_path, is_dir=False):
-                    self.files.append(str(rel_path))
+                rel_path = f"{rel_prefix}{name}" if rel_prefix else name
+                if filters.is_included(name, rel_path, is_dir=False):
+                    self.files.append(rel_path)
 
 
 class ListTraverseBackup(list[TraverseBackup]):

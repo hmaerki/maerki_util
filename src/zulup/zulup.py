@@ -31,12 +31,18 @@ def backup(
         directories = [pathlib.Path.home()]
 
     zulup = util_zulup.Zulup()
+    zulup.log_duration("zulup")
     list_traverse_backup = zulup.traverse_directories(directories=directories)
     zulup.log_duration(
         f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
     )
     list_traverse_backup.verify_history()
+    zulup.log_duration("verify_history")
     list_traverse_backup.do_backup(full=full)
+    zulup.log_duration("backup")
+    zulup.log_duration(
+        f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
+    )
     zulup.log_duration("done")
 
 
