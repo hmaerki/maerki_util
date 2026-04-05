@@ -55,6 +55,23 @@ class TraverseBackup:
             metafile = backup_directory.last_snapshot.metafile
             backup_directory.verify_history(metafile=metafile)
 
+    def do_backup(self, full: bool) -> None:
+        """
+        See AGENTS.md
+
+        * Merge `last_metafile` with `current_filelist` into `new_metafile`. In this step the `verb` will be updated:
+            * `added`: If the file is new.
+            * `removed`: if the file is gone.
+            * `untouched`: If the file size and modification time have not changed.
+            * `modified`: else
+        * Create a file list as input into `tar --files-from`: All files which are `added` or `modified`.
+        * Call `tar --zstd --files-from ... -cf <directory_target>/<snapshot_stem>.tgz_tmp`.
+        * Calculate sha256 from `<directory_target>/<snapshot_stem>.tgz_tmp` and add it to `backup/tar_checksum` of `new_metafile`.
+        * Store `new_metafile` in `<directory_target>/<snapshot_stem>.json`.
+        * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
+        """
+        pass
+
     def _collect(
         self,
         directory: pathlib.Path,
@@ -84,3 +101,7 @@ class ListTraverseBackup(list[TraverseBackup]):
     def verify_history(self) -> None:
         for traverse_backup in self:
             traverse_backup.verify_history()
+
+    def do_backup(self, full: bool) -> None:
+        for traverse_backup in self:
+            traverse_backup.do_backup(full=full)
