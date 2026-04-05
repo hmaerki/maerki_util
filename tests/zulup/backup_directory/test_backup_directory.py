@@ -14,6 +14,7 @@ def test_empty_directory() -> None:
     bd = BackupDirectory(DIRECTORY_TESTDATA / "directory_empty", BACKUP_NAME)
     assert bd.snapshots == []
     assert bd.last_snapshot is None
+    assert bd.last_metafile is None
 
 
 def test_full_only() -> None:
@@ -22,6 +23,8 @@ def test_full_only() -> None:
     entry = bd.snapshots[0]
     assert entry.filename_metafile.name == "project_xy_2026-04-03_12-22-22_full.json"
     assert bd.last_snapshot == entry
+    metafile = bd.last_metafile
+    assert metafile is not None
 
 
 def test_full_and_incr() -> None:
@@ -36,6 +39,8 @@ def test_full_and_incr() -> None:
         == "project_xy_2026-04-03_13-22-22_incr.json"
     )
     assert bd.last_snapshot == bd.snapshots[1]
+    assert bd.last_metafile is not None
+    assert len(bd.last_metafile.history) == 1
 
 
 def test_metafile_and_tarfile_paths() -> None:

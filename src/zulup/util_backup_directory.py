@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import pathlib
 
+from zulup.util_json_metafile import Metafile
 
 TARFILE_SUFFIX = ".tgz"
 METAFILE_SUFFIX = ".json"
@@ -47,3 +48,9 @@ class BackupDirectory:
         if not self.snapshots:
             return None
         return self.snapshots[-1]
+
+    @property
+    def last_metafile(self) -> Metafile | None:
+        if self.last_snapshot is None:
+            return None
+        return Metafile.from_file(self.last_snapshot.filename_metafile)
