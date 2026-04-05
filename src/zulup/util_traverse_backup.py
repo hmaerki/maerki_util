@@ -191,16 +191,15 @@ class TraverseBackup:
         assert isinstance(filters, ZulupFilters)
 
         for directory_sub in sorted(directory.iterdir()):
-            name = directory_sub.name
-            rel_path = str(directory_sub.relative_to(directory_top))
+            rel_path = directory_sub.relative_to(directory_top)
             if directory_sub.is_dir():
-                if filters.is_included(name, rel_path, is_dir=True):
+                if filters.is_included(path=rel_path, is_dir=True):
                     self._collect(directory_sub, directory_top, filters)
             elif directory_sub.is_file():
-                if name == ZULUP_JSON:
+                if directory_sub.name == ZULUP_JSON:
                     continue
-                if filters.is_included(name, rel_path, is_dir=False):
-                    self.files.append(rel_path)
+                if filters.is_included(path=rel_path, is_dir=False):
+                    self.files.append(str(rel_path))
 
 
 class ListTraverseBackup(list[TraverseBackup]):
