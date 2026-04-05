@@ -3,10 +3,9 @@ from __future__ import annotations
 import pathlib
 import re
 
+from zulup.util_constants import ZULUP_JSON
 from zulup.util_json_zulup import ZulupBackup, ZulupFilterEntry
 from zulup.util_traverse_zulup import TraverseZulupEntry
-
-ZULUP_JSON = "zulup.json"
 
 
 def _matches(entry: ZulupFilterEntry, name: str, rel_path: str) -> bool:
