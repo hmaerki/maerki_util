@@ -5,6 +5,7 @@ import enum
 import json
 import pathlib
 import re
+import typing
 
 from zulup.util_json import check_enum
 
@@ -29,19 +30,40 @@ class EnumKind(enum.StrEnum):
 
 @dataclasses.dataclass(frozen=True)
 class ZulupFilter:
-    name: str | None = None
-    path: str | None = None
+    name: str | re.Pattern | None = None
+    path: str | re.Pattern | None = None
     matching: str = EnumMatching.LITERAL.value
     kind: str = EnumKind.FILE.value
     logic: str = EnumLogic.EXCLUDE.value
 
     def __post_init__(self) -> None:
+        assert isinstance(self.name, str | re.Pattern | None)
+        assert isinstance(self.path, str | re.Pattern | None)
         check_enum(EnumMatching, self.matching)
         check_enum(EnumKind, self.kind)
         check_enum(EnumLogic, self.logic)
         assert (self.name is None) is not (self.path is None), (
             "Ether 'name' or 'path' must be specified!"
         )
+
+    @staticmethod
+    def factory(**kwargs) -> ZulupFilter:
+        """
+        precompile regular expression for speedup
+        """
+        f = ZulupFilter(**kwargs)
+        if f.matching == EnumMatching.REGEXP:
+            # return dataclasses.replace(
+            #     f,
+            #     name=f.name and re.compile(typing.cast(str, f.name)),
+            #     path=f.path and re.compile(typing.cast(str, f.path)),
+            # )
+            if isinstance(f.name, str):
+                return dataclasses.replace(f, name=re.compile(f.name))
+            if isinstance(f.path, str):
+                return dataclasses.replace(f, path=re.compile(f.path))
+
+        return f
 
     def matches(self, path: pathlib.Path, is_dir: bool) -> bool:
         assert isinstance(path, pathlib.Path)
@@ -62,9 +84,11 @@ class ZulupFilter:
         if self.matching == EnumMatching.LITERAL:
             return name_or_path == pattern
         if self.matching == EnumMatching.NOCASE:
+            assert isinstance(pattern, str)
             return name_or_path.lower() == pattern.lower()
         if self.matching == EnumMatching.REGEXP:
-            return re.match(pattern, name_or_path) is not None
+            assert isinstance(pattern, re.Pattern)
+            return pattern.match(name_or_path) is not None
         return False
 
 
@@ -105,7 +129,7 @@ class ZulupJson:
             filters: ZulupFilters | None = None
             if "filters" in backup_data:
                 filters = ZulupFilters(
-                    [ZulupFilter(**entry) for entry in backup_data["filters"]]
+                    [ZulupFilter.factory(**entry) for entry in backup_data["filters"]]
                 )
             backup = ZulupBackup(
                 backup_name=backup_data["backup_name"],
