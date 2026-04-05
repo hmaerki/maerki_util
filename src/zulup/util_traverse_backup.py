@@ -11,7 +11,6 @@ from .util_json_metafile import (
     MetafileBackup,
     MetafileFileEntry,
     MetafileSnapshot,
-    merge_files,
 )
 from .util_json_zulup import ZulupBackup, ZulupFilter
 from .util_traverse_zulup import DirectoryZulupJson
@@ -62,6 +61,19 @@ class TraverseBackup:
     def directory_target(self) -> pathlib.Path:
         return pathlib.Path(self.backup.directory_target)
 
+    @property
+    def current_files(self) -> list[CurrentFileEntry]:
+        directory_src = self.directory_src
+        if self.backup.directory_name_include:
+            directory_src = directory_src.parent
+        return [
+            CurrentFileEntry.from_file(
+                filepath=directory_src / rel_path,
+                root=self.directory_src,
+            )
+            for rel_path in self.files
+        ]
+
     def verify_history(self) -> None:
         backup_directory = self.backup_directory
         if backup_directory.last_snapshot is not None:
@@ -92,25 +104,11 @@ class TraverseBackup:
             if backup_directory.last_snapshot is not None:
                 last_snapshot = backup_directory.last_snapshot
 
-        directory_src = self.directory_src
-        assert self.dir_zulup_json.zulup_json.backup is not None
-        if self.dir_zulup_json.zulup_json.backup.directory_name_include:
-            directory_src = directory_src.parent
-
-        # Build current file entries from filesystem
-        current_files = [
-            CurrentFileEntry.from_file(
-                filepath=directory_src / rel_path,
-                root=self.directory_src,
-            )
-            for rel_path in self.files
-        ]
-
         # Merge
         snapshot_datetime = now_text()
-        merged_files = merge_files(
+        merged_files = Metafile.merge_files(
             last_files=last_files,
-            current_files=current_files,
+            current_files=self.current_files,
             snapshot_datetime=snapshot_datetime,
         )
 
