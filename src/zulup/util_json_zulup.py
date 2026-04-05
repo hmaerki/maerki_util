@@ -22,23 +22,36 @@ class EnumLogic(enum.StrEnum):
     INCLUDE = "include"
 
 
+class EnumKind(enum.StrEnum):
+    FILE = "file"
+    DIRECTORY = "directory"
+
+
 @dataclasses.dataclass(frozen=True)
 class ZulupFilter:
     name: str | None = None
     path: str | None = None
     matching: str = EnumMatching.LITERAL.value
+    kind: str = EnumKind.FILE.value
     logic: str = EnumLogic.EXCLUDE.value
 
     def __post_init__(self) -> None:
         check_enum(EnumMatching, self.matching)
+        check_enum(EnumKind, self.kind)
         check_enum(EnumLogic, self.logic)
         assert (self.name is None) is not (self.path is None), (
             "Ether 'name' or 'path' must be specified!"
         )
 
-    def matches(self, name: str, path: str) -> bool:
+    def matches(self, name: str, path: str, is_dir: bool) -> bool:
         assert isinstance(name, str)
         assert isinstance(path, str)
+        assert isinstance(is_dir, bool)
+
+        if is_dir and self.kind != EnumKind.DIRECTORY:
+            return False
+        if not is_dir and self.kind != EnumKind.FILE:
+            return False
 
         name_or_path = name
         pattern = self.name
@@ -57,10 +70,10 @@ class ZulupFilter:
 
 
 class ZulupFilters(list[ZulupFilter]):
-    def is_excluded(self, name: str, path: str) -> bool:
+    def is_excluded(self, name: str, path: str, is_dir: bool) -> bool:
         excluded = False
         for entry in self:
-            if entry.matches(name, path):
+            if entry.matches(name, path, is_dir):
                 excluded = entry.logic == EnumLogic.EXCLUDE
         return excluded
 
@@ -126,6 +139,7 @@ class ZulupJson:
                         for k, v in dataclasses.asdict(entry).items()
                         if v is not None
                         and not (k == "matching" and v == "literal")
+                        and not (k == "kind" and v == "file")
                         and not (k == "logic" and v == "exclude")
                     }
                     for entry in self.backup.filters

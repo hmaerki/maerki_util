@@ -23,7 +23,8 @@
             },
             {
                 "name": "_git",
-                "matching": "nocase"
+                "matching": "nocase",
+                "kind": "directory"
             }
         ]
     }

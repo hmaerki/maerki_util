@@ -203,12 +203,12 @@ class TraverseBackup:
             name = directory_sub.name
             rel_path = prefix + str(directory_sub.relative_to(directory_top))
             if directory_sub.is_dir():
-                if not filters.is_excluded(name, rel_path):
+                if not filters.is_excluded(name, rel_path, is_dir=True):
                     self._collect(directory_sub, directory_top, prefix, filters)
             elif directory_sub.is_file():
                 if name == ZULUP_JSON:
                     continue
-                if not filters.is_excluded(name, rel_path):
+                if not filters.is_excluded(name, rel_path, is_dir=False):
                     self.files.append(rel_path)
 
 

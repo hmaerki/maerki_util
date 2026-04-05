@@ -76,6 +76,7 @@ This file contains instructions.
     {
         "name": "README.md",
         "matching": "literal",
+        "kind": "directory",
         "logic": "exclude"
     }
   ]
@@ -83,6 +84,7 @@ This file contains instructions.
 
   * `path`/`name`: If the pattern should match the file path or just the file name.
   * `matching`: One of `literal`(default), `nocase`(for case insensitive) or `regexp`.
+  * `kind`: One of `file`(default or `directory`)
   * `logic`: One of `exclude`(default) or `include`.
 
   The filters default behaviour is to select everything.
