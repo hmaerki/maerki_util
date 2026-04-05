@@ -20,7 +20,7 @@ class EnumLogic(enum.StrEnum):
 
 
 @dataclasses.dataclass(frozen=True)
-class ZulupSelectEntry:
+class ZulupFilterEntry:
     name: str | None = None
     path: str | None = None
     matching: str = "literal"
@@ -37,7 +37,7 @@ class ZulupBackup:
     directory_target: str
     directory_src: str
     directory_name_include: bool
-    select: list[ZulupSelectEntry] | None = None
+    filter: list[ZulupFilterEntry] | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -51,15 +51,15 @@ class ZulupJson:
         backup = None
         if "backup" in data:
             backup_data = data["backup"]
-            select = None
-            if "select" in backup_data:
-                select = [ZulupSelectEntry(**entry) for entry in backup_data["select"]]
+            filter_ = None
+            if "filter" in backup_data:
+                filter_ = [ZulupFilterEntry(**entry) for entry in backup_data["filter"]]
             backup = ZulupBackup(
                 backup_name=backup_data["backup_name"],
                 directory_target=backup_data["directory_target"],
                 directory_src=backup_data["directory_src"],
                 directory_name_include=backup_data["directory_name_include"],
-                select=select,
+                filter=filter_,
             )
         return ZulupJson(
             depth=data.get("depth"),
@@ -77,8 +77,8 @@ class ZulupJson:
                 "directory_src": self.backup.directory_src,
                 "directory_name_include": self.backup.directory_name_include,
             }
-            if self.backup.select is not None:
-                backup_dict["select"] = [
+            if self.backup.filter is not None:
+                backup_dict["filter"] = [
                     {
                         k: v
                         for k, v in dataclasses.asdict(entry).items()
@@ -86,7 +86,7 @@ class ZulupJson:
                         and not (k == "matching" and v == "literal")
                         and not (k == "logic" and v == "exclude")
                     }
-                    for entry in self.backup.select
+                    for entry in self.backup.filter
                 ]
             data["backup"] = backup_dict
         filename.write_text(json.dumps(data, indent=4) + "\n")

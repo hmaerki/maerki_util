@@ -20,7 +20,10 @@ def _get_entry(backup_name: str) -> TraverseBackup:
 
 def test_traverse_project_rs_files() -> None:
     backup = _get_entry("project_rs")
-    assert backup.files == ["a.txt", "sub/b.txt"]
+    assert backup.files == [
+        "a.txt",
+        "sub/b.txt",
+    ]
 
 
 def test_traverse_project_xy_files() -> None:
@@ -28,11 +31,12 @@ def test_traverse_project_xy_files() -> None:
     assert backup.files == [
         "project_xy/README.md",
         "project_xy/sub/README.md",
+        "project_xy/sub/main.c",
         "project_xy/sub/task.txt",
     ]
 
 
 def test_traverse_project_xy_excludes_git() -> None:
     backup = _get_entry("project_xy")
-    # sub/_git directory should be excluded by select rule (nocase match for "_git")
+    # sub/_git directory should be excluded by filter rule (nocase match for "_git")
     assert all("_git" not in f.lower() for f in backup.files)

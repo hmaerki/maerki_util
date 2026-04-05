@@ -3,13 +3,13 @@ from __future__ import annotations
 import pathlib
 import re
 
-from zulup.util_json_zulup import ZulupBackup, ZulupSelectEntry
+from zulup.util_json_zulup import ZulupBackup, ZulupFilterEntry
 from zulup.util_traverse_zulup import TraverseZulupEntry
 
 ZULUP_JSON = "zulup.json"
 
 
-def _matches(entry: ZulupSelectEntry, name: str, rel_path: str) -> bool:
+def _matches(entry: ZulupFilterEntry, name: str, rel_path: str) -> bool:
     value = name if entry.name is not None else rel_path
     pattern = entry.name if entry.name is not None else entry.path
     if pattern is None:
@@ -23,9 +23,9 @@ def _matches(entry: ZulupSelectEntry, name: str, rel_path: str) -> bool:
     return False
 
 
-def _is_excluded(select: list[ZulupSelectEntry], name: str, rel_path: str) -> bool:
+def _is_excluded(filter_: list[ZulupFilterEntry], name: str, rel_path: str) -> bool:
     excluded = False
-    for entry in select:
+    for entry in filter_:
         if _matches(entry, name, rel_path):
             excluded = entry.logic == "exclude"
     return excluded
@@ -36,7 +36,7 @@ class TraverseBackup:
         assert entry.zulup_json.backup is not None
         backup: ZulupBackup = entry.zulup_json.backup
         directory_src = entry.directory / backup.directory_src
-        select = backup.select or []
+        filter_ = backup.filter or []
 
         self.files: list[str] = []
 
@@ -45,7 +45,7 @@ class TraverseBackup:
         else:
             prefix = ""
 
-        self._traverse(directory_src, directory_src, prefix, select)
+        self._traverse(directory_src, directory_src, prefix, filter_)
         self.files.sort()
 
     def _traverse(
@@ -53,16 +53,16 @@ class TraverseBackup:
         directory: pathlib.Path,
         root: pathlib.Path,
         prefix: str,
-        select: list[ZulupSelectEntry],
+        filter_: list[ZulupFilterEntry],
     ) -> None:
         for child in sorted(directory.iterdir()):
             name = child.name
             rel_path = prefix + str(child.relative_to(root))
             if child.is_dir():
-                if not _is_excluded(select, name, rel_path):
-                    self._traverse(child, root, prefix, select)
+                if not _is_excluded(filter_, name, rel_path):
+                    self._traverse(child, root, prefix, filter_)
             elif child.is_file():
                 if name == ZULUP_JSON:
                     continue
-                if not _is_excluded(select, name, rel_path):
+                if not _is_excluded(filter_, name, rel_path):
                     self.files.append(rel_path)
