@@ -84,10 +84,16 @@ This file contains instructions.
 
   * `path`/`name`: If the pattern should match the file path or just the file name.
   * `matching`: One of `literal`(default), `nocase`(for case insensitive) or `regexp`.
-  * `kind`: One of `file`(default or `directory`)
+  * `kind`: One of `file`(default) or `directory`.
   * `logic`: One of `exclude`(default) or `include`.
 
-  The filters default behaviour is to select everything.
+  How the filters work:
+
+  * By default the file is included.
+  * Loop over all filters
+    * If a filter matches:
+      * `include` or `exclude` depnding on `logic`
+      * terminate loop
 
 ## `metafile`
 

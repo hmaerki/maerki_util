@@ -6,20 +6,20 @@
         "directory_name_include": true,
         "filters": [
             {
-                "name": ".*\\.md",
-                "matching": "regexp"
-            },
-            {
-                "name": ".*\\.txt",
-                "matching": "regexp"
-            },
-            {
                 "name": "README.md",
                 "logic": "include"
             },
             {
                 "path": "project_xy/sub/task.txt",
                 "logic": "include"
+            },
+            {
+                "name": ".*\\.md",
+                "matching": "regexp"
+            },
+            {
+                "name": ".*\\.txt",
+                "matching": "regexp"
             },
             {
                 "name": "_git",

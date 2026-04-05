@@ -70,12 +70,16 @@ class ZulupFilter:
 
 
 class ZulupFilters(list[ZulupFilter]):
-    def is_excluded(self, name: str, path: str, is_dir: bool) -> bool:
-        excluded = False
+    def is_included(self, name: str, path: str, is_dir: bool) -> bool:
+        """
+        return matched, excluded
+        """
+        included = True
         for entry in self:
             if entry.matches(name, path, is_dir):
-                excluded = entry.logic == EnumLogic.EXCLUDE
-        return excluded
+                assert entry.logic in (EnumLogic.INCLUDE, EnumLogic.EXCLUDE)
+                return entry.logic == EnumLogic.INCLUDE
+        return included
 
 
 @dataclasses.dataclass(frozen=True)
