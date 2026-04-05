@@ -7,7 +7,8 @@ from zulup.util_traverse_zulup import TraverseZulup
 DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
 DIRECTORY_TESTDATA = DIRECTORY_OF_THIS_FILE / "testdata_zulup" / "top"
 
-_traverse = TraverseZulup(DIRECTORY_TESTDATA)
+_traverse = TraverseZulup()
+_traverse.collect(DIRECTORY_TESTDATA)
 
 
 def test_traverse_project_rs_files() -> None:

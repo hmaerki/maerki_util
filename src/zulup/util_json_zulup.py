@@ -4,10 +4,9 @@ import dataclasses
 import enum
 import json
 import pathlib
+import re
 
 from zulup.util_json import check_enum
-
-import re
 
 BACKUP_NAME_RE = re.compile(r"^[a-zA-Z0-9_]+$")
 
@@ -27,12 +26,43 @@ class EnumLogic(enum.StrEnum):
 class ZulupFilterEntry:
     name: str | None = None
     path: str | None = None
-    matching: str = "literal"
-    logic: str = "exclude"
+    matching: str = EnumMatching.LITERAL.value
+    logic: str = EnumLogic.EXCLUDE.value
 
     def __post_init__(self) -> None:
         check_enum(EnumMatching, self.matching)
         check_enum(EnumLogic, self.logic)
+        assert (self.name is None) is not (self.path is None), (
+            "Ether 'name' or 'path' must be specified!"
+        )
+
+    def matches(self, name: str, path: str) -> bool:
+        assert isinstance(name, str)
+        assert isinstance(path, str)
+
+        name_or_path = name
+        pattern = self.name
+        if self.path is not None:
+            name_or_path = path
+            pattern = self.path
+        assert pattern is not None
+
+        if self.matching == EnumMatching.LITERAL:
+            return name_or_path == pattern
+        if self.matching == EnumMatching.NOCASE:
+            return name_or_path.lower() == pattern.lower()
+        if self.matching == EnumMatching.REGEXP:
+            return re.match(pattern, name_or_path) is not None
+        return False
+
+
+class ZulupFilter(list[ZulupFilterEntry]):
+    def is_excluded(self, name: str, path: str) -> bool:
+        excluded = False
+        for entry in self:
+            if entry.matches(name, path):
+                excluded = entry.logic == EnumLogic.EXCLUDE
+        return excluded
 
 
 @dataclasses.dataclass(frozen=True)
@@ -41,7 +71,7 @@ class ZulupBackup:
     directory_target: str
     directory_src: str
     directory_name_include: bool
-    filter: list[ZulupFilterEntry] | None = None
+    filter: ZulupFilter | None = None
 
     def __post_init__(self) -> None:
         if not BACKUP_NAME_RE.match(self.backup_name):
@@ -61,15 +91,17 @@ class ZulupJson:
         backup = None
         if "backup" in data:
             backup_data = data["backup"]
-            filter_ = None
+            filter: ZulupFilter | None = None
             if "filter" in backup_data:
-                filter_ = [ZulupFilterEntry(**entry) for entry in backup_data["filter"]]
+                filter = ZulupFilter(
+                    [ZulupFilterEntry(**entry) for entry in backup_data["filter"]]
+                )
             backup = ZulupBackup(
                 backup_name=backup_data["backup_name"],
                 directory_target=backup_data["directory_target"],
                 directory_src=backup_data["directory_src"],
                 directory_name_include=backup_data["directory_name_include"],
-                filter=filter_,
+                filter=filter,
             )
         return ZulupJson(
             depth=data.get("depth"),

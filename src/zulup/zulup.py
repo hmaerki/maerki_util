@@ -33,10 +33,10 @@ def backup(
     zulup = util_zulup.Zulup()
     list_traverse_backup = zulup.traverse_directories(directories=directories)
     zulup.log_duration(
-        f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON} and"
+        f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
     )
     zulup.verify(list_traverse_backup=list_traverse_backup)
-    pass
+    zulup.log_duration("done")
 
 
 if __name__ == "__main__":
