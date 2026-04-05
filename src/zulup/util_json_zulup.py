@@ -7,6 +7,10 @@ import pathlib
 
 from zulup.util_json import check_enum
 
+import re
+
+BACKUP_NAME_RE = re.compile(r"^[a-zA-Z0-9_]+$")
+
 
 class EnumMatching(enum.StrEnum):
     LITERAL = "literal"
@@ -38,6 +42,12 @@ class ZulupBackup:
     directory_src: str
     directory_name_include: bool
     filter: list[ZulupFilterEntry] | None = None
+
+    def __post_init__(self) -> None:
+        if not BACKUP_NAME_RE.match(self.backup_name):
+            raise ValueError(
+                f"backup_name '{self.backup_name}' does not match {BACKUP_NAME_RE.pattern}!"
+            )
 
 
 @dataclasses.dataclass(frozen=True)

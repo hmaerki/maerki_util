@@ -5,7 +5,7 @@ import pathlib
 
 import pytest
 
-from zulup.util_json_zulup import ZulupJson
+from zulup.util_json_zulup import ZulupBackup, ZulupJson
 
 DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
 DIRECTORY_TESTDATA = DIRECTORY_OF_THIS_FILE / "testdata_zulup"
@@ -34,3 +34,30 @@ def test_zulup_json_round_trip(testfile: pathlib.Path) -> None:
     expected = json.loads(testfile.read_text())
     actual = json.loads(output_file.read_text())
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["valid_name", "project123", "A_B_C"],
+)
+def test_backup_name_valid(name: str) -> None:
+    ZulupBackup(
+        backup_name=name,
+        directory_target="/mnt/backup",
+        directory_src=".",
+        directory_name_include=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["has space", "with-dash", "dot.name", "slash/bad", ""],
+)
+def test_backup_name_invalid(name: str) -> None:
+    with pytest.raises(ValueError, match="backup_name"):
+        ZulupBackup(
+            backup_name=name,
+            directory_target="/mnt/backup",
+            directory_src=".",
+            directory_name_include=True,
+        )
