@@ -21,6 +21,10 @@ class SnapshotEntry:
     def filename_tarfile(self) -> pathlib.Path:
         return self.filename_metafile.with_suffix(TARFILE_SUFFIX)
 
+    @property
+    def metafile(self) -> Metafile:
+        return Metafile.from_file(self.filename_metafile)
+
 
 class BackupDirectory:
     def __init__(self, directory: pathlib.Path, backup_name: str) -> None:
@@ -48,9 +52,3 @@ class BackupDirectory:
         if not self.snapshots:
             return None
         return self.snapshots[-1]
-
-    @property
-    def last_metafile(self) -> Metafile | None:
-        if self.last_snapshot is None:
-            return None
-        return Metafile.from_file(self.last_snapshot.filename_metafile)
