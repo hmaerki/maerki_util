@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import logging
 import pathlib
 import socket
+import subprocess
+import tempfile
 
 from .util_backup_directory import BackupDirectory, SnapshotEntry
 from .util_constants import ZULUP_JSON, now_text
 from .util_json_metafile import (
     CurrentFileEntries,
     CurrentFileEntry,
+    EnumVerb,
     Metafile,
     MetafileBackup,
     MetafileFileEntry,
@@ -15,6 +19,8 @@ from .util_json_metafile import (
 )
 from .util_json_zulup import ZulupBackup, ZulupFilter
 from .util_traverse_zulup import DirectoryZulupJson
+
+logger = logging.getLogger(__name__)
 
 
 class TraverseBackup:
@@ -143,8 +149,43 @@ class TraverseBackup:
 
         metafile.to_file(self.directory_target / metafile.current.metafile_name)
 
-        # TODO: Create tar, calculate checksum, rename tar
-        pass
+        self.do_tar(
+            merged_files=merged_files,
+            filename_target=self.directory_target / metafile.current.tarfile_name,
+        )
+
+        # TODO: Calculate checksum, rename tar
+
+    def do_tar(
+        self,
+        merged_files: list[MetafileFileEntry],
+        filename_target: pathlib.Path,
+    ) -> None:
+        tar_files = [
+            entry.path
+            for entry in merged_files
+            if entry.verb in (EnumVerb.ADDED, EnumVerb.MODIFIED)
+        ]
+
+        directory_src = self.directory_src
+        if self.backup.directory_name_include:
+            directory_src = directory_src.parent
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+            temp_filename = pathlib.Path(temp_file.name)
+            temp_file.write("\n".join(tar_files) + "\n")
+        try:
+            args = [
+                "tar",
+                "--files-from",
+                str(temp_filename),
+                "-zcf",
+                str(filename_target),
+            ]
+            logger.debug(f"Calling: {' '.join(args)}")
+            subprocess.run(args, cwd=directory_src, check=True)
+        finally:
+            temp_filename.unlink(missing_ok=True)
 
     def _collect(
         self,

@@ -57,6 +57,6 @@ class TraverseZulup:
                 return
             remaining_depth -= 1
 
-        for child in sorted(directory.iterdir()):
-            if child.is_dir():
-                self._collect(child, remaining_depth)
+        for directory_sub in sorted(directory.iterdir()):
+            if directory_sub.is_dir():
+                self._collect(directory_sub, remaining_depth)
