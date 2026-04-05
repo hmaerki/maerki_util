@@ -1,0 +1,2 @@
+TARFILE_SUFFIX = ".tgz"
+METAFILE_SUFFIX = ".json"

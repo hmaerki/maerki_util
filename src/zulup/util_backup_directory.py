@@ -3,10 +3,9 @@ from __future__ import annotations
 import dataclasses
 import pathlib
 
+from zulup.util_constants import METAFILE_SUFFIX, TARFILE_SUFFIX
 from zulup.util_json_metafile import Metafile
-
-TARFILE_SUFFIX = ".tgz"
-METAFILE_SUFFIX = ".json"
+from zulup.util_tarfile import verify_tarfile
 
 
 @dataclasses.dataclass(frozen=True)
@@ -61,9 +60,7 @@ class BackupDirectory:
     def verify_history(self, metafile: Metafile) -> None:
         missing: list[str] = []
         for metafile_snapshot in metafile.history:
-            metafile_path = self.directory / (
-                metafile_snapshot.snapshot_stem + METAFILE_SUFFIX
-            )
+            metafile_path = self.directory / metafile_snapshot.metafile_name
             if not metafile_path.is_file():
                 missing.append(str(metafile_path))
         if missing:
@@ -72,4 +69,6 @@ class BackupDirectory:
                 f"'{metafile.current.snapshot_stem}': {missing}"
             )
         for metafile_snapshot in metafile.history:
-            metafile_snapshot.verify_tarfile(directory=self.directory)
+            verify_tarfile(
+                directory=self.directory, metafile_snapshot=metafile_snapshot
+            )

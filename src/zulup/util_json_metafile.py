@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import dataclasses
 import enum
-import hashlib
 import json
 import pathlib
 
+from zulup.util_constants import METAFILE_SUFFIX, TARFILE_SUFFIX
 from zulup.util_json import check_enum
 
 
@@ -36,15 +36,6 @@ class MetafileBackup:
     tar_checksum: str
 
 
-TARFILE_SUFFIX = ".tgz"
-
-
-def calculate_tar_checksum(filename_tar: pathlib.Path) -> str:
-    with filename_tar.open("rb") as f:
-        file_hash = hashlib.file_digest(f, "sha256").hexdigest()
-    return f"sha256:{file_hash}"
-
-
 @dataclasses.dataclass(frozen=True)
 class MetafileSnapshot:
     snapshot_datetime: str
@@ -52,18 +43,13 @@ class MetafileSnapshot:
     snapshot_stem: str
     tar_checksum: str | None = None
 
-    def verify_tarfile(self, directory: pathlib.Path) -> None:
-        if self.tar_checksum is None:
-            return
-        filename_tar = directory / (self.snapshot_stem + TARFILE_SUFFIX)
-        if not filename_tar.is_file():
-            raise FileNotFoundError(f"Tarfile not found: '{filename_tar}'")
-        actual_checksum = calculate_tar_checksum(filename_tar)
-        if actual_checksum != self.tar_checksum:
-            raise ValueError(
-                f"Checksum mismatch for '{filename_tar}': "
-                f"expected {self.tar_checksum}, got {actual_checksum}"
-            )
+    @property
+    def tarfile_name(self) -> str:
+        return self.snapshot_stem + TARFILE_SUFFIX
+
+    @property
+    def metafile_name(self) -> str:
+        return self.snapshot_stem + METAFILE_SUFFIX
 
 
 @dataclasses.dataclass(frozen=True)

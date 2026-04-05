@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import pathlib
 
 import pytest
@@ -81,7 +82,6 @@ def test_verify_history_missing(tmp_path: pathlib.Path) -> None:
         ],
         "files": [],
     }
-    import json
 
     metafile_path = tmp_path / "project_xy_2026-04-03_13-22-22_incr.json"
     metafile_path.write_text(json.dumps(metafile_content))
