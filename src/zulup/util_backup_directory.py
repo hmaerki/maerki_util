@@ -11,6 +11,7 @@ METAFILE_SUFFIX = ".json"
 
 @dataclasses.dataclass(frozen=True)
 class SnapshotEntry:
+    backup_directory: BackupDirectory
     filename_metafile: pathlib.Path
 
     @property
@@ -42,7 +43,11 @@ class BackupDirectory:
             if not filename_metafile.name.startswith(self._prefix):
                 continue
             if filename_metafile.suffix == METAFILE_SUFFIX:
-                snapshots.append(SnapshotEntry(filename_metafile=filename_metafile))
+                snapshots.append(
+                    SnapshotEntry(
+                        backup_directory=self, filename_metafile=filename_metafile
+                    )
+                )
 
         snapshots.sort(key=lambda e: e.snapshot_stem)
         return snapshots
@@ -52,3 +57,19 @@ class BackupDirectory:
         if not self.snapshots:
             return None
         return self.snapshots[-1]
+
+    def verify_history(self, metafile: Metafile) -> None:
+        missing: list[str] = []
+        for metafile_snapshot in metafile.history:
+            metafile_path = self.directory / (
+                metafile_snapshot.snapshot_stem + METAFILE_SUFFIX
+            )
+            if not metafile_path.is_file():
+                missing.append(str(metafile_path))
+        if missing:
+            raise ValueError(
+                f"Missing metafile(s) referenced in history of "
+                f"'{metafile.current.snapshot_stem}': {missing}"
+            )
+        for metafile_snapshot in metafile.history:
+            metafile_snapshot.verify_tarfile(directory=self.directory)
