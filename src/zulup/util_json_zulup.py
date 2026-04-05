@@ -30,6 +30,7 @@ class EnumKind(enum.StrEnum):
 
 @dataclasses.dataclass(frozen=True)
 class ZulupFilter:
+    comment: str | None = None
     name: str | re.Pattern | None = None
     path: str | re.Pattern | None = None
     matching: str = EnumMatching.LITERAL.value
@@ -37,13 +38,14 @@ class ZulupFilter:
     logic: str = EnumLogic.EXCLUDE.value
 
     def __post_init__(self) -> None:
+        assert isinstance(self.comment, str | None)
         assert isinstance(self.name, str | re.Pattern | None)
         assert isinstance(self.path, str | re.Pattern | None)
         check_enum(EnumMatching, self.matching)
         check_enum(EnumKind, self.kind)
         check_enum(EnumLogic, self.logic)
-        assert (self.name is None) is not (self.path is None), (
-            "Ether 'name' or 'path' must be specified!"
+        assert (self.name is None) or (self.path is None), (
+            "Not allowed to specify both 'name' or 'path'!"
         )
 
     @staticmethod
@@ -69,6 +71,9 @@ class ZulupFilter:
         assert isinstance(name, str)
         assert isinstance(rel_path, str)
         assert isinstance(is_dir, bool)
+
+        if (self.name is None) and (self.path is None):
+            return True
 
         if is_dir and self.kind != EnumKind.DIRECTORY:
             return False
