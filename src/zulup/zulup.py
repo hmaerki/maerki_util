@@ -70,7 +70,7 @@ def backup(
     logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
 
     zulup = Zulup()
-    zulup.backup(filename_target=pathlib.Path("/home/maerki/tmp_backup.zst"))
+    zulup.backup(filename_target=pathlib.Path("/home/maerki/tmp_backup.tgz"))
 
 
 if __name__ == "__main__":

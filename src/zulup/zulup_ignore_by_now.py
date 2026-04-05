@@ -119,7 +119,7 @@ def backup(
 
     zulup = Zulup(directory_src=directory)
     zulup.create_file_list()
-    zulup.backup(filename_target=pathlib.Path("/home/maerki/tmp_backup.zst"))
+    zulup.backup(filename_target=pathlib.Path("/home/maerki/tmp_backup.tgz"))
 
 
 if __name__ == "__main__":

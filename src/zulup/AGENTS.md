@@ -15,7 +15,7 @@ Terms
   * `<backup_name>_<snapshot_datetime>_<snapshot_type>`
   * `snapshot_datetime` is `YYYY-MM-DD_HH-MM-SS`
   * `snapshot_type` is `full` or `incr`.
-* `tarfile`: Belongs to a snapshot. The filename is `<snapshot_stem>.zst`
+* `tarfile`: Belongs to a snapshot. The filename is `<snapshot_stem>.tgz`
 * `metafile`: Belongs to a snapshot. The filename is `<snapshot_stem>.json`
 * `verb`: The action that happened to a file: `added` (new file), `modified` (changed), `untouched` (unchanged), or `removed` (deleted).
 * `directory_src`: The directory to be backed up.
@@ -163,8 +163,8 @@ This is the file which is stored with every snapshot.
     * `untouched`: If the file size and modification time have not changed.
     * `modified`: else
   * Create a file list as input into `tar --files-from`: All files which are `added` or `modified`.
-  * Call `tar --zstd --files-from ... -cf <directory_target>/<snapshot_stem>.zst_tmp`.
-  * Calculate sha256 from `<directory_target>/<snapshot_stem>.zst_tmp` and add it to `backup/tar_checksum` of `new_metafile`.
+  * Call `tar --zstd --files-from ... -cf <directory_target>/<snapshot_stem>.tgz_tmp`.
+  * Calculate sha256 from `<directory_target>/<snapshot_stem>.tgz_tmp` and add it to `backup/tar_checksum` of `new_metafile`.
   * Store `new_metafile` in `<directory_target>/<snapshot_stem>.json`.
-  * Rename `<snapshot_stem>.zst_tmp` to `<snapshot_stem>.zst`
+  * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
 
