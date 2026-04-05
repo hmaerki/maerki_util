@@ -43,6 +43,10 @@
             "type": "debugpy",
             "request": "launch",
             "module": "zulup.zulup",
+            "args": [
+                "/home/maerki/work_antenna",
+                "/home/maerki/work_heizung"
+            ],
             "console": "integratedTerminal",
             "justMyCode": false,
         },

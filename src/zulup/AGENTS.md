@@ -154,9 +154,11 @@ This is the file which is stored with every snapshot.
 
 * Loop over the directory structure and find all backups to be done based on `zulup.json`.
 * For each backup:
-  * Traverse `directory_src` and collect files according to `filter`: We call it `current_filelist`.
-  * Find the last snapshot in `directory_target`. If no previous snapshot exists, this is a full backup and all files are `added`.
-  * Read `metafile` from last snapshot. We call it `last_metafile`.
+  * Do minimal checks
+    * Traverse `directory_src` and collect files according to `filter`: We call it `current_filelist`.
+    * Find the last snapshot in `directory_target`. If no previous snapshot exists, this is a full backup and all files are `added`.
+    * Read `metafile` from last snapshot. We call it `last_metafile`.
+* For each backup:
   * Merge `last_metafile` with `current_filelist` into `new_metafile`. In this step the `verb` will be updated:
     * `added`: If the file is new.
     * `removed`: if the file is gone.

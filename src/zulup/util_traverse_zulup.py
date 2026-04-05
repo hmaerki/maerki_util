@@ -8,19 +8,17 @@ from zulup.util_json_zulup import ZulupJson
 
 
 @dataclasses.dataclass(frozen=True)
-class TraverseZulupEntry:
+class TraverseZulupJson:
     directory: pathlib.Path
     zulup_json: ZulupJson
 
 
 class TraverseZulup:
-    def __init__(self, directory: pathlib.Path) -> None:
-        self.directory = directory
-        self.backups: list[TraverseZulupEntry] = []
-        self._traverse(directory, remaining_depth=None)
+    def __init__(self) -> None:
+        self.list_zulup_json: list[TraverseZulupJson] = []
 
-    def get_zulup_entry(self, backup_name: str) -> TraverseZulupEntry:
-        for entry in self.backups:
+    def get_zulup_entry(self, backup_name: str) -> TraverseZulupJson:
+        for entry in self.list_zulup_json:
             assert entry.zulup_json.backup is not None
             if entry.zulup_json.backup.backup_name == backup_name:
                 return entry
@@ -31,14 +29,18 @@ class TraverseZulup:
 
         return TraverseBackup(self.get_zulup_entry(backup_name))
 
-    def _traverse(self, directory: pathlib.Path, remaining_depth: int | None) -> None:
+    def collect(self, directory: pathlib.Path) -> None:
+        self._collect(directory, remaining_depth=None)
+
+    def _collect(self, directory: pathlib.Path, remaining_depth: int | None) -> None:
         zulup_json_path = directory / ZULUP_JSON
         if zulup_json_path.exists():
             zulup_json = ZulupJson.from_file(zulup_json_path)
             if zulup_json.backup is not None:
-                self.backups.append(
-                    TraverseZulupEntry(directory=directory, zulup_json=zulup_json)
+                self.list_zulup_json.append(
+                    TraverseZulupJson(directory=directory, zulup_json=zulup_json)
                 )
+                return
             if zulup_json.depth is not None:
                 remaining_depth = zulup_json.depth
 
@@ -49,4 +51,4 @@ class TraverseZulup:
 
         for child in sorted(directory.iterdir()):
             if child.is_dir():
-                self._traverse(child, remaining_depth)
+                self._collect(child, remaining_depth)
