@@ -4,7 +4,7 @@
         "directory_target": "/mnt/backup",
         "directory_src": ".",
         "directory_name_include": true,
-        "filter": [
+        "filters": [
             {
                 "name": "README.md"
             },

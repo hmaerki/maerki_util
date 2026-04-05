@@ -17,7 +17,7 @@ from .util_json_metafile import (
     MetafileFileEntry,
     MetafileSnapshot,
 )
-from .util_json_zulup import ZulupBackup, ZulupFilter
+from .util_json_zulup import ZulupBackup, ZulupFilters
 from .util_traverse_zulup import DirectoryZulupJson
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class TraverseBackup:
         assert dir_zulup_json.zulup_json.backup is not None
         self.dir_zulup_json = dir_zulup_json
         backup: ZulupBackup = dir_zulup_json.zulup_json.backup
-        filter = backup.filter or ZulupFilter([])
+        filters = backup.filters or ZulupFilters([])
 
         self.files: list[str] = []
 
@@ -42,7 +42,7 @@ class TraverseBackup:
             directory=self.directory_src,
             directory_top=self.directory_src,
             prefix=prefix,
-            filter=filter,
+            filters=filters,
         )
         self.files.sort()
 
@@ -192,23 +192,23 @@ class TraverseBackup:
         directory: pathlib.Path,
         directory_top: pathlib.Path,
         prefix: str,
-        filter: ZulupFilter,
+        filters: ZulupFilters,
     ) -> None:
         assert isinstance(directory, pathlib.Path)
         assert isinstance(directory_top, pathlib.Path)
         assert isinstance(prefix, str)
-        assert isinstance(filter, ZulupFilter)
+        assert isinstance(filters, ZulupFilters)
 
         for directory_sub in sorted(directory.iterdir()):
             name = directory_sub.name
             rel_path = prefix + str(directory_sub.relative_to(directory_top))
             if directory_sub.is_dir():
-                if not filter.is_excluded(name, rel_path):
-                    self._collect(directory_sub, directory_top, prefix, filter)
+                if not filters.is_excluded(name, rel_path):
+                    self._collect(directory_sub, directory_top, prefix, filters)
             elif directory_sub.is_file():
                 if name == ZULUP_JSON:
                     continue
-                if not filter.is_excluded(name, rel_path):
+                if not filters.is_excluded(name, rel_path):
                     self.files.append(rel_path)
 
 

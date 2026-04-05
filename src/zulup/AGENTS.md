@@ -54,7 +54,7 @@ This file contains instructions.
       "directory_target": "/mnt/backup",
       "directory_src": ".",
       "directory_name_include": true,
-      "filter": "see below"
+      "filters": "see below"
     }
   }
   ```
@@ -72,7 +72,7 @@ This file contains instructions.
 * Include/Exclude options
 
   ```json
-  "filter": [
+  "filters": [
     {
         "name": "README.md",
         "matching": "literal",
@@ -85,7 +85,7 @@ This file contains instructions.
   * `matching`: One of `literal`(default), `nocase`(for case insensitive) or `regexp`.
   * `logic`: One of `exclude`(default) or `include`.
 
-  The filter default behaviour is to select everything.
+  The filters default behaviour is to select everything.
 
 ## `metafile`
 
@@ -155,7 +155,7 @@ This is the file which is stored with every snapshot.
 * Loop over the directory structure and find all backups to be done based on `zulup.json`.
 * For each backup:
   * Do minimal checks
-    * Traverse `directory_src` and collect files according to `filter`: We call it `current_filelist`.
+    * Traverse `directory_src` and collect files according to `filters`: We call it `current_filelist`.
     * Find the last snapshot in `directory_target`. If no previous snapshot exists, this is a full backup and all files are `added`.
     * Read `metafile` from last snapshot. We call it `last_metafile`.
 * For each backup:

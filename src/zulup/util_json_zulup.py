@@ -23,7 +23,7 @@ class EnumLogic(enum.StrEnum):
 
 
 @dataclasses.dataclass(frozen=True)
-class ZulupFilterEntry:
+class ZulupFilter:
     name: str | None = None
     path: str | None = None
     matching: str = EnumMatching.LITERAL.value
@@ -56,7 +56,7 @@ class ZulupFilterEntry:
         return False
 
 
-class ZulupFilter(list[ZulupFilterEntry]):
+class ZulupFilters(list[ZulupFilter]):
     def is_excluded(self, name: str, path: str) -> bool:
         excluded = False
         for entry in self:
@@ -71,7 +71,7 @@ class ZulupBackup:
     directory_target: str
     directory_src: str
     directory_name_include: bool
-    filter: ZulupFilter | None = None
+    filters: ZulupFilters | None = None
 
     def __post_init__(self) -> None:
         if not BACKUP_NAME_RE.match(self.backup_name):
@@ -91,17 +91,17 @@ class ZulupJson:
         backup = None
         if "backup" in data:
             backup_data = data["backup"]
-            filter: ZulupFilter | None = None
-            if "filter" in backup_data:
-                filter = ZulupFilter(
-                    [ZulupFilterEntry(**entry) for entry in backup_data["filter"]]
+            filters: ZulupFilters | None = None
+            if "filters" in backup_data:
+                filters = ZulupFilters(
+                    [ZulupFilter(**entry) for entry in backup_data["filters"]]
                 )
             backup = ZulupBackup(
                 backup_name=backup_data["backup_name"],
                 directory_target=backup_data["directory_target"],
                 directory_src=backup_data["directory_src"],
                 directory_name_include=backup_data["directory_name_include"],
-                filter=filter,
+                filters=filters,
             )
         return ZulupJson(
             depth=data.get("depth"),
@@ -119,8 +119,8 @@ class ZulupJson:
                 "directory_src": self.backup.directory_src,
                 "directory_name_include": self.backup.directory_name_include,
             }
-            if self.backup.filter is not None:
-                backup_dict["filter"] = [
+            if self.backup.filters is not None:
+                backup_dict["filters"] = [
                     {
                         k: v
                         for k, v in dataclasses.asdict(entry).items()
@@ -128,7 +128,7 @@ class ZulupJson:
                         and not (k == "matching" and v == "literal")
                         and not (k == "logic" and v == "exclude")
                     }
-                    for entry in self.backup.filter
+                    for entry in self.backup.filters
                 ]
             data["backup"] = backup_dict
         filename.write_text(json.dumps(data, indent=4) + "\n")
