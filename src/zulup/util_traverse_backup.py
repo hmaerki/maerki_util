@@ -33,15 +33,9 @@ class TraverseBackup:
 
         self.files: list[str] = []
 
-        if backup.directory_name_include:
-            prefix = dir_zulup_json.directory.name + "/"
-        else:
-            prefix = ""
-
         self._collect(
             directory=self.directory_src,
             directory_top=self.directory_src,
-            prefix=prefix,
             filters=filters,
         )
         self.files.sort()
@@ -70,13 +64,10 @@ class TraverseBackup:
 
     @property
     def current_files(self) -> CurrentFileEntries:
-        directory_src = self.directory_src
-        if self.backup.directory_name_include:
-            directory_src = directory_src.parent
         return CurrentFileEntries(
             [
                 CurrentFileEntry.from_file(
-                    filepath=directory_src / rel_path,
+                    filepath=self.directory_src / rel_path,
                     root=self.directory_src,
                 )
                 for rel_path in self.files
@@ -170,6 +161,8 @@ class TraverseBackup:
         directory_src = self.directory_src
         if self.backup.directory_name_include:
             directory_src = directory_src.parent
+            dir_name = self.dir_zulup_json.directory.name
+            tar_files = [f"{dir_name}/{f}" for f in tar_files]
 
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
             temp_filename = pathlib.Path(temp_file.name)
@@ -191,20 +184,18 @@ class TraverseBackup:
         self,
         directory: pathlib.Path,
         directory_top: pathlib.Path,
-        prefix: str,
         filters: ZulupFilters,
     ) -> None:
         assert isinstance(directory, pathlib.Path)
         assert isinstance(directory_top, pathlib.Path)
-        assert isinstance(prefix, str)
         assert isinstance(filters, ZulupFilters)
 
         for directory_sub in sorted(directory.iterdir()):
             name = directory_sub.name
-            rel_path = prefix + str(directory_sub.relative_to(directory_top))
+            rel_path = str(directory_sub.relative_to(directory_top))
             if directory_sub.is_dir():
                 if filters.is_included(name, rel_path, is_dir=True):
-                    self._collect(directory_sub, directory_top, prefix, filters)
+                    self._collect(directory_sub, directory_top, filters)
             elif directory_sub.is_file():
                 if name == ZULUP_JSON:
                     continue

@@ -10,7 +10,7 @@
                 "logic": "include"
             },
             {
-                "path": "project_xy/sub/task.txt",
+                "path": "sub/task.txt",
                 "logic": "include"
             },
             {

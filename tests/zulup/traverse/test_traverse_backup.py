@@ -22,10 +22,10 @@ def test_traverse_project_rs_files() -> None:
 def test_traverse_project_xy_files() -> None:
     backup = _traverse.get_traverse_backup("project_xy")
     assert backup.files == [
-        "project_xy/README.md",
-        "project_xy/sub/README.md",
-        "project_xy/sub/main.c",
-        "project_xy/sub/task.txt",
+        "README.md",
+        "sub/README.md",
+        "sub/main.c",
+        "sub/task.txt",
     ]
 
 
