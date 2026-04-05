@@ -1,9 +1,18 @@
 from __future__ import annotations
 
 import pathlib
+import socket
 
-from .util_backup_directory import BackupDirectory
-from .util_constants import ZULUP_JSON
+from .util_backup_directory import BackupDirectory, SnapshotEntry
+from .util_constants import ZULUP_JSON, now_text
+from .util_json_metafile import (
+    CurrentFileEntry,
+    Metafile,
+    MetafileBackup,
+    MetafileFileEntry,
+    MetafileSnapshot,
+    merge_files,
+)
 from .util_json_zulup import ZulupBackup, ZulupFilter
 from .util_traverse_zulup import DirectoryZulupJson
 
@@ -49,6 +58,10 @@ class TraverseBackup:
             backup_name=self.backup.backup_name,
         )
 
+    @property
+    def directory_target(self) -> pathlib.Path:
+        return pathlib.Path(self.backup.directory_target)
+
     def verify_history(self) -> None:
         backup_directory = self.backup_directory
         if backup_directory.last_snapshot is not None:
@@ -70,6 +83,67 @@ class TraverseBackup:
         * Store `new_metafile` in `<directory_target>/<snapshot_stem>.json`.
         * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
         """
+
+        # Get last metafile's file entries (empty if no previous backup or full backup)
+        last_files: list[MetafileFileEntry] = []
+        last_snapshot: SnapshotEntry | None = None
+        backup_directory = self.backup_directory
+        if not full:
+            if backup_directory.last_snapshot is not None:
+                last_snapshot = backup_directory.last_snapshot
+
+        directory_src = self.directory_src
+        assert self.dir_zulup_json.zulup_json.backup is not None
+        if self.dir_zulup_json.zulup_json.backup.directory_name_include:
+            directory_src = directory_src.parent
+
+        # Build current file entries from filesystem
+        current_files = [
+            CurrentFileEntry.from_file(
+                filepath=directory_src / rel_path,
+                root=self.directory_src,
+            )
+            for rel_path in self.files
+        ]
+
+        # Merge
+        snapshot_datetime = now_text()
+        merged_files = merge_files(
+            last_files=last_files,
+            current_files=current_files,
+            snapshot_datetime=snapshot_datetime,
+        )
+
+        snapshot_type = "full" if last_snapshot is None else "incr"
+        backup_name = self.backup.backup_name
+        snapshot_stem = f"{backup_name}_{snapshot_datetime}_{snapshot_type}"
+
+        # Build history from previous metafile
+        history: list[MetafileSnapshot] = []
+        if last_snapshot is not None:
+            1 / 0
+            prev_metafile = last_snapshot.metafile
+            history = [prev_metafile.current] + prev_metafile.history
+
+        metafile = Metafile(
+            backup=MetafileBackup(
+                backup_name=backup_name,
+                parent=str(self.directory_src),
+                hostname=socket.gethostname(),
+                tar_checksum="",
+            ),
+            current=MetafileSnapshot(
+                snapshot_datetime=snapshot_datetime,
+                snapshot_type=snapshot_type,
+                snapshot_stem=snapshot_stem,
+            ),
+            history=history,
+            files=merged_files,
+        )
+
+        metafile.to_file(self.directory_target / metafile.current.metafile_name)
+
+        # TODO: Create tar, calculate checksum, rename tar
         pass
 
     def _collect(

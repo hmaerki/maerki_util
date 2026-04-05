@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import enum
 import json
 import pathlib
@@ -25,6 +26,11 @@ class MetafileFileEntry:
     snapshot_datetime: str
 
     def __post_init__(self) -> None:
+        assert isinstance(self.path, str)
+        assert isinstance(self.size, int)
+        assert isinstance(self.modified, str)
+        assert isinstance(self.verb, str)
+        assert isinstance(self.snapshot_datetime, str)
         check_enum(EnumVerb, self.verb)
 
 
@@ -35,6 +41,12 @@ class MetafileBackup:
     hostname: str
     tar_checksum: str
 
+    def __post_init__(self) -> None:
+        assert isinstance(self.backup_name, str)
+        assert isinstance(self.parent, str)
+        assert isinstance(self.hostname, str)
+        assert isinstance(self.tar_checksum, str)
+
 
 @dataclasses.dataclass(frozen=True)
 class MetafileSnapshot:
@@ -42,6 +54,12 @@ class MetafileSnapshot:
     snapshot_type: str
     snapshot_stem: str
     tar_checksum: str | None = None
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.snapshot_datetime, str)
+        assert isinstance(self.snapshot_type, str)
+        assert isinstance(self.snapshot_stem, str)
+        assert isinstance(self.tar_checksum, (str, type(None)))
 
     @property
     def tarfile_name(self) -> str:
@@ -58,6 +76,12 @@ class Metafile:
     current: MetafileSnapshot
     history: list[MetafileSnapshot]
     files: list[MetafileFileEntry]
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.backup, MetafileBackup)
+        assert isinstance(self.current, MetafileSnapshot)
+        assert isinstance(self.history, list)
+        assert isinstance(self.files, list)
 
     @staticmethod
     def from_file(filename: pathlib.Path) -> Metafile:
@@ -85,3 +109,76 @@ class Metafile:
             "files": [dataclasses.asdict(entry) for entry in self.files],
         }
         filename.write_text(json.dumps(data, indent=4, sort_keys=True) + "\n")
+
+
+def _format_modified(mtime: float) -> str:
+    dt = datetime.datetime.fromtimestamp(mtime)
+    return dt.strftime("%Y-%m-%d_%H-%M-%S.") + f"{dt.microsecond // 1000:03d}"
+
+
+@dataclasses.dataclass(frozen=True)
+class CurrentFileEntry:
+    path: str
+    size: int
+    modified: str
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.path, str)
+        assert isinstance(self.size, int)
+        assert isinstance(self.modified, str)
+
+    @staticmethod
+    def from_file(filepath: pathlib.Path, root: pathlib.Path) -> CurrentFileEntry:
+        try:
+            stat = filepath.stat()
+        except FileNotFoundError:
+            raise
+        return CurrentFileEntry(
+            path=str(filepath.relative_to(root)),
+            size=stat.st_size,
+            modified=_format_modified(stat.st_mtime),
+        )
+
+
+def merge_files(
+    last_files: list[MetafileFileEntry],
+    current_files: list[CurrentFileEntry],
+    snapshot_datetime: str,
+) -> list[MetafileFileEntry]:
+    last_by_path: dict[str, MetafileFileEntry] = {f.path: f for f in last_files}
+    current_by_path: dict[str, CurrentFileEntry] = {f.path: f for f in current_files}
+
+    result: list[MetafileFileEntry] = []
+
+    for current in current_files:
+        last = last_by_path.get(current.path)
+        if last is None:
+            verb = EnumVerb.ADDED
+        elif last.size == current.size and last.modified == current.modified:
+            verb = EnumVerb.UNTOUCHED
+        else:
+            verb = EnumVerb.MODIFIED
+        result.append(
+            MetafileFileEntry(
+                path=current.path,
+                size=current.size,
+                modified=current.modified,
+                verb=verb,
+                snapshot_datetime=snapshot_datetime,
+            )
+        )
+
+    for last in last_files:
+        if last.path not in current_by_path:
+            result.append(
+                MetafileFileEntry(
+                    path=last.path,
+                    size=last.size,
+                    modified=last.modified,
+                    verb=EnumVerb.REMOVED,
+                    snapshot_datetime=snapshot_datetime,
+                )
+            )
+
+    result.sort(key=lambda e: e.path)
+    return result
