@@ -35,7 +35,7 @@ def backup(
     zulup.log_duration(
         f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
     )
-    zulup.verify(list_traverse_backup=list_traverse_backup)
+    list_traverse_backup.verify_history()
     zulup.log_duration("done")
 
 

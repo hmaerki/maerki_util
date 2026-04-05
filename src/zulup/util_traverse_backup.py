@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import pathlib
 
-from zulup.util_constants import ZULUP_JSON
-from zulup.util_json_zulup import ZulupBackup, ZulupFilter
-from zulup.util_traverse_zulup import DirectoryZulupJson
+from .util_backup_directory import BackupDirectory
+from .util_constants import ZULUP_JSON
+from .util_json_zulup import ZulupBackup, ZulupFilter
+from .util_traverse_zulup import DirectoryZulupJson
 
 
 class TraverseBackup:
@@ -39,6 +40,21 @@ class TraverseBackup:
         assert self.dir_zulup_json.zulup_json.backup is not None
         return self.dir_zulup_json.zulup_json.backup
 
+    @property
+    def backup_directory(self) -> BackupDirectory:
+        from zulup.util_backup_directory import BackupDirectory
+
+        return BackupDirectory(
+            directory=self.directory_src,
+            backup_name=self.backup.backup_name,
+        )
+
+    def verify_history(self) -> None:
+        backup_directory = self.backup_directory
+        if backup_directory.last_snapshot is not None:
+            metafile = backup_directory.last_snapshot.metafile
+            backup_directory.verify_history(metafile=metafile)
+
     def _collect(
         self,
         directory: pathlib.Path,
@@ -62,3 +78,9 @@ class TraverseBackup:
                     continue
                 if not filter.is_excluded(name, rel_path):
                     self.files.append(rel_path)
+
+
+class ListTraverseBackup(list[TraverseBackup]):
+    def verify_history(self) -> None:
+        for traverse_backup in self:
+            traverse_backup.verify_history()
