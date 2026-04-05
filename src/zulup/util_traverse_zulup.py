@@ -2,23 +2,31 @@ from __future__ import annotations
 
 import dataclasses
 import pathlib
+import typing
 
 from zulup.util_constants import ZULUP_JSON
 from zulup.util_json_zulup import ZulupJson
 
+if typing.TYPE_CHECKING:
+    from zulup.util_traverse_backup import TraverseBackup
+
 
 @dataclasses.dataclass(frozen=True)
-class TraverseZulupJson:
+class DirectoryZulupJson:
     directory: pathlib.Path
     zulup_json: ZulupJson
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.directory, pathlib.Path)
+        assert isinstance(self.zulup_json, ZulupJson)
 
 
 class TraverseZulup:
     def __init__(self) -> None:
-        self.list_zulup_json: list[TraverseZulupJson] = []
+        self.list_dir_zulup_json: list[DirectoryZulupJson] = []
 
-    def get_zulup_entry(self, backup_name: str) -> TraverseZulupJson:
-        for entry in self.list_zulup_json:
+    def get_zulup_entry(self, backup_name: str) -> DirectoryZulupJson:
+        for entry in self.list_dir_zulup_json:
             assert entry.zulup_json.backup is not None
             if entry.zulup_json.backup.backup_name == backup_name:
                 return entry
@@ -37,8 +45,8 @@ class TraverseZulup:
         if zulup_json_path.exists():
             zulup_json = ZulupJson.from_file(zulup_json_path)
             if zulup_json.backup is not None:
-                self.list_zulup_json.append(
-                    TraverseZulupJson(directory=directory, zulup_json=zulup_json)
+                self.list_dir_zulup_json.append(
+                    DirectoryZulupJson(directory=directory, zulup_json=zulup_json)
                 )
                 return
             if zulup_json.depth is not None:

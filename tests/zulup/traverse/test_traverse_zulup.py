@@ -14,7 +14,7 @@ def test_traverse_finds_correct_zulup_json() -> None:
 
     backup_names = sorted(
         entry.zulup_json.backup.backup_name
-        for entry in traverse.list_zulup_json
+        for entry in traverse.list_dir_zulup_json
         if entry.zulup_json.backup is not None
     )
     assert backup_names == ["project_rs", "project_xy"]
@@ -24,7 +24,7 @@ def test_traverse_finds_correct_directories() -> None:
     traverse = TraverseZulup()
     traverse.collect(DIRECTORY_TESTDATA)
 
-    directories = sorted(entry.directory.name for entry in traverse.list_zulup_json)
+    directories = sorted(entry.directory.name for entry in traverse.list_dir_zulup_json)
     assert directories == ["project_rs", "project_xy"]
 
 
@@ -33,4 +33,4 @@ def test_traverse_respects_depth_limit() -> None:
     traverse.collect(DIRECTORY_TESTDATA)
 
     # deep/ignored/zulup.json must NOT be found due to depth: 1 in top/zulup.json
-    assert len(traverse.list_zulup_json) == 2
+    assert len(traverse.list_dir_zulup_json) == 2

@@ -29,7 +29,7 @@ class Zulup:
         for directory in directories:
             traverse.collect(directory=directory)
 
-        return [TraverseBackup(z) for z in traverse.list_zulup_json]
+        return [TraverseBackup(z) for z in traverse.list_dir_zulup_json]
 
     def verify(self, list_traverse_backup: list[TraverseBackup]) -> None:
         for traverse_backup in list_traverse_backup:
