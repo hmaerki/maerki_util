@@ -65,7 +65,6 @@ def test_verify_history_missing(tmp_path: pathlib.Path) -> None:
             "backup_name": "project_xy",
             "parent": "/tmp",
             "hostname": "test",
-            "tar_checksum": "sha256:abc",
         },
         "current": {
             "snapshot_datetime": "2026-04-03_13-22-22",
@@ -77,7 +76,7 @@ def test_verify_history_missing(tmp_path: pathlib.Path) -> None:
                 "snapshot_datetime": "2026-04-03_12-22-22",
                 "snapshot_type": "full",
                 "snapshot_stem": "project_xy_2026-04-03_12-22-22_full",
-                "tar_checksum": "sha256:def",
+                "tarfile_size": 1234,
             }
         ],
         "files": [],

@@ -111,26 +111,26 @@ In the `files` array, `snapshot_datetime` records the snapshot in which the curr
     "backup" : {
         "backup_name": "project_xy",
         "parent": "/home/maerki/Downloads",
-        "hostname": "maerki-ideapad-320",
-        "tar_checksum": "sha256:4efb75d..."
+        "hostname": "maerki-ideapad-320"
     },
     "current": {
         "snapshot_datetime": "2026-04-03_14-22-22",
         "snapshot_type": "incr",
-        "snapshot_stem": "project_xy_2026-04-03_14-22-22_incr"
+        "snapshot_stem": "project_xy_2026-04-03_14-22-22_incr",
+        "tarfile_size": 1234
     },
     "history": [
         {
             "snapshot_datetime": "2026-04-03_12-22-22",
             "snapshot_type": "full",
             "snapshot_stem": "project_xy_2026-04-03_12-22-22_full",
-            "tar_checksum": "sha256:4efb75d..."
+            "tarfile_size": 1234
         },
         {
             "snapshot_datetime": "2026-04-03_13-22-22",
             "snapshot_type": "incr",
             "snapshot_stem": "project_xy_2026-04-03_13-22-22_incr",
-            "tar_checksum": "sha256:4efb75d..."
+            "tarfile_size": 1234
         }
     ],
     "files": [
@@ -177,7 +177,7 @@ This is the file which is stored with every snapshot.
     * `modified`: else
   * Create a file list as input into `tar --files-from`: All files which are `added` or `modified`.
   * Call `tar --zstd --files-from ... -cf <directory_target>/<snapshot_stem>.tgz_tmp`.
-  * Calculate sha256 from `<directory_target>/<snapshot_stem>.tgz_tmp` and add it to `backup/tar_checksum` of `new_metafile`.
+  * Read the file size of `<directory_target>/<snapshot_stem>.tgz_tmp` and store it as `tarfile_size` in `current` of `new_metafile`.
   * Store `new_metafile` in `<directory_target>/<snapshot_stem>.json`.
   * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
 

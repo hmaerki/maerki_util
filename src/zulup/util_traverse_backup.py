@@ -92,7 +92,7 @@ class TraverseBackup:
             * `modified`: else
         * Create a file list as input into `tar --files-from`: All files which are `added` or `modified`.
         * Call `tar --zstd --files-from ... -cf <directory_target>/<snapshot_stem>.tgz_tmp`.
-        * Calculate sha256 from `<directory_target>/<snapshot_stem>.tgz_tmp` and add it to `backup/tar_checksum` of `new_metafile`.
+        * Read the file size of `<directory_target>/<snapshot_stem>.tgz_tmp` and store it as `tarfile_size` in `current` of `new_metafile`.
         * Store `new_metafile` in `<directory_target>/<snapshot_stem>.json`.
         * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
         """
@@ -128,7 +128,6 @@ class TraverseBackup:
                 backup_name=backup_name,
                 parent=str(self.directory_src),
                 hostname=socket.gethostname(),
-                tar_checksum="",
             ),
             current=MetafileSnapshot(
                 snapshot_datetime=snapshot_datetime,

@@ -2,13 +2,13 @@
     "backup": {
         "backup_name": "project_xy",
         "hostname": "maerki-ideapad-320",
-        "parent": "/home/maerki/Downloads",
-        "tar_checksum": "sha256:aabbccdd1122334455"
+        "parent": "/home/maerki/Downloads"
     },
     "current": {
         "snapshot_datetime": "2026-04-03_12-22-22",
         "snapshot_stem": "project_xy_2026-04-03_12-22-22_full",
-        "snapshot_type": "full"
+        "snapshot_type": "full",
+        "tarfile_size": 5678
     },
     "files": [
         {

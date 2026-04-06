@@ -111,13 +111,11 @@ class MetafileBackup:
     backup_name: str
     parent: str
     hostname: str
-    tar_checksum: str
 
     def __post_init__(self) -> None:
         assert isinstance(self.backup_name, str)
         assert isinstance(self.parent, str)
         assert isinstance(self.hostname, str)
-        assert isinstance(self.tar_checksum, str)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -125,13 +123,13 @@ class MetafileSnapshot:
     snapshot_datetime: str
     snapshot_type: str
     snapshot_stem: str
-    tar_checksum: str | None = None
+    tarfile_size: int | None = None
 
     def __post_init__(self) -> None:
         assert isinstance(self.snapshot_datetime, str)
         assert isinstance(self.snapshot_type, str)
         assert isinstance(self.snapshot_stem, str)
-        assert isinstance(self.tar_checksum, (str, type(None)))
+        assert isinstance(self.tarfile_size, (int, type(None)))
 
     @property
     def tarfile_name(self) -> str:

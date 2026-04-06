@@ -2,20 +2,20 @@
     "backup": {
         "backup_name": "project_xy",
         "parent": "/home/maerki/Downloads",
-        "hostname": "maerki-ideapad-320",
-        "tar_checksum": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        "hostname": "maerki-ideapad-320"
     },
     "current": {
         "snapshot_datetime": "2026-04-03_13-22-22",
         "snapshot_type": "incr",
-        "snapshot_stem": "project_xy_2026-04-03_13-22-22_incr"
+        "snapshot_stem": "project_xy_2026-04-03_13-22-22_incr",
+        "tarfile_size": 0
     },
     "history": [
         {
             "snapshot_datetime": "2026-04-03_12-22-22",
             "snapshot_type": "full",
             "snapshot_stem": "project_xy_2026-04-03_12-22-22_full",
-            "tar_checksum": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            "tarfile_size": 0
         }
     ],
     "files": []
