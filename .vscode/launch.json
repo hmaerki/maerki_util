@@ -47,6 +47,10 @@
                 "/home/maerki/work_antenna",
                 "/home/maerki/work_heizung"
             ],
+            // "args": [
+            //     "."
+            // ],
+            // "cwd": "/home/maerki/work_heizung",
             "console": "integratedTerminal",
             "justMyCode": false,
         },

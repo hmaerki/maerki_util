@@ -6,7 +6,7 @@ import typing
 
 import typer
 
-from . import util_constants, util_zulup
+from . import util_constants, util_systemd_inhibit, util_zulup
 
 logger = logging.getLogger(__file__)
 
@@ -27,25 +27,26 @@ def backup(
 ) -> None:
     logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
 
-    if directories is None:
-        directories = [pathlib.Path.home().resolve().absolute()]
-    else:
-        directories = [d.resolve().absolute() for d in directories]
+    with util_systemd_inhibit.systemd_inhibit():
+        if directories is None:
+            directories = [pathlib.Path.home().resolve().absolute()]
+        else:
+            directories = [d.resolve().absolute() for d in directories]
 
-    zulup = util_zulup.Zulup()
-    zulup.log_duration("zulup")
-    list_traverse_backup = zulup.traverse_directories(directories=directories)
-    zulup.log_duration(
-        f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
-    )
-    list_traverse_backup.verify_history()
-    zulup.log_duration("verify_history")
-    list_traverse_backup.do_backup(full=full)
-    zulup.log_duration("backup")
-    zulup.log_duration(
-        f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
-    )
-    zulup.log_duration("done")
+        zulup = util_zulup.Zulup()
+        zulup.log_duration("zulup")
+        list_traverse_backup = zulup.traverse_directories(directories=directories)
+        zulup.log_duration(
+            f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
+        )
+        list_traverse_backup.verify_history()
+        zulup.log_duration("verify_history")
+        list_traverse_backup.do_backup(full=full)
+        zulup.log_duration("backup")
+        zulup.log_duration(
+            f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
+        )
+        zulup.log_duration("done")
 
 
 if __name__ == "__main__":

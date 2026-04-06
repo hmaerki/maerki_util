@@ -186,3 +186,47 @@ This is the file which is stored with every snapshot.
 * Tar files always have the suffix .tgz
 * On windows: Use compression `-zcf` (gzip, as zstd is not available)
 * Else: Use compression `--zstd -cf`
+
+## systemd-inhibit - linux only
+
+While the backup is running linux should not go sleep or shutdown.
+
+**Implementation**
+
+This is achieved with
+
+```bash
+systemd-inhibit --who=zulup --what=shutdown:sleep sleep infinity
+```
+
+This command will be called by `zulup` just after program start.
+
+The termination of `zulup` must also terminate `systemd-inhibit`.
+
+This is achieved with the kernel *Process Control* `prctl`:
+
+```python
+import subprocess
+import ctypes
+
+# Load the standard C library to access prctl
+libc = ctypes.CDLL("libc.so.6")
+PR_SET_PDEATHSIG = 1
+SIGTERM = 15
+
+def set_death_signal():
+    # This function runs in the CHILD process just before systemd-inhibit starts
+    libc.prctl(PR_SET_PDEATHSIG, SIGTERM)
+
+cmd = [
+    "systemd-inhibit",
+    "--who=zulup",
+    "--why=Backup in progress",
+    "sleep", "infinity"
+]
+
+# preexec_fn ensures child gets SIGTERM when parent dies
+process = subprocess.Popen(cmd, preexec_fn=set_death_signal)
+```
+
+On normal exit, `zulup` must explicitly call `process.terminate()` and `process.wait()` to clean up the `sleep infinity` process.
