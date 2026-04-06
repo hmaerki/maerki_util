@@ -22,10 +22,12 @@ class Zulup:
         logger.debug(f"{tag}: {self.duration_s:0.3f}s.")
 
     def traverse_directories(
-        self, directories: list[pathlib.Path]
+        self,
+        directories: list[pathlib.Path],
     ) -> ListTraverseBackup:
         traverse = TraverseZulup()
         for directory in directories:
+            logger.debug(f"traverse {directory}")
             traverse.collect(directory=directory)
 
         list_traverse_backup = ListTraverseBackup(

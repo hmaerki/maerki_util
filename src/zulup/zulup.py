@@ -29,7 +29,7 @@ def backup(
 
     with util_systemd_inhibit.systemd_inhibit():
         if directories is None:
-            directories = [pathlib.Path.home().resolve().absolute()]
+            directories = [pathlib.Path.cwd().resolve().absolute()]
         else:
             directories = [d.resolve().absolute() for d in directories]
 

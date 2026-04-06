@@ -98,7 +98,7 @@ This file contains instructions.
 
   Examples:
   * `"*.log"` — exclude all `.log` files
-  * `".git/"` — exclude the `.git` directory
+  * `".git/"` — exclude every directory named `.git` (top folder and all subfolders)
   * `"build/output/"` — exclude the `output` directory under `build` (path match)
   * `"!README.md"` — include `README.md` even if a previous pattern would exclude it
 
