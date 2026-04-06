@@ -103,6 +103,7 @@ class TraverseBackup:
         if not full:
             if backup_directory.last_snapshot is not None:
                 last_snapshot = backup_directory.last_snapshot
+                last_files = last_snapshot.metafile.files
 
         # Merge
         snapshot_datetime = now_text()
