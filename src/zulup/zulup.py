@@ -28,7 +28,9 @@ def backup(
     logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
 
     if directories is None:
-        directories = [pathlib.Path.home()]
+        directories = [pathlib.Path.home().resolve().absolute()]
+    else:
+        directories = [d.resolve().absolute() for d in directories]
 
     zulup = util_zulup.Zulup()
     zulup.log_duration("zulup")

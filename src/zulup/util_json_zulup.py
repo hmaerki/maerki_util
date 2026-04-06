@@ -3,11 +3,13 @@ from __future__ import annotations
 import dataclasses
 import enum
 import json
+import logging
 import pathlib
 import re
-import typing
 
 from zulup.util_json import check_enum
+
+logger = logging.getLogger(__name__)
 
 BACKUP_NAME_RE = re.compile(r"^[a-zA-Z0-9_]+$")
 
@@ -72,13 +74,13 @@ class ZulupFilter:
         assert isinstance(rel_path, str)
         assert isinstance(is_dir, bool)
 
-        if (self.name is None) and (self.path is None):
-            return True
-
         if is_dir and self.kind != EnumKind.DIRECTORY:
             return False
         if not is_dir and self.kind != EnumKind.FILE:
             return False
+
+        if (self.name is None) and (self.path is None):
+            return True
 
         name_or_path = name
         pattern = self.name
@@ -94,7 +96,7 @@ class ZulupFilter:
             return name_or_path.lower() == pattern.lower()
         if self.matching == EnumMatching.REGEXP:
             assert isinstance(pattern, re.Pattern)
-            return pattern.match(name_or_path) is not None
+            return pattern.fullmatch(name_or_path) is not None
         return False
 
 
@@ -128,7 +130,13 @@ class ZulupJson:
 
     @staticmethod
     def from_file(filename: pathlib.Path) -> ZulupJson:
-        data = json.loads(filename.read_text())
+        try:
+            data = json.loads(filename.read_text())
+        except json.JSONDecodeError as e:
+            msg = f"{filename}: {e}"
+            logger.error(msg)
+            raise ValueError(msg) from e
+
         backup = None
         if "backup" in data:
             backup_data = data["backup"]
