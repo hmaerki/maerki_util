@@ -54,7 +54,7 @@ class TraverseBackup:
         from zulup.util_backup_directory import BackupDirectory
 
         return BackupDirectory(
-            directory=self.directory_src,
+            directory=self.directory_target,
             backup_name=self.backup.backup_name,
         )
 

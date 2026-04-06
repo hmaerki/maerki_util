@@ -14,3 +14,45 @@ Profile
 ```bash
 .venv/bin/python -m cProfile -s cumulative -m zulup.zulup ~/work_antenna 2>&1 | head -40
 ```
+
+
+## User Miniguide
+
+```bash
+uv run --with=git+https://github.com/hmaerki/maerki_util.git@zulup zulup
+```
+
+zulup.json
+
+```json
+{
+    "backup": {
+        "backup_name": "project_heizung",
+        "directory_target": "/tmp/backup",
+        "directory_src": ".",
+        "directory_name_include": true,
+        "filters": [
+            {
+                "name": ".*\\.py",
+                "matching": "regexp",
+                "logic": "include"
+            },
+            {
+                "name": ".*\\.ods",
+                "matching": "regexp",
+                "logic": "include"
+            },
+            {
+                "name": ".git",
+                "kind": "directory" 
+            },
+            {
+                "name": ".venv",
+                "kind": "directory" 
+            },
+            {
+            }
+        ]
+    }
+}
+```
