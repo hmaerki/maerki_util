@@ -76,17 +76,20 @@ class CurrentFileEntries(list[CurrentFileEntry]):
             last = last_by_path.get(current.path)
             if last is None:
                 verb = EnumVerb.ADDED
+                entry_snapshot_datetime = snapshot_datetime
             elif last.size == current.size and last.modified == current.modified:
                 verb = EnumVerb.UNTOUCHED
+                entry_snapshot_datetime = last.snapshot_datetime
             else:
                 verb = EnumVerb.MODIFIED
+                entry_snapshot_datetime = snapshot_datetime
             result.append(
                 MetafileFileEntry(
                     path=current.path,
                     size=current.size,
                     modified=current.modified,
                     verb=verb,
-                    snapshot_datetime=snapshot_datetime,
+                    snapshot_datetime=entry_snapshot_datetime,
                 )
             )
 

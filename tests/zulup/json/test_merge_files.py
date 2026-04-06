@@ -42,6 +42,7 @@ def test_untouched_when_same_size_and_modified() -> None:
     result = CurrentFileEntries(current).merge_files(last, SNAPSHOT_NEW)
     assert len(result) == 1
     assert result[0].verb == EnumVerb.UNTOUCHED
+    assert result[0].snapshot_datetime == SNAPSHOT_OLD
 
 
 def test_modified_when_size_changed() -> None:
@@ -50,6 +51,7 @@ def test_modified_when_size_changed() -> None:
     result = CurrentFileEntries(current).merge_files(last, SNAPSHOT_NEW)
     assert len(result) == 1
     assert result[0].verb == EnumVerb.MODIFIED
+    assert result[0].snapshot_datetime == SNAPSHOT_NEW
 
 
 def test_modified_when_mtime_changed() -> None:
@@ -58,6 +60,7 @@ def test_modified_when_mtime_changed() -> None:
     result = CurrentFileEntries(current).merge_files(last, SNAPSHOT_NEW)
     assert len(result) == 1
     assert result[0].verb == EnumVerb.MODIFIED
+    assert result[0].snapshot_datetime == SNAPSHOT_NEW
 
 
 def test_removed_when_file_gone() -> None:
@@ -66,6 +69,7 @@ def test_removed_when_file_gone() -> None:
     assert len(result) == 1
     assert result[0].verb == EnumVerb.REMOVED
     assert result[0].path == "a.txt"
+    assert result[0].snapshot_datetime == SNAPSHOT_NEW
 
 
 def test_mixed_verbs() -> None:
@@ -82,9 +86,13 @@ def test_mixed_verbs() -> None:
     result = CurrentFileEntries(current).merge_files(last, SNAPSHOT_NEW)
     by_path = {e.path: e for e in result}
     assert by_path["keep.txt"].verb == EnumVerb.UNTOUCHED
+    assert by_path["keep.txt"].snapshot_datetime == SNAPSHOT_OLD
     assert by_path["change.txt"].verb == EnumVerb.MODIFIED
+    assert by_path["change.txt"].snapshot_datetime == SNAPSHOT_NEW
     assert by_path["gone.txt"].verb == EnumVerb.REMOVED
+    assert by_path["gone.txt"].snapshot_datetime == SNAPSHOT_NEW
     assert by_path["new.txt"].verb == EnumVerb.ADDED
+    assert by_path["new.txt"].snapshot_datetime == SNAPSHOT_NEW
 
 
 def test_result_sorted_by_path() -> None:

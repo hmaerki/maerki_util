@@ -123,6 +123,11 @@ class TraverseBackup:
             prev_metafile = last_snapshot.metafile
             history = [prev_metafile.current] + prev_metafile.history
 
+        tarfile_size = self.do_tar(
+            merged_files=merged_files,
+            filename_target=self.directory_target / f"{snapshot_stem}.tgz",
+        )
+
         metafile = Metafile(
             backup=MetafileBackup(
                 backup_name=backup_name,
@@ -133,6 +138,7 @@ class TraverseBackup:
                 snapshot_datetime=snapshot_datetime,
                 snapshot_type=snapshot_type,
                 snapshot_stem=snapshot_stem,
+                tarfile_size=tarfile_size,
             ),
             history=history,
             files=merged_files,
@@ -142,18 +148,11 @@ class TraverseBackup:
 
         metafile.stats()
 
-        self.do_tar(
-            merged_files=merged_files,
-            filename_target=self.directory_target / metafile.current.tarfile_name,
-        )
-
-        # TODO: Calculate checksum, rename tar
-
     def do_tar(
         self,
         merged_files: list[MetafileFileEntry],
         filename_target: pathlib.Path,
-    ) -> None:
+    ) -> int:
         tar_files = [
             entry.path
             for entry in merged_files
@@ -183,6 +182,7 @@ class TraverseBackup:
             ]
             logger.debug(f"Calling: {' '.join(args)}")
             subprocess.run(args, cwd=directory_src, check=True)
+            return filename_target.stat().st_size
         finally:
             temp_filename.unlink(missing_ok=True)
 
