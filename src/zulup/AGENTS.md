@@ -54,7 +54,7 @@ This file contains instructions.
       "directory_target": "/mnt/backup",
       "directory_src": ".",
       "directory_name_include": true,
-      "filters": "see below"
+      "ignore": "see below"
     }
   }
   ```
@@ -72,31 +72,35 @@ This file contains instructions.
 * Include/Exclude options
 
   ```json
-  "filters": [
-    {
-        "comment": "Freetext",
-        "name": "README.md",
-        "matching": "literal",
-        "kind": "directory",
-        "logic": "exclude"
-    }
+  "ignore": [
+    ".git/",
+    "*.pyc",
+    "__pycache__/",
+    "!important.pyc"
   ]
   ```
 
-  * `comment`: Allows to comment the filter.
-  * `path`/`name`: If the pattern should match the file path or just the file name.
-  * If both `path` and `name` are empty: Match! Therefore {} would exclude all files and { "logic": "include" } would include all files.
-  * `matching`: One of `literal`(default), `nocase`(for case insensitive) or `regexp`.
-  * `kind`: One of `file`(default) or `directory`.
-  * `logic`: One of `exclude`(default) or `include`.
+  Patterns use `.gitignore`-style syntax based on Python's `fnmatch` module.
 
-  How the filters work:
+  Pattern syntax:
+  * `*` matches everything except `/`
+  * `?` matches any single character except `/`
+  * `[seq]` matches any character in *seq*
+  * `[!seq]` matches any character not in *seq*
 
-  * By default the file is included.
-  * Loop over all filters
-    * If a filter matches:
-      * `include` or `exclude` depnding on `logic`
-      * terminate loop
+  Rules:
+  * A pattern ending with `/` matches only directories. Otherwise it matches only files.
+  * A pattern starting with `!` is an include (overrides a previous exclude).
+  * A pattern containing `/` (other than a trailing `/`) is matched against the relative path. Otherwise it is matched against the file/directory name only.
+  * By default, all files and directories are included.
+  * The first matching pattern wins (determines include/exclude).
+  * Patterns without `!` prefix are excludes.
+
+  Examples:
+  * `"*.log"` — exclude all `.log` files
+  * `".git/"` — exclude the `.git` directory
+  * `"build/output/"` — exclude the `output` directory under `build` (path match)
+  * `"!README.md"` — include `README.md` even if a previous pattern would exclude it
 
 ## `metafile`
 
@@ -166,7 +170,7 @@ This is the file which is stored with every snapshot.
 * Loop over the directory structure and find all backups to be done based on `zulup.json`.
 * For each backup:
   * Do minimal checks
-    * Traverse `directory_src` and collect files according to `filters`: We call it `current_filelist`.
+    * Traverse `directory_src` and collect files according to `ignore`: We call it `current_filelist`.
     * Find the last snapshot in `directory_target`. If no previous snapshot exists, this is a full backup and all files are `added`.
     * Read `metafile` from last snapshot. We call it `last_metafile`.
 * For each backup:

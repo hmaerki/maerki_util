@@ -19,7 +19,7 @@ from .util_json_metafile import (
     MetafileFileEntry,
     MetafileSnapshot,
 )
-from .util_json_zulup import ZulupBackup, ZulupFilters
+from .util_json_zulup import ZulupBackup, ZulupIgnore
 from .util_traverse_zulup import DirectoryZulupJson
 
 logger = logging.getLogger(__name__)
@@ -31,13 +31,13 @@ class TraverseBackup:
         assert dir_zulup_json.zulup_json.backup is not None
         self.dir_zulup_json = dir_zulup_json
         backup: ZulupBackup = dir_zulup_json.zulup_json.backup
-        filters = backup.filters or ZulupFilters([])
+        ignore = ZulupIgnore(backup.ignore or [])
 
         self.files: list[str] = []
 
         self._collect(
             directory=self.directory_src,
-            filters=filters,
+            ignore=ignore,
         )
         self.files.sort()
 
@@ -189,7 +189,7 @@ class TraverseBackup:
     def _collect(
         self,
         directory: pathlib.Path,
-        filters: ZulupFilters,
+        ignore: ZulupIgnore,
     ) -> None:
         top = str(directory)
         top_len = len(top) + 1  # +1 for trailing separator
@@ -201,7 +201,7 @@ class TraverseBackup:
             dirnames[:] = [
                 d
                 for d in sorted(dirnames)
-                if filters.is_included(
+                if ignore.is_included(
                     d, f"{rel_prefix}{d}" if rel_prefix else d, is_dir=True
                 )
             ]
@@ -210,7 +210,7 @@ class TraverseBackup:
                 if name == ZULUP_JSON:
                     continue
                 rel_path = f"{rel_prefix}{name}" if rel_prefix else name
-                if filters.is_included(name, rel_path, is_dir=False):
+                if ignore.is_included(name, rel_path, is_dir=False):
                     self.files.append(rel_path)
 
 

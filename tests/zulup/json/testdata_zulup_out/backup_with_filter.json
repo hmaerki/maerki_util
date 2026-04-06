@@ -4,14 +4,9 @@
         "directory_target": "/mnt/backup",
         "directory_src": ".",
         "directory_name_include": true,
-        "filters": [
-            {
-                "name": "README.md"
-            },
-            {
-                "path": ".git",
-                "matching": "nocase"
-            }
+        "ignore": [
+            "README.md",
+            ".git/"
         ]
     }
 }

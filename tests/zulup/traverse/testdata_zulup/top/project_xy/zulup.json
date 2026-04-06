@@ -4,28 +4,12 @@
         "directory_target": "/mnt/backup",
         "directory_src": ".",
         "directory_name_include": true,
-        "filters": [
-            {
-                "name": "README.md",
-                "logic": "include"
-            },
-            {
-                "path": "sub/task.txt",
-                "logic": "include"
-            },
-            {
-                "name": ".*\\.md",
-                "matching": "regexp"
-            },
-            {
-                "name": ".*\\.txt",
-                "matching": "regexp"
-            },
-            {
-                "name": "_git",
-                "matching": "nocase",
-                "kind": "directory"
-            }
+        "ignore": [
+            "!README.md",
+            "!sub/task.txt",
+            "*.md",
+            "*.txt",
+            "_git/"
         ]
     }
 }

@@ -21,7 +21,7 @@ Profile
 run_zulu.sh
 
 ```bash
-uv run --with=git+https://github.com/hmaerki/maerki_util.git@zulup zulup
+uv run --with=git+https://github.com/hmaerki/maerki_util.git@zulup zulup "$@"
 ```
 
 zulup.json
@@ -33,27 +33,12 @@ zulup.json
         "directory_target": "/tmp/backup",
         "directory_src": ".",
         "directory_name_include": true,
-        "filters": [
-            {
-                "name": ".*\\.py",
-                "matching": "regexp",
-                "logic": "include"
-            },
-            {
-                "name": ".*\\.ods",
-                "matching": "regexp",
-                "logic": "include"
-            },
-            {
-                "name": ".git",
-                "kind": "directory" 
-            },
-            {
-                "name": ".venv",
-                "kind": "directory" 
-            },
-            {
-            }
+        "ignore": [
+            "!*.py",
+            "!*.ods",
+            ".git/",
+            ".venv/",
+            "*"
         ]
     }
 }
