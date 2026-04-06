@@ -18,6 +18,8 @@ Profile
 
 ## User Miniguide
 
+run_zulu.sh
+
 ```bash
 uv run --with=git+https://github.com/hmaerki/maerki_util.git@zulup zulup
 ```

@@ -4,10 +4,13 @@ import dataclasses
 import datetime
 import enum
 import json
+import logging
 import pathlib
 
 from zulup.util_constants import METAFILE_SUFFIX, TARFILE_SUFFIX
 from zulup.util_json import check_enum
+
+logger = logging.getLogger(__name__)
 
 
 class EnumVerb(enum.StrEnum):
@@ -169,6 +172,27 @@ class Metafile:
     @staticmethod
     def _snapshot_dict(snapshot: MetafileSnapshot) -> dict[str, object]:
         return {k: v for k, v in dataclasses.asdict(snapshot).items() if v is not None}
+
+    @property
+    def stat_total_file(self) -> list[MetafileFileEntry]:
+        return [f for f in self.files if f.verb != EnumVerb.REMOVED]
+
+    @property
+    def stat_backup_file(self) -> list[MetafileFileEntry]:
+        return [f for f in self.files if f.verb in (EnumVerb.ADDED, EnumVerb.MODIFIED)]
+
+    @property
+    def stat_total_size_byte(self) -> int:
+        return sum(f.size for f in self.stat_total_file)
+
+    @property
+    def stat_backup_size_byte(self) -> int:
+        return sum(f.size for f in self.stat_backup_file)
+
+    def stats(self) -> None:
+        logger.info(
+            f"Total: {len(self.stat_total_file)} files, {self.stat_total_size_byte / 1_000_000:.1f} MByte. Backup: {len(self.stat_backup_file)} files, {self.stat_backup_size_byte / 1_000_000:.1f} MByte."
+        )
 
     def to_file(self, filename: pathlib.Path) -> None:
         data = {

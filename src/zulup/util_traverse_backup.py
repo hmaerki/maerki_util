@@ -118,7 +118,6 @@ class TraverseBackup:
         # Build history from previous metafile
         history: list[MetafileSnapshot] = []
         if last_snapshot is not None:
-            1 / 0
             prev_metafile = last_snapshot.metafile
             history = [prev_metafile.current] + prev_metafile.history
 
@@ -139,6 +138,8 @@ class TraverseBackup:
         )
 
         metafile.to_file(self.directory_target / metafile.current.metafile_name)
+
+        metafile.stats()
 
         self.do_tar(
             merged_files=merged_files,

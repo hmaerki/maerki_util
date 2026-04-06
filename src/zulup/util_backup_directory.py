@@ -31,6 +31,7 @@ class BackupDirectory:
         self.directory = directory
         self.backup_name = backup_name
         self._prefix = f"{backup_name}_"
+        self.directory.mkdir(parents=True, exist_ok=True)
         self.snapshots = self._scan()
 
     def _scan(self) -> list[SnapshotEntry]:
