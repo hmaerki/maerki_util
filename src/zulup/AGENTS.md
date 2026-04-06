@@ -181,3 +181,8 @@ This is the file which is stored with every snapshot.
   * Store `new_metafile` in `<directory_target>/<snapshot_stem>.json`.
   * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
 
+## Tar
+
+* Tar files always have the suffix .tgz
+* On windows: Use compression `-zcf` (gzip, as zstd is not available)
+* Else: Use compression `--zstd -cf`

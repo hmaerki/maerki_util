@@ -5,6 +5,7 @@ import os
 import pathlib
 import socket
 import subprocess
+import sys
 import tempfile
 
 from .util_backup_directory import BackupDirectory, SnapshotEntry
@@ -170,11 +171,15 @@ class TraverseBackup:
             temp_filename = pathlib.Path(temp_file.name)
             temp_file.write("\n".join(tar_files) + "\n")
         try:
+            if sys.platform == "win32":
+                compression = ["-zcf"]
+            else:
+                compression = ["--zstd", "-cf"]
             args = [
                 "tar",
                 "--files-from",
                 str(temp_filename),
-                "-zcf",
+                *compression,
                 str(filename_target),
             ]
             logger.debug(f"Calling: {' '.join(args)}")
