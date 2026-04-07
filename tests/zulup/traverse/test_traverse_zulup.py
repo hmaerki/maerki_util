@@ -8,7 +8,7 @@ DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
 DIRECTORY_TESTDATA = DIRECTORY_OF_THIS_FILE / "testdata_zulup" / "top"
 
 
-def test_traverse_finds_correct_zulup_json() -> None:
+def test_traverse_finds_correct_zulup_backup_json() -> None:
     traverse = TraverseZulup()
     traverse.collect(DIRECTORY_TESTDATA)
 
@@ -32,5 +32,5 @@ def test_traverse_respects_depth_limit() -> None:
     traverse = TraverseZulup()
     traverse.collect(DIRECTORY_TESTDATA)
 
-    # deep/ignored/zulup.json must NOT be found due to depth: 1 in top/zulup.json
+    # deep/ignored/zulup_backup.json must NOT be found due to top/zulup_scan.json
     assert len(traverse.list_dir_zulup_json) == 2

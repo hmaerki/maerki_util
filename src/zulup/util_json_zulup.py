@@ -69,8 +69,10 @@ class ZulupBackup:
 
 @dataclasses.dataclass(frozen=True)
 class ZulupJson:
-    depth: int | None = None
-    backup: ZulupBackup | None = None
+    backup: ZulupBackup
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.backup, ZulupBackup)
 
     @staticmethod
     def from_file(filename: pathlib.Path) -> ZulupJson:
@@ -81,34 +83,54 @@ class ZulupJson:
             logger.error(msg)
             raise ValueError(msg) from e
 
-        backup = None
-        if "backup" in data:
-            backup_data = data["backup"]
-            ignore: list[str] | None = backup_data.get("ignore")
-            backup = ZulupBackup(
-                backup_name=backup_data["backup_name"],
-                directory_target=backup_data["directory_target"],
-                directory_src=backup_data["directory_src"],
-                directory_name_include=backup_data["directory_name_include"],
-                ignore=ignore,
-            )
-        return ZulupJson(
-            depth=data.get("depth"),
-            backup=backup,
+        ignore: list[str] | None = data.get("ignore")
+        backup = ZulupBackup(
+            backup_name=data["backup_name"],
+            directory_target=data["directory_target"],
+            directory_src=data["directory_src"],
+            directory_name_include=data["directory_name_include"],
+            ignore=ignore,
         )
+        return ZulupJson(backup=backup)
 
     def to_file(self, filename: pathlib.Path) -> None:
-        data: dict[str, object] = {}
-        if self.depth is not None:
-            data["depth"] = self.depth
-        if self.backup is not None:
-            backup_dict: dict[str, object] = {
-                "backup_name": self.backup.backup_name,
-                "directory_target": self.backup.directory_target,
-                "directory_src": self.backup.directory_src,
-                "directory_name_include": self.backup.directory_name_include,
-            }
-            if self.backup.ignore is not None:
-                backup_dict["ignore"] = self.backup.ignore
-            data["backup"] = backup_dict
+        data: dict[str, object] = {
+            "backup_name": self.backup.backup_name,
+            "directory_target": self.backup.directory_target,
+            "directory_src": self.backup.directory_src,
+            "directory_name_include": self.backup.directory_name_include,
+        }
+        if self.backup.ignore is not None:
+            data["ignore"] = self.backup.ignore
         filename.write_text(json.dumps(data, indent=4) + "\n")
+
+
+@dataclasses.dataclass(frozen=True)
+class ZulupScanJson:
+    patterns: list[str]
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.patterns, list)
+        for pattern in self.patterns:
+            assert isinstance(pattern, str)
+
+    @staticmethod
+    def from_file(filename: pathlib.Path) -> ZulupScanJson:
+        try:
+            data = json.loads(filename.read_text())
+        except json.JSONDecodeError as e:
+            msg = f"{filename}: {e}"
+            logger.error(msg)
+            raise ValueError(msg) from e
+
+        if not isinstance(data, list):
+            raise ValueError(f"{filename}: expected JSON list")
+
+        for index, value in enumerate(data):
+            if not isinstance(value, str):
+                raise ValueError(f"{filename}: index {index}: expected string")
+
+        return ZulupScanJson(patterns=data)
+
+    def to_file(self, filename: pathlib.Path) -> None:
+        filename.write_text(json.dumps(self.patterns, indent=4) + "\n")

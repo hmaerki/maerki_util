@@ -19,12 +19,11 @@ logger = logging.getLogger(__file__)
 app = typer.Typer()
 
 
-def _load_backup_directory_from_zulup_json(directory: pathlib.Path) -> BackupDirectory:
-    zulup_json = ZulupJson.from_file(directory / util_constants.ZULUP_JSON)
-    if zulup_json.backup is None:
-        raise ValueError(
-            f"{directory / util_constants.ZULUP_JSON}: missing 'backup' section"
-        )
+def _load_backup_directory_from_zulup_backup_json(
+    directory: pathlib.Path,
+) -> BackupDirectory:
+    filename = directory / util_constants.ZULUP_BACKUP_JSON
+    zulup_json = ZulupJson.from_file(filename)
     return BackupDirectory(
         directory=pathlib.Path(zulup_json.backup.directory_target),
         backup_name=zulup_json.backup.backup_name,
@@ -57,7 +56,9 @@ def _snapshot_by_datetime(metafile: Metafile) -> dict[str, MetafileSnapshot]:
 def backup(
     directories: typing.Annotated[
         list[pathlib.Path] | None,
-        typer.Argument(help="One or more directories to start finding `zulup.json`."),
+        typer.Argument(
+            help="One or more directories to start finding `zulup_backup.json` / `zulup_scan.json`."
+        ),
     ] = None,
     full: typing.Annotated[
         bool,
@@ -76,14 +77,14 @@ def backup(
         zulup.log_duration("zulup")
         list_traverse_backup = zulup.traverse_directories(directories=directories)
         zulup.log_duration(
-            f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
+            f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_BACKUP_JSON}"
         )
         list_traverse_backup.verify_history()
         zulup.log_duration("verify_history")
         list_traverse_backup.do_backup(full=full)
         zulup.log_duration("backup")
         zulup.log_duration(
-            f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_JSON}"
+            f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_BACKUP_JSON}"
         )
         zulup.log_duration("done")
 
@@ -92,10 +93,12 @@ def backup(
 def snapshots(
     directory: typing.Annotated[
         pathlib.Path,
-        typer.Argument(help="Directory containing zulup.json."),
+        typer.Argument(help="Directory containing zulup_backup.json."),
     ],
 ) -> None:
-    backup_directory = _load_backup_directory_from_zulup_json(directory.resolve())
+    backup_directory = _load_backup_directory_from_zulup_backup_json(
+        directory.resolve()
+    )
     for snapshot in backup_directory.snapshots:
         typer.echo(str(snapshot.filename_metafile.resolve()))
 

@@ -4,7 +4,10 @@
     "directory_src": ".",
     "directory_name_include": true,
     "ignore": [
-        "README.md",
-        ".git/"
+        "!README.md",
+        "!sub/task.txt",
+        "*.md",
+        "*.txt",
+        "_git/"
     ]
 }

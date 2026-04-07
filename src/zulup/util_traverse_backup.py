@@ -9,7 +9,7 @@ import sys
 import tempfile
 
 from .util_backup_directory import BackupDirectory, SnapshotEntry
-from .util_constants import ZULUP_JSON, now_text
+from .util_constants import ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON, now_text
 from .util_json_metafile import (
     CurrentFileEntries,
     CurrentFileEntry,
@@ -208,7 +208,7 @@ class TraverseBackup:
             ]
 
             for name in sorted(filenames):
-                if name == ZULUP_JSON:
+                if name in (ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON):
                     continue
                 rel_path = f"{rel_prefix}{name}" if rel_prefix else name
                 if ignore.is_included(name, rel_path, is_dir=False):
