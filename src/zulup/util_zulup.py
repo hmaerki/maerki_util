@@ -18,7 +18,7 @@ class Zulup:
         return time.monotonic() - self.begin_s
 
     def log_duration(self, tag: str) -> None:
-        logger.debug(f"{tag}: {self.duration_s:0.3f}s.")
+        logger.debug(f"{tag}: {self.duration_s:.3f}s.")
 
     def traverse_directories(
         self,

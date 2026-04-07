@@ -102,7 +102,7 @@ class Zulup:
         duration_s = time.monotonic() - self.begin_s
         size_bytes = filename_target.stat().st_size
         logger.debug(
-            f"Created {filename_target} with {size_bytes / 1e6:0.0f}MByte in {duration_s:0.0f}s. {size_bytes / duration_s / 1e6:0.0f}MByte/s"
+            f"Created {filename_target} with {size_bytes / 1e6:.0f}MByte in {duration_s:.0f}s. {size_bytes / duration_s / 1e6:.0f}MByte/s"
         )
 
 

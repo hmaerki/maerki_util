@@ -9,10 +9,12 @@ import socket
 import subprocess
 import sys
 import tempfile
+import time
+
+from zulup.util_logging import snapshot_logfile
 
 from . import util_constants
 from .util_backup_directory import BackupDirectory, SnapshotEntry
-from .util_constants import ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON
 from .util_json_metafile import (
     CurrentFileEntries,
     CurrentFileEntry,
@@ -27,7 +29,7 @@ from .util_json_zulup import BackupJson, ScanJson, ZulupIgnore
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class BackupArguments:
     last_files: list[MetafileFileEntry]
     last_snapshot: SnapshotEntry | None
@@ -159,7 +161,17 @@ class DirectoryBackupJson:
             filename_tar=filename_tar,
         )
 
-    def do_backup(self, args: BackupArguments) -> None:
+    def do_backup(self, full: bool, snapshot_datetime: str | None = None) -> None:
+        args = self.backup_arguments(
+            full=full,
+            snapshot_datetime=snapshot_datetime,
+        )
+        with snapshot_logfile(
+            filename_log=args.filename_tar.with_suffix(util_constants.LOGFILE_SUFFIX)
+        ):
+            self._do_backup(args=args)
+
+    def _do_backup(self, args: BackupArguments) -> None:
         """
         See AGENTS.md
 
@@ -175,6 +187,7 @@ class DirectoryBackupJson:
         * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
         """
 
+        begin_s = time.monotonic()
         merged_files = self.current_files.merge(args)
 
         logger.info(f"snapshot: {args.filename_tar}")
@@ -196,7 +209,7 @@ class DirectoryBackupJson:
 
         metafile.to_file(self.directory_target / metafile.current.metafile_name)
 
-        metafile.stats()
+        metafile.stats(duration_s=time.monotonic() - begin_s)
 
     def do_tar(
         self,
@@ -254,12 +267,12 @@ class TraverseZulup:
         self._collect(directory)
 
     def _collect(self, directory: pathlib.Path) -> None:
-        backup_path = directory / ZULUP_BACKUP_JSON
-        scan_path = directory / ZULUP_SCAN_JSON
+        backup_path = directory / util_constants.ZULUP_BACKUP_JSON
+        scan_path = directory / util_constants.ZULUP_SCAN_JSON
 
         if backup_path.exists() and scan_path.exists():
             raise ValueError(
-                f"{directory}: '{ZULUP_BACKUP_JSON}' and '{ZULUP_SCAN_JSON}' must not coexist"
+                f"{directory}: '{util_constants.ZULUP_BACKUP_JSON}' and '{util_constants.ZULUP_SCAN_JSON}' must not coexist"
             )
 
         if backup_path.exists():

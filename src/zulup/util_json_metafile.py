@@ -209,9 +209,13 @@ class Metafile:
     def stat_backup_size_byte(self) -> int:
         return sum(f.size for f in self.stat_backup_file)
 
-    def stats(self) -> None:
+    def stats(self, duration_s: float) -> None:
+        try:
+            speed_bytes_s = self.stat_backup_size_byte / duration_s
+        except ZeroDivisionError:
+            speed_bytes_s = 0.0
         logger.info(
-            f"Total: {len(self.stat_total_file)} files, {self.stat_total_size_byte / 1_000_000:.1f} MByte. Backup: {len(self.stat_backup_file)} files, {self.stat_backup_size_byte / 1_000_000:.1f} MByte."
+            f"Total: {len(self.stat_total_file)} files, {self.stat_total_size_byte / 1_000_000:.1f} MByte. Backup: {len(self.stat_backup_file)} files, {self.stat_backup_size_byte / 1_000_000:.1f} MByte, {duration_s:.1f}s, {speed_bytes_s / 1_000_000:.1f} MByte/s."
         )
 
     def to_file(self, filename: pathlib.Path) -> None:

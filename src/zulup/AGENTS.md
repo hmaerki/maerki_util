@@ -295,6 +295,11 @@ Restores file-a and file-b into the current directory. All files are restored if
 * Naming of variables/properties of filenames
   * good: filename_xy
   * bad: path_xy
+
 * Naming of variables/properties of directories
   * good: directory_xy
-  * bach: path_xy
+  * bad: path_xy
+
+* Always use ISO units in the variable/property name. Always singular.
+  * good: duration_s
+  * bad: started_at

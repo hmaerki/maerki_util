@@ -73,11 +73,7 @@ def backup(
         for dir_zulup_json in traverse.list_dir_zulup_json:
             dir_zulup_json.verify_history()
             zulup.log_duration("verify_history")
-            args = dir_zulup_json.backup_arguments(
-                full=full,
-                snapshot_datetime=None,
-            )
-            dir_zulup_json.do_backup(args=args)
+            dir_zulup_json.do_backup(full=full)
             zulup.log_duration("backup")
 
         zulup.log_duration("done")
