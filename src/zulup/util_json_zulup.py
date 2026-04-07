@@ -8,7 +8,11 @@ import pathlib
 import re
 from typing import TYPE_CHECKING
 
-from zulup.util_constants import ZULUP_BACKUP_DEFAULTS_JSON, ZULUP_BACKUP_JSON
+from zulup.util_constants import (
+    DIRECTORY_NAME_TOKEN,
+    ZULUP_BACKUP_DEFAULTS_JSON,
+    ZULUP_BACKUP_JSON,
+)
 
 if TYPE_CHECKING:
     from zulup.util_backup_directory import BackupDirectory
@@ -67,6 +71,8 @@ class BackupJson:
     ignore: list[str] | None = None
 
     def __post_init__(self) -> None:
+        if self.backup_name == DIRECTORY_NAME_TOKEN:
+            return
         if not BACKUP_NAME_RE.match(self.backup_name):
             raise ValueError(
                 f"backup_name '{self.backup_name}' does not match {BACKUP_NAME_RE.pattern}!"
@@ -96,7 +102,10 @@ class BackupJson:
                 defaults = _read_json_dict(filename_defaults)
                 kwargs = {**defaults, **kwargs}
 
-        return BackupJson(**kwargs)  # type: ignore
+        b = BackupJson(**kwargs)  # type: ignore
+        if b.backup_name == DIRECTORY_NAME_TOKEN:
+            return dataclasses.replace(b, backup_name=filename.parent.name)
+        return b
 
     def to_file(self, filename: pathlib.Path) -> None:
         data: dict[str, object] = {

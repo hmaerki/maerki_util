@@ -126,7 +126,7 @@ If `"directory_name_include": false` the added files are `README.md`, `image.jpg
   * `"!README.md"` — include `README.md` even if a previous pattern would exclude it
 
 * `"backup_name": "<DIRECTORY_NAME>"`
-  `<DIRECTORY_NAME>` indicates to use the directory name of `zulup_backup.json`.
+  `<DIRECTORY_NAME>` is a special token meaning: use the name of the parent directory that contains `zulup_backup.json`.
 
 ## `metafile`
 

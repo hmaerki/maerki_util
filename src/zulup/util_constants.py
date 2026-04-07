@@ -6,6 +6,7 @@ LOGFILE_SUFFIX = ".log"
 ZULUP_BACKUP_JSON = "zulup_backup.json"
 ZULUP_BACKUP_DEFAULTS_JSON = "zulup_backup_defaults.json"
 ZULUP_SCAN_JSON = "zulup_scan.json"
+DIRECTORY_NAME_TOKEN = "<DIRECTORY_NAME>"
 README_URL = "https://github.com/hmaerki/maerki_util/blob/zulup/src/zulup/README.md"
 SNAPSHOT_DATETIME_FORMAT = "%Y-%m-%d_%H-%M-%S"
 
