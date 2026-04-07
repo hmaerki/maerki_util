@@ -57,7 +57,12 @@ class TestProjectDirectory:
         self, full: bool = False, snapshot_datetime: str | None = None
     ) -> None:
         backup = self.get_directory_backup_json()
-        backup.do_backup(full=full, snapshot_datetime=snapshot_datetime)
+        args = backup.backup_directory.backup_arguments(
+            full=full,
+            snapshot_datetime=snapshot_datetime,
+            directory_target=backup.directory_target,
+        )
+        backup.do_backup(args=args)
 
     def get_backup_directory(self) -> BackupDirectory:
         from zulup.util_backup_directory import BackupDirectory

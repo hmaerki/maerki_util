@@ -129,7 +129,7 @@ class DirectoryBackupJson:
             metafile = backup_directory.last_snapshot.metafile
             backup_directory.verify_history(metafile=metafile)
 
-    def do_backup(self, full: bool, snapshot_datetime: str | None = None) -> None:
+    def do_backup(self, args: BackupArguments) -> None:
         """
         See AGENTS.md
 
@@ -144,12 +144,6 @@ class DirectoryBackupJson:
         * Store `new_metafile` in `<directory_target>/<snapshot_stem>.json`.
         * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
         """
-
-        args = self.backup_directory.backup_arguments(
-            full=full,
-            snapshot_datetime=snapshot_datetime,
-            directory_target=self.directory_target,
-        )
 
         merged_files = self.current_files.merge(args)
 
