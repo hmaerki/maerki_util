@@ -6,6 +6,10 @@ import json
 import logging
 import pathlib
 import re
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zulup.util_backup_directory import BackupDirectory
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +98,15 @@ class ZulupBackupJson:
         if self.ignore is not None:
             data["ignore"] = self.ignore
         filename.write_text(json.dumps(data, indent=4) + "\n")
+
+    @property
+    def backup_directory(self) -> BackupDirectory:
+        from zulup.util_backup_directory import BackupDirectory
+
+        return BackupDirectory(
+            directory=pathlib.Path(self.directory_target),
+            backup_name=self.backup_name,
+        )
 
 
 @dataclasses.dataclass(frozen=True)

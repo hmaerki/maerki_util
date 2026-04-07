@@ -2,54 +2,37 @@ from __future__ import annotations
 
 import logging
 import pathlib
-import subprocess
-import sys
 import typing
 
 import typer
 
 from . import util_constants, util_systemd_inhibit, util_zulup
-from .util_backup_directory import BackupDirectory
-from .util_json_metafile import Metafile, MetafileSnapshot
+from .util_json_metafile import Metafile
 from .util_json_zulup import ZulupBackupJson
+from .util_tarfile import TarExtract
 
 logger = logging.getLogger(__file__)
 
 
-app = typer.Typer()
+app = typer.Typer(
+    invoke_without_command=True,
+    rich_markup_mode="markdown",
+    help=f"Zulup backup tool. Documentation: {util_constants.README_URL}",
+)
 
 
-def _load_backup_directory_from_backup_json(
-    directory: pathlib.Path,
-) -> BackupDirectory:
-    filename = directory / util_constants.ZULUP_BACKUP_JSON
-    backup_json = ZulupBackupJson.from_file(filename)
-    return BackupDirectory(
-        directory=pathlib.Path(backup_json.directory_target),
-        backup_name=backup_json.backup_name,
-    )
-
-
-def _tar_flag() -> str:
-    return "-z" if sys.platform == "win32" else "--zstd"
-
-
-def _tar_list(filename_tar: pathlib.Path) -> set[str]:
-    args = ["tar", _tar_flag(), "-tf", str(filename_tar)]
-    result = subprocess.run(args, capture_output=True, text=True, check=True)
-    return set(line.strip() for line in result.stdout.splitlines() if line.strip())
-
-
-def _tar_extract(filename_tar: pathlib.Path, members: list[str]) -> None:
-    if not members:
-        return
-    args = ["tar", _tar_flag(), "-xf", str(filename_tar), *members]
-    subprocess.run(args, check=True)
-
-
-def _snapshot_by_datetime(metafile: Metafile) -> dict[str, MetafileSnapshot]:
-    snapshots = [metafile.current, *metafile.history]
-    return {snapshot.snapshot_datetime: snapshot for snapshot in snapshots}
+@app.callback()
+def main(
+    ctx: typer.Context,
+    debug: typing.Annotated[
+        bool,
+        typer.Option("--debug", help="Set log level to DEBUG (default: INFO)"),
+    ] = False,
+) -> None:
+    level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(level=level, format="%(levelname)s %(message)s")
+    if ctx.invoked_subcommand is None:
+        ctx.invoke(backup)
 
 
 @app.command()
@@ -69,8 +52,6 @@ def backup(
         typer.Option(help="Force a full backup"),
     ] = False,
 ) -> None:
-    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
-
     with util_systemd_inhibit.systemd_inhibit():
         if directories is None:
             directories = [pathlib.Path.cwd().resolve().absolute()]
@@ -102,7 +83,9 @@ def snapshots(
         ),
     ],
 ) -> None:
-    backup_directory = _load_backup_directory_from_backup_json(directory.resolve())
+    filename = directory.resolve() / util_constants.ZULUP_BACKUP_JSON
+    backup_json = ZulupBackupJson.from_file(filename)
+    backup_directory = backup_json.backup_directory
     for snapshot in backup_directory.snapshots:
         typer.echo(str(snapshot.filename_metafile.resolve()))
 
@@ -111,7 +94,9 @@ def snapshots(
 def list_snapshot_files(
     filename_metafile: typing.Annotated[
         pathlib.Path,
-        typer.Argument(help="Absolute path to snapshot metafile JSON."),
+        typer.Argument(
+            help="Absolute path to snapshot ('project_xxx_2026-05-22_xxx.json')."
+        ),
     ],
 ) -> None:
     metafile = Metafile.from_file(filename_metafile.resolve())
@@ -124,7 +109,9 @@ def list_snapshot_files(
 def restore(
     filename_metafile: typing.Annotated[
         pathlib.Path,
-        typer.Argument(help="Absolute path to snapshot metafile JSON."),
+        typer.Argument(
+            help="Absolute path to snapshot ('project_xxx_2026-05-22_xxx.json')."
+        ),
     ],
     files: typing.Annotated[
         list[str] | None,
@@ -134,7 +121,7 @@ def restore(
     filename_metafile = filename_metafile.resolve()
     snapshot_directory = filename_metafile.parent
     metafile = Metafile.from_file(filename_metafile)
-    snapshot_map = _snapshot_by_datetime(metafile)
+    snapshot_map = metafile.by_datetime
 
     wanted = set(files) if files else None
     entries = [entry for entry in metafile.files if entry.verb != "removed"]
@@ -155,9 +142,10 @@ def restore(
         grouped_members.setdefault(filename_tar, []).append(entry.path)
 
     for filename_tar, rel_paths in grouped_members.items():
-        members = _tar_list(filename_tar)
+        tar_extract = TarExtract(filename_tar)
+        members = tar_extract.list()
         parent_name = pathlib.Path(metafile.backup.parent).name
-        members_to_extract: list[str] = []
+        members_to_restore: list[str] = []
 
         for rel_path in rel_paths:
             candidates = [
@@ -172,9 +160,9 @@ def restore(
                 raise FileNotFoundError(
                     f"'{rel_path}' not found in tarfile '{filename_tar}'"
                 )
-            members_to_extract.append(selected)
+            members_to_restore.append(selected)
 
-        _tar_extract(filename_tar, members_to_extract)
+        tar_extract.restore(members_to_restore)
 
 
 if __name__ == "__main__":

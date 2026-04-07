@@ -175,6 +175,11 @@ class Metafile:
         return {k: v for k, v in dataclasses.asdict(snapshot).items() if v is not None}
 
     @property
+    def by_datetime(self) -> dict[str, MetafileSnapshot]:
+        snapshots = [self.current, *self.history]
+        return {snapshot.snapshot_datetime: snapshot for snapshot in snapshots}
+
+    @property
     def stat_total_file(self) -> list[MetafileFileEntry]:
         return [f for f in self.files if f.verb != EnumVerb.REMOVED]
 
