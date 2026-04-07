@@ -131,11 +131,15 @@ class BackupJson:
 @dataclasses.dataclass(frozen=True)
 class ScanJson:
     patterns: list[str]
+    depth: int = 1
 
     def __post_init__(self) -> None:
         assert isinstance(self.patterns, list)
         for pattern in self.patterns:
             assert isinstance(pattern, str)
+        assert isinstance(self.depth, int)
+        if self.depth < 0:
+            raise ValueError("depth must be >= 0")
 
     @staticmethod
     def from_file(filename: pathlib.Path) -> ScanJson:
@@ -146,14 +150,31 @@ class ScanJson:
             logger.error(msg)
             raise ValueError(msg) from e
 
-        if not isinstance(data, list):
-            raise ValueError(f"{filename}: expected JSON list")
+        if not isinstance(data, dict):
+            raise ValueError(f"{filename}: expected JSON object")
 
-        for index, value in enumerate(data):
+        if "patterns" not in data:
+            raise ValueError(f"{filename}: missing key 'patterns'")
+
+        patterns = data["patterns"]
+        depth = data.get("depth", 1)
+
+        if not isinstance(patterns, list):
+            raise ValueError(f"{filename}: key 'patterns': expected list")
+
+        for index, value in enumerate(patterns):
             if not isinstance(value, str):
-                raise ValueError(f"{filename}: index {index}: expected string")
+                raise ValueError(
+                    f"{filename}: key 'patterns' index {index}: expected string"
+                )
 
-        return ScanJson(patterns=data)
+        if not isinstance(depth, int):
+            raise ValueError(f"{filename}: key 'depth': expected integer")
+
+        return ScanJson(patterns=patterns, depth=depth)
 
     def to_file(self, filename: pathlib.Path) -> None:
-        filename.write_text(json.dumps(self.patterns, indent=4) + "\n")
+        filename.write_text(
+            json.dumps({"patterns": self.patterns, "depth": self.depth}, indent=4)
+            + "\n"
+        )

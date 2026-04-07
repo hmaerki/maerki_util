@@ -266,7 +266,12 @@ class TraverseZulup:
     def collect(self, directory: pathlib.Path) -> None:
         self._collect(directory)
 
-    def _collect(self, directory: pathlib.Path) -> None:
+    def _collect(
+        self,
+        directory: pathlib.Path,
+        scan_patterns: list[str] | None = None,
+        depth_remaining: int | None = None,
+    ) -> None:
         backup_path = directory / util_constants.ZULUP_BACKUP_JSON
         scan_path = directory / util_constants.ZULUP_SCAN_JSON
 
@@ -282,13 +287,26 @@ class TraverseZulup:
             )
             return
 
-        if scan_path.exists():
+        if scan_patterns is None and scan_path.exists():
             scan_json = ScanJson.from_file(scan_path)
+            scan_patterns = scan_json.patterns
+            depth_remaining = scan_json.depth
+
+        if scan_patterns is not None:
+            if depth_remaining is not None and depth_remaining <= 0:
+                return
             for directory_sub in sorted(directory.iterdir()):
                 if not directory_sub.is_dir():
                     continue
-                if self._matches_scan_pattern(directory_sub, scan_json.patterns):
-                    self._collect(directory_sub)
+                if self._matches_scan_pattern(directory_sub, scan_patterns):
+                    next_depth = None
+                    if depth_remaining is not None:
+                        next_depth = depth_remaining - 1
+                    self._collect(
+                        directory_sub,
+                        scan_patterns=scan_patterns,
+                        depth_remaining=next_depth,
+                    )
             return
 
         for directory_sub in sorted(directory.iterdir()):

@@ -1,3 +1,6 @@
-[
-    "project_*"
-]
+{
+    "patterns": [
+        "project_*"
+    ],
+    "depth": 1
+}

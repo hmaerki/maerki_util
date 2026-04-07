@@ -28,7 +28,7 @@ Terms
 
 * `zulup_backup.json`: Defines one backup job.
 * `zulup_backup_defaults.json`: Optional global defaults (same schema as `zulup_backup.json`) loaded from `~/zulup_backup_defaults.json`; missing values in `zulup_backup.json` are filled from defaults, and local values override defaults.
-* `zulup_scan.json`: Controls how scanning continues below a directory.
+* `zulup_scan.json`: Controls how scanning continues below a directory (object with `patterns` and optional `depth`).
 
 If both files exist in the same directory, `zulup` raises an error.
 
@@ -38,32 +38,47 @@ Rationale: A directory is either a backup root (`zulup_backup.json`) or a scan r
 
 Purpose: speed up discovery in large trees.
 
-`zulup_scan.json` contains a JSON list of patterns.
+`zulup_scan.json`
 
 ```json
-[
-  "project_*",
-  "dir_A",
-  "dir_B",
-  "/mnt/external/project_xy"
-]
+{
+  "patterns": [
+    "project_*",
+    "dir_A",
+    "dir_B",
+    "/mnt/external/project_xy"
+  ],
+  "depth": 1
+}
 ```
+
+`patterns`: required list of patterns.
+
+`depth`: optional non-negative integer. Defaults to `1`.
+
+Depth semantics:
+
+* `depth` is counted from the directory containing `zulup_scan.json`.
+* `depth: 0` means do not descend into subdirectories from this point.
+* `depth: 1` means consider direct child directories only.
+* Directories deeper than `depth` are ignored.
 
 Behavior:
 
 * When `zulup_scan.json` is encountered, normal recursive descent below that directory stops.
-* Scanning continues only for directories matched by entries in the list.
-* Entries are matched with Python's `fnmatch` module.
+* Scanning continues only for directories matched by entries in `patterns` and within `depth`.
+* Entries are matched with Python's `fnmatch` module against both directory name and directory path.
+* Absolute patterns do not bypass depth; they are considered only for directories reached within the configured `depth`.
 
 Rationale: If a directory is known to contain many subdirectories but only a few relevant backup roots, `zulup_scan.json` prevents a full tree walk.
 
 Examples:
 
-* `["project_*"]`: Will search for `zulup_backup.json` in `project_xy` and `project_rs`.
+* `{"patterns": ["project_*"], "depth": 1}`: Will search for `zulup_backup.json` in direct child directories like `project_xy` and `project_rs`.
 
-* `"dir_A"`, `"dir_B"`: search these named directories.
+* `{"patterns": ["dir_A", "dir_B"], "depth": 1}`: search these named direct child directories.
 
-* `"/mnt/external/project_xy"`: search this absolute directory explicitly.
+* `{"patterns": ["/mnt/external/project_xy"], "depth": 1}`: include this absolute directory path if it matches and is within depth.
 
 
 
