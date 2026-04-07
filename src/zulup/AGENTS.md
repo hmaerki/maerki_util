@@ -234,3 +234,36 @@ process = subprocess.Popen(cmd, preexec_fn=set_death_signal)
 ```
 
 On normal exit, `zulup` must explicitly call `process.terminate()` and `process.wait()` to clean up the `sleep infinity` process.
+
+## zulup command line syntax
+
+```bash
+zulup backup <directories>
+```
+
+Searches <directories> for zulup.json files.
+For every zulup.json found a backup is done.
+
+```bash
+zulup backup --full <directories>
+```
+
+As above, but does a full backup.
+
+```bash
+zulup snapshots <directory>
+```
+
+Reads <directory>/zulup.json and lists all paths to metafiles for all snapshots.
+
+```bash
+zulup list <absolute-path-to-metafile.json>
+```
+
+Lists all files in this snapshot.
+
+```bash
+zulup restore <absolute-path-to-metafile.json> file-a file-b
+```
+
+Restores file-a and file-b into the current directory. All files are restored if no files are given.
