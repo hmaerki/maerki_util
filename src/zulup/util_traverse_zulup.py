@@ -7,7 +7,7 @@ import pathlib
 import typing
 
 from zulup.util_constants import ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON
-from zulup.util_json_zulup import ZulupBackupJson, ZulupScanJson
+from zulup.util_json_zulup import ZulupBackupJson, ZulupIgnore, ZulupScanJson
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,10 @@ class DirectoryZulupJson:
     def __post_init__(self) -> None:
         assert isinstance(self.directory, pathlib.Path)
         assert isinstance(self.backup_json, ZulupBackupJson)
+
+    @property
+    def zulup_ignore(self) -> ZulupIgnore:
+        return ZulupIgnore(self.backup_json.ignore or [])
 
 
 class TraverseZulup:

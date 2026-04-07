@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
 import os
 import pathlib
@@ -26,24 +27,32 @@ from .util_traverse_zulup import DirectoryZulupJson
 logger = logging.getLogger(__name__)
 
 
+@dataclasses.dataclass(frozen=True)
+class BackupRunContext:
+    last_files: list[MetafileFileEntry]
+    last_snapshot: SnapshotEntry | None
+    history: list[MetafileSnapshot]
+    snapshot_datetime: str
+    snapshot_type: str
+    filename_tar: pathlib.Path
+
+    @property
+    def is_incr(self) -> bool:
+        return self.last_snapshot is not None
+
+
 class TraverseBackup:
     def __init__(self, dir_zulup_json: DirectoryZulupJson) -> None:
         assert isinstance(dir_zulup_json, DirectoryZulupJson)
         self.dir_zulup_json = dir_zulup_json
-        backup_json: ZulupBackupJson = dir_zulup_json.backup_json
-        ignore = ZulupIgnore(backup_json.ignore or [])
-
-        self.files: list[str] = []
-
-        self._collect(
-            directory=self.directory_src,
-            ignore=ignore,
-        )
-        self.files.sort()
 
     @property
     def directory_src(self) -> pathlib.Path:
         return self.dir_zulup_json.directory / self.backup_json.directory_src
+
+    @property
+    def directory_target(self) -> pathlib.Path:
+        return pathlib.Path(self.backup_json.directory_target)
 
     @property
     def backup_json(self) -> ZulupBackupJson:
@@ -59,8 +68,36 @@ class TraverseBackup:
         )
 
     @property
-    def directory_target(self) -> pathlib.Path:
-        return pathlib.Path(self.backup_json.directory_target)
+    def files(self) -> list[str]:
+        ignore = self.dir_zulup_json.zulup_ignore
+        top = str(self.directory_src)
+        top_len = len(top) + 1  # +1 for trailing separator
+        files: list[str] = []
+
+        for dirpath, dirnames, filenames in os.walk(top):
+            rel_prefix = dirpath[top_len:] + "/" if len(dirpath) > top_len - 1 else ""
+
+            # Filter directories in-place (sorted) to control os.walk traversal
+            dirnames[:] = [
+                d
+                for d in sorted(dirnames)
+                if ignore.is_included(
+                    d, f"{rel_prefix}{d}" if rel_prefix else d, is_dir=True
+                )
+            ]
+
+            for name in sorted(filenames):
+                if name in (
+                    util_constants.ZULUP_BACKUP_JSON,
+                    util_constants.ZULUP_SCAN_JSON,
+                ):
+                    continue
+                rel_path = f"{rel_prefix}{name}" if rel_prefix else name
+                if ignore.is_included(name, rel_path, is_dir=False):
+                    files.append(rel_path)
+
+        files.sort()
+        return files
 
     @property
     def current_files(self) -> CurrentFileEntries:
@@ -96,64 +133,75 @@ class TraverseBackup:
         * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
         """
 
-        # Get last metafile's file entries (empty if no previous backup or full backup)
-        last_files: list[MetafileFileEntry] = []
-        last_snapshot: SnapshotEntry | None = None
-        backup_directory = self.backup_directory
-        if not full:
-            if backup_directory.last_snapshot is not None:
-                last_snapshot = backup_directory.last_snapshot
-                last_files = last_snapshot.metafile.files
+        context = self._build_run_context(
+            full=full, snapshot_datetime=snapshot_datetime
+        )
 
         # Merge
-        if snapshot_datetime is None:
-            snapshot_datetime = util_constants.now_text()
         merged_files = self.current_files.merge_files(
-            last_files=last_files,
-            snapshot_datetime=snapshot_datetime,
+            last_files=context.last_files,
+            snapshot_datetime=context.snapshot_datetime,
         )
 
-        snapshot_type = "full" if last_snapshot is None else "incr"
-        backup_name = self.backup_json.backup_name
-        filename_tar = (
-            self.directory_target
-            / f"{backup_name}_{snapshot_datetime}_{snapshot_type}{util_constants.TARFILE_SUFFIX}"
-        )
-
-        logger.info(f"snapshot: {filename_tar}")
+        logger.info(f"snapshot: {context.filename_tar}")
         with snapshot_logfile(
-            filename_log=filename_tar.with_suffix(util_constants.LOGFILE_SUFFIX)
+            filename_log=context.filename_tar.with_suffix(util_constants.LOGFILE_SUFFIX)
         ):
-            # Build history from previous metafile
-            history: list[MetafileSnapshot] = []
-            if last_snapshot is not None:
-                prev_metafile = last_snapshot.metafile
-                history = [prev_metafile.current] + prev_metafile.history
-
             tarfile_size = self.do_tar(
                 merged_files=merged_files,
-                filename_target=filename_tar,
+                filename_target=context.filename_tar,
             )
 
             metafile = Metafile(
                 backup=MetafileBackup(
-                    backup_name=backup_name,
+                    backup_name=self.backup_json.backup_name,
                     parent=str(self.directory_src),
                     hostname=socket.gethostname(),
                 ),
                 current=MetafileSnapshot(
-                    snapshot_datetime=snapshot_datetime,
-                    snapshot_type=snapshot_type,
-                    snapshot_stem=filename_tar.stem,
+                    snapshot_datetime=context.snapshot_datetime,
+                    snapshot_type=context.snapshot_type,
+                    snapshot_stem=context.filename_tar.stem,
                     tarfile_size=tarfile_size,
                 ),
-                history=history,
+                history=context.history,
                 files=merged_files,
             )
 
             metafile.to_file(self.directory_target / metafile.current.metafile_name)
 
             metafile.stats()
+
+    def _build_run_context(
+        self, full: bool, snapshot_datetime: str | None
+    ) -> BackupRunContext:
+        # Get last metafile's file entries (empty if no previous backup or full backup)
+        last_files: list[MetafileFileEntry] = []
+        last_snapshot: SnapshotEntry | None = None
+        history: list[MetafileSnapshot] = []
+        backup_directory = self.backup_directory
+        if not full and backup_directory.last_snapshot is not None:
+            last_snapshot = backup_directory.last_snapshot
+            last_files = last_snapshot.metafile.files
+            prev_metafile = last_snapshot.metafile
+            history = [prev_metafile.current] + prev_metafile.history
+
+        snapshot_datetime = snapshot_datetime or util_constants.now_text()
+        is_incr = last_snapshot is not None
+        snapshot_type = "incr" if is_incr else "full"
+        backup_name = self.backup_json.backup_name
+        filename_tar = (
+            self.directory_target
+            / f"{backup_name}_{snapshot_datetime}_{snapshot_type}{util_constants.TARFILE_SUFFIX}"
+        )
+        return BackupRunContext(
+            last_files=last_files,
+            last_snapshot=last_snapshot,
+            history=history,
+            snapshot_datetime=snapshot_datetime,
+            snapshot_type=snapshot_type,
+            filename_tar=filename_tar,
+        )
 
     def do_tar(
         self,
@@ -192,33 +240,3 @@ class TraverseBackup:
             return filename_target.stat().st_size
         finally:
             temp_filename.unlink(missing_ok=True)
-
-    def _collect(
-        self,
-        directory: pathlib.Path,
-        ignore: ZulupIgnore,
-    ) -> None:
-        top = str(directory)
-        top_len = len(top) + 1  # +1 for trailing separator
-
-        for dirpath, dirnames, filenames in os.walk(top):
-            rel_prefix = dirpath[top_len:] + "/" if len(dirpath) > top_len - 1 else ""
-
-            # Filter directories in-place (sorted) to control os.walk traversal
-            dirnames[:] = [
-                d
-                for d in sorted(dirnames)
-                if ignore.is_included(
-                    d, f"{rel_prefix}{d}" if rel_prefix else d, is_dir=True
-                )
-            ]
-
-            for name in sorted(filenames):
-                if name in (
-                    util_constants.ZULUP_BACKUP_JSON,
-                    util_constants.ZULUP_SCAN_JSON,
-                ):
-                    continue
-                rel_path = f"{rel_prefix}{name}" if rel_prefix else name
-                if ignore.is_included(name, rel_path, is_dir=False):
-                    self.files.append(rel_path)

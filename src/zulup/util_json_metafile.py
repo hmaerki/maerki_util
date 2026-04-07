@@ -62,6 +62,10 @@ class CurrentFileEntry:
 
 
 class CurrentFileEntries(list[CurrentFileEntry]):
+    @property
+    def files(self) -> list[str]:
+        return [f.path for f in self]
+
     def merge_files(
         self,
         last_files: list[MetafileFileEntry],
