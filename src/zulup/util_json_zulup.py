@@ -8,6 +8,8 @@ import pathlib
 import re
 from typing import TYPE_CHECKING
 
+from zulup.util_constants import ZULUP_BACKUP_DEFAULTS_JSON, ZULUP_BACKUP_JSON
+
 if TYPE_CHECKING:
     from zulup.util_backup_directory import BackupDirectory
 
@@ -72,21 +74,29 @@ class BackupJson:
 
     @staticmethod
     def from_file(filename: pathlib.Path) -> BackupJson:
-        try:
-            data = json.loads(filename.read_text())
-        except json.JSONDecodeError as e:
-            msg = f"{filename}: {e}"
-            logger.error(msg)
-            raise ValueError(msg) from e
+        def _read_json_dict(file_path: pathlib.Path) -> dict[str, str | list]:
+            try:
+                data = json.loads(file_path.read_text())
+            except json.JSONDecodeError as e:
+                msg = f"{file_path}: {e}"
+                logger.error(msg)
+                raise ValueError(msg) from e
+            if not isinstance(data, dict):
+                msg = f"{file_path}: expected JSON object"
+                logger.error(msg)
+                raise ValueError(msg)
+            return data
 
-        ignore: list[str] | None = data.get("ignore")
-        return BackupJson(
-            backup_name=data["backup_name"],
-            directory_target=data["directory_target"],
-            directory_src=data["directory_src"],
-            directory_name_include=data["directory_name_include"],
-            ignore=ignore,
-        )
+        kwargs = _read_json_dict(filename)
+
+        # Apply optional global defaults only to real zulup_backup.json files.
+        if filename.name == ZULUP_BACKUP_JSON:
+            filename_defaults = pathlib.Path.home() / ZULUP_BACKUP_DEFAULTS_JSON
+            if filename_defaults.is_file():
+                defaults = _read_json_dict(filename_defaults)
+                kwargs = {**defaults, **kwargs}
+
+        return BackupJson(**kwargs)  # type: ignore
 
     def to_file(self, filename: pathlib.Path) -> None:
         data: dict[str, object] = {

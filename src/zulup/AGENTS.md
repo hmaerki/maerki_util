@@ -27,6 +27,7 @@ Terms
 `zulup` scans the directory tree for these configuration files:
 
 * `zulup_backup.json`: Defines one backup job.
+* `zulup_backup_defaults.json`: Optional global defaults (same schema as `zulup_backup.json`) loaded from `~/zulup_backup_defaults.json`; missing values in `zulup_backup.json` are filled from defaults, and local values override defaults.
 * `zulup_scan.json`: Controls how scanning continues below a directory.
 
 If both files exist in the same directory, `zulup` raises an error.
@@ -123,6 +124,9 @@ If `"directory_name_include": false` the added files are `README.md`, `image.jpg
   * `".git/"` — exclude every directory named `.git` (top folder and all subfolders)
   * `"build/output/"` — exclude the `output` directory under `build` (path match)
   * `"!README.md"` — include `README.md` even if a previous pattern would exclude it
+
+* `"backup_name": "<DIRECTORY_NAME>"`
+  `<DIRECTORY_NAME>` indicates to use the directory name of `zulup_backup.json`.
 
 ## `metafile`
 

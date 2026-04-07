@@ -76,3 +76,73 @@ def test_backup_name_invalid(name: str) -> None:
             directory_src=".",
             directory_name_include=True,
         )
+
+
+def test_backup_defaults_fill_missing_keys(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    filename_defaults = tmp_path / "zulup_backup_defaults.json"
+    filename_defaults.write_text(
+        json.dumps(
+            {
+                "directory_target": "/mnt/default_target",
+                "directory_src": ".",
+                "directory_name_include": False,
+                "ignore": [".git/"],
+            },
+            indent=4,
+        )
+        + "\n"
+    )
+
+    filename_backup = tmp_path / "zulup_backup.json"
+    filename_backup.write_text(json.dumps({"backup_name": "project_xy"}, indent=4) + "\n")
+
+    backup_json = BackupJson.from_file(filename_backup)
+    assert backup_json.backup_name == "project_xy"
+    assert backup_json.directory_target == "/mnt/default_target"
+    assert backup_json.directory_src == "."
+    assert backup_json.directory_name_include is False
+    assert backup_json.ignore == [".git/"]
+
+
+def test_backup_defaults_local_values_override_defaults(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    filename_defaults = tmp_path / "zulup_backup_defaults.json"
+    filename_defaults.write_text(
+        json.dumps(
+            {
+                "directory_target": "/mnt/default_target",
+                "directory_src": ".",
+                "directory_name_include": False,
+                "ignore": [".git/"],
+            },
+            indent=4,
+        )
+        + "\n"
+    )
+
+    filename_backup = tmp_path / "zulup_backup.json"
+    filename_backup.write_text(
+        json.dumps(
+            {
+                "backup_name": "project_xy",
+                "directory_target": "/mnt/local_target",
+                "directory_name_include": True,
+            },
+            indent=4,
+        )
+        + "\n"
+    )
+
+    backup_json = BackupJson.from_file(filename_backup)
+    assert backup_json.backup_name == "project_xy"
+    assert backup_json.directory_target == "/mnt/local_target"
+    assert backup_json.directory_src == "."
+    assert backup_json.directory_name_include is True
+    assert backup_json.ignore == [".git/"]
