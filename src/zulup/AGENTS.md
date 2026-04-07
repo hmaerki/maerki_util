@@ -17,6 +17,7 @@ Terms
   * `snapshot_type` is `full` or `incr`.
 * `tarfile`: Belongs to a snapshot. The filename is `<snapshot_stem>.tgz`
 * `metafile`: Belongs to a snapshot. The filename is `<snapshot_stem>.json`
+* `logfilefile`: Belongs to a snapshot. The filename is `<snapshot_stem>.log`
 * `verb`: The action that happened to a file: `added` (new file), `modified` (changed), `untouched` (unchanged), or `removed` (deleted).
 * `directory_src`: The directory to be backed up.
 * `directory_target`: The directory where the snapshots for this backup are stored.

@@ -29,8 +29,14 @@ def main(
         typer.Option("--debug", help="Set log level to DEBUG (default: INFO)"),
     ] = False,
 ) -> None:
-    level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(level=level, format="%(levelname)s %(message)s")
+    console_level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(levelname)s %(message)s",
+        force=True,
+    )
+    for handler in logging.getLogger().handlers:
+        handler.setLevel(console_level)
     if ctx.invoked_subcommand is None:
         ctx.invoke(backup)
 

@@ -7,9 +7,11 @@ import socket
 import subprocess
 import sys
 import tempfile
+import typing
+from contextlib import contextmanager
 
 from .util_backup_directory import BackupDirectory, SnapshotEntry
-from .util_constants import ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON, now_text
+from .util_constants import LOGFILE_SUFFIX, ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON, now_text
 from .util_json_metafile import (
     CurrentFileEntries,
     CurrentFileEntry,
@@ -23,6 +25,24 @@ from .util_json_zulup import ZulupBackupJson, ZulupIgnore
 from .util_traverse_zulup import DirectoryZulupJson
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def _snapshot_logfile(filename_log: pathlib.Path) -> typing.Iterator[None]:
+    root_logger = logging.getLogger()
+
+    file_handler = logging.FileHandler(filename_log, encoding="utf-8")
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
+    )
+    root_logger.addHandler(file_handler)
+
+    try:
+        yield
+    finally:
+        root_logger.removeHandler(file_handler)
+        file_handler.close()
 
 
 class TraverseBackup:
@@ -115,37 +135,41 @@ class TraverseBackup:
         snapshot_type = "full" if last_snapshot is None else "incr"
         backup_name = self.backup_json.backup_name
         snapshot_stem = f"{backup_name}_{snapshot_datetime}_{snapshot_type}"
+        filename_log = self.directory_target / f"{snapshot_stem}{LOGFILE_SUFFIX}"
 
-        # Build history from previous metafile
-        history: list[MetafileSnapshot] = []
-        if last_snapshot is not None:
-            prev_metafile = last_snapshot.metafile
-            history = [prev_metafile.current] + prev_metafile.history
+        with _snapshot_logfile(filename_log=filename_log):
+            logger.info(f"snapshot logfile: {filename_log}")
 
-        tarfile_size = self.do_tar(
-            merged_files=merged_files,
-            filename_target=self.directory_target / f"{snapshot_stem}.tgz",
-        )
+            # Build history from previous metafile
+            history: list[MetafileSnapshot] = []
+            if last_snapshot is not None:
+                prev_metafile = last_snapshot.metafile
+                history = [prev_metafile.current] + prev_metafile.history
 
-        metafile = Metafile(
-            backup=MetafileBackup(
-                backup_name=backup_name,
-                parent=str(self.directory_src),
-                hostname=socket.gethostname(),
-            ),
-            current=MetafileSnapshot(
-                snapshot_datetime=snapshot_datetime,
-                snapshot_type=snapshot_type,
-                snapshot_stem=snapshot_stem,
-                tarfile_size=tarfile_size,
-            ),
-            history=history,
-            files=merged_files,
-        )
+            tarfile_size = self.do_tar(
+                merged_files=merged_files,
+                filename_target=self.directory_target / f"{snapshot_stem}.tgz",
+            )
 
-        metafile.to_file(self.directory_target / metafile.current.metafile_name)
+            metafile = Metafile(
+                backup=MetafileBackup(
+                    backup_name=backup_name,
+                    parent=str(self.directory_src),
+                    hostname=socket.gethostname(),
+                ),
+                current=MetafileSnapshot(
+                    snapshot_datetime=snapshot_datetime,
+                    snapshot_type=snapshot_type,
+                    snapshot_stem=snapshot_stem,
+                    tarfile_size=tarfile_size,
+                ),
+                history=history,
+                files=merged_files,
+            )
 
-        metafile.stats()
+            metafile.to_file(self.directory_target / metafile.current.metafile_name)
+
+            metafile.stats()
 
     def do_tar(
         self,
