@@ -29,8 +29,8 @@ class TraverseBackup:
     def __init__(self, dir_zulup_json: DirectoryZulupJson) -> None:
         assert isinstance(dir_zulup_json, DirectoryZulupJson)
         self.dir_zulup_json = dir_zulup_json
-        backup: ZulupBackupJson = dir_zulup_json.zulup_json
-        ignore = ZulupIgnore(backup.ignore or [])
+        backup_json: ZulupBackupJson = dir_zulup_json.backup_json
+        ignore = ZulupIgnore(backup_json.ignore or [])
 
         self.files: list[str] = []
 
@@ -42,11 +42,11 @@ class TraverseBackup:
 
     @property
     def directory_src(self) -> pathlib.Path:
-        return self.dir_zulup_json.directory / self.backup.directory_src
+        return self.dir_zulup_json.directory / self.backup_json.directory_src
 
     @property
-    def backup(self) -> ZulupBackupJson:
-        return self.dir_zulup_json.zulup_json
+    def backup_json(self) -> ZulupBackupJson:
+        return self.dir_zulup_json.backup_json
 
     @property
     def backup_directory(self) -> BackupDirectory:
@@ -54,12 +54,12 @@ class TraverseBackup:
 
         return BackupDirectory(
             directory=self.directory_target,
-            backup_name=self.backup.backup_name,
+            backup_name=self.backup_json.backup_name,
         )
 
     @property
     def directory_target(self) -> pathlib.Path:
-        return pathlib.Path(self.backup.directory_target)
+        return pathlib.Path(self.backup_json.directory_target)
 
     @property
     def current_files(self) -> CurrentFileEntries:
@@ -113,7 +113,7 @@ class TraverseBackup:
         )
 
         snapshot_type = "full" if last_snapshot is None else "incr"
-        backup_name = self.backup.backup_name
+        backup_name = self.backup_json.backup_name
         snapshot_stem = f"{backup_name}_{snapshot_datetime}_{snapshot_type}"
 
         # Build history from previous metafile
@@ -159,7 +159,7 @@ class TraverseBackup:
         ]
 
         directory_src = self.directory_src
-        if self.backup.directory_name_include:
+        if self.backup_json.directory_name_include:
             directory_src = directory_src.parent
             dir_name = self.dir_zulup_json.directory.name
             tar_files = [f"{dir_name}/{f}" for f in tar_files]

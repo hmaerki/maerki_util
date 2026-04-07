@@ -46,7 +46,7 @@ def test_ignore_dot_git_directories_recursively(project: TestProjectDirectory) -
     project.create_file("src/code.py", "print('ok')\n")
     project.create_file("src/.git/config", "[core]\n")
 
-    project.create_zulup_json(directory_name_include=False, ignore=[".git/"])
+    project.create_backup_json(directory_name_include=False, ignore=[".git/"])
 
     backup = project.get_traverse_backup()
     assert backup.files == ["keep.txt", "src/code.py"]

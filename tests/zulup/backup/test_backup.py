@@ -9,7 +9,7 @@ def test_backup_incr(project: TestProjectDirectory) -> None:
     project.create_file("b.txt", "b-v1\n")
     project.create_file("c.txt", "c-v1\n")
 
-    project.create_zulup_json(directory_name_include=False, ignore=[".git/"])
+    project.create_backup_json(directory_name_include=False, ignore=[".git/"])
 
     # create first full backup
     project.do_backup(snapshot_datetime="2026-04-07_10-00-00")

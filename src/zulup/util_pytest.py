@@ -4,6 +4,8 @@ import json
 import pathlib
 from typing import TYPE_CHECKING
 
+from zulup.util_constants import ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON
+
 if TYPE_CHECKING:
     from zulup.util_backup_directory import BackupDirectory
     from zulup.util_traverse_backup import TraverseBackup
@@ -25,23 +27,12 @@ class TestProjectDirectory:
         file_path.write_text(content)
         return file_path
 
-    def create_zulup_json(
+    def create_backup_json(
         self,
         directory_name_include: bool,
         ignore: list[str],
     ) -> pathlib.Path:
-        # Backward compatible shim for older tests.
-        return self.create_zulup_backup_json(
-            directory_name_include=directory_name_include,
-            ignore=ignore,
-        )
-
-    def create_zulup_backup_json(
-        self,
-        directory_name_include: bool,
-        ignore: list[str],
-    ) -> pathlib.Path:
-        zulup_backup_json = {
+        backup_json = {
             "backup_name": self.src.name,
             "directory_target": str(self.target),
             "directory_src": ".",
@@ -49,11 +40,11 @@ class TestProjectDirectory:
             "ignore": ignore,
         }
         return self.create_file(
-            "zulup_backup.json", json.dumps(zulup_backup_json, indent=4) + "\n"
+            ZULUP_BACKUP_JSON, json.dumps(backup_json, indent=4) + "\n"
         )
 
-    def create_zulup_scan_json(self, patterns: list[str]) -> pathlib.Path:
-        return self.create_file("zulup_scan.json", json.dumps(patterns, indent=4) + "\n")
+    def create_scan_json(self, patterns: list[str]) -> pathlib.Path:
+        return self.create_file(ZULUP_SCAN_JSON, json.dumps(patterns, indent=4) + "\n")
 
     def get_traverse_backup(self) -> TraverseBackup:
         from zulup.util_traverse_zulup import TraverseZulup

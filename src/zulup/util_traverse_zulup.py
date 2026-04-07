@@ -18,11 +18,11 @@ if typing.TYPE_CHECKING:
 @dataclasses.dataclass(frozen=True)
 class DirectoryZulupJson:
     directory: pathlib.Path
-    zulup_json: ZulupBackupJson
+    backup_json: ZulupBackupJson
 
     def __post_init__(self) -> None:
         assert isinstance(self.directory, pathlib.Path)
-        assert isinstance(self.zulup_json, ZulupBackupJson)
+        assert isinstance(self.backup_json, ZulupBackupJson)
 
 
 class TraverseZulup:
@@ -31,7 +31,7 @@ class TraverseZulup:
 
     def get_zulup_entry(self, backup_name: str) -> DirectoryZulupJson:
         for entry in self.list_dir_zulup_json:
-            if entry.zulup_json.backup_name == backup_name:
+            if entry.backup_json.backup_name == backup_name:
                 return entry
         raise ValueError(f"Backup '{backup_name}' not found")
 
@@ -53,18 +53,18 @@ class TraverseZulup:
             )
 
         if backup_path.exists():
-            zulup_json = ZulupBackupJson.from_file(backup_path)
+            backup_json = ZulupBackupJson.from_file(backup_path)
             self.list_dir_zulup_json.append(
-                DirectoryZulupJson(directory=directory, zulup_json=zulup_json)
+                DirectoryZulupJson(directory=directory, backup_json=backup_json)
             )
             return
 
         if scan_path.exists():
-            scan = ZulupScanJson.from_file(scan_path)
+            scan_json = ZulupScanJson.from_file(scan_path)
             for directory_sub in sorted(directory.iterdir()):
                 if not directory_sub.is_dir():
                     continue
-                if self._matches_scan_pattern(directory_sub, scan.patterns):
+                if self._matches_scan_pattern(directory_sub, scan_json.patterns):
                     self._collect(directory_sub)
             return
 

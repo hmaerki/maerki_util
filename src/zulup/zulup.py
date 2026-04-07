@@ -19,7 +19,7 @@ logger = logging.getLogger(__file__)
 app = typer.Typer()
 
 
-def _load_backup_directory_from_zulup_backup_json(
+def _load_backup_directory_from_backup_json(
     directory: pathlib.Path,
 ) -> BackupDirectory:
     filename = directory / util_constants.ZULUP_BACKUP_JSON
@@ -57,7 +57,11 @@ def backup(
     directories: typing.Annotated[
         list[pathlib.Path] | None,
         typer.Argument(
-            help="One or more directories to start finding `zulup_backup.json` / `zulup_scan.json`."
+            help=(
+                "One or more directories to start finding "
+                f"`{util_constants.ZULUP_BACKUP_JSON}` / "
+                f"`{util_constants.ZULUP_SCAN_JSON}`."
+            )
         ),
     ] = None,
     full: typing.Annotated[
@@ -93,12 +97,12 @@ def backup(
 def snapshots(
     directory: typing.Annotated[
         pathlib.Path,
-        typer.Argument(help="Directory containing zulup_backup.json."),
+        typer.Argument(
+            help=f"Directory containing {util_constants.ZULUP_BACKUP_JSON}."
+        ),
     ],
 ) -> None:
-    backup_directory = _load_backup_directory_from_zulup_backup_json(
-        directory.resolve()
-    )
+    backup_directory = _load_backup_directory_from_backup_json(directory.resolve())
     for snapshot in backup_directory.snapshots:
         typer.echo(str(snapshot.filename_metafile.resolve()))
 

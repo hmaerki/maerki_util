@@ -26,7 +26,7 @@ def _get_testdata_files(prefix: str) -> list[pathlib.Path]:
     _get_testdata_files("backup_"),
     ids=[f.name for f in _get_testdata_files("backup_")],
 )
-def test_zulup_backup_json_round_trip(testfile: pathlib.Path) -> None:
+def test_backup_json_round_trip(testfile: pathlib.Path) -> None:
     backup_json = ZulupBackupJson.from_file(testfile)
     output_file = DIRECTORY_TESTDATA_OUT / testfile.name
     backup_json.to_file(output_file)
@@ -41,7 +41,7 @@ def test_zulup_backup_json_round_trip(testfile: pathlib.Path) -> None:
     _get_testdata_files("scan_"),
     ids=[f.name for f in _get_testdata_files("scan_")],
 )
-def test_zulup_scan_json_round_trip(testfile: pathlib.Path) -> None:
+def test_scan_json_round_trip(testfile: pathlib.Path) -> None:
     scan_json = ZulupScanJson.from_file(testfile)
     output_file = DIRECTORY_TESTDATA_OUT / testfile.name
     scan_json.to_file(output_file)
