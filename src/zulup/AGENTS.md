@@ -21,53 +21,74 @@ Terms
 * `directory_src`: The directory to be backed up.
 * `directory_target`: The directory where the snapshots for this backup are stored.
 
-## Backup instructions files
+## `zulup` instruction files
 
-`zulup` starts searching from the home folder for `zulup.json` files.
+`zulup` scans the directory tree for these configuration files:
 
-If a `zulup.json` file with `backup` is found: A backup is created.
+* `zulup_backup.json`: Defines one backup job.
+* `zulup_scan.json`: Controls how scanning continues below a directory.
 
-## zulup.json
+If both files exist in the same directory, `zulup` raises an error.
+
+Rationale: A directory is either a backup root (`zulup_backup.json`) or a scan router (`zulup_scan.json`). Mixing both roles in one directory is ambiguous and therefore forbidden.
+
+## zulup_scan.json
+
+Purpose: speed up discovery in large trees.
+
+`zulup_scan.json` contains a JSON list of patterns.
+
+```json
+[
+  "project_*",
+  "dir_A",
+  "dir_B",
+  "/mnt/external/project_xy"
+]
+```
+
+Behavior:
+
+* When `zulup_scan.json` is encountered, normal recursive descent below that directory stops.
+* Scanning continues only for directories matched by entries in the list.
+* Entries are matched with Python's `fnmatch` module.
+
+Rationale: If a directory is known to contain many subdirectories but only a few relevant backup roots, `zulup_scan.json` prevents a full tree walk.
+
+Examples:
+
+* `["project_*"]`: Will search for `zulup_backup.json` in `project_xy` and `project_rs`.
+
+* `"dir_A"`, `"dir_B"`: search these named directories.
+
+* `"/mnt/external/project_xy"`: search this absolute directory explicitly.
+
+
+
+## zulup_backup.json
 
 This file contains instructions.
 
-* Recurse only by one directory level.
 
-  ```json
-  { "depth": 1 }
-  ```
+```json
+{
+  "backup_name": "project_xy",
+  "directory_target": "/mnt/backup",
+  "directory_src": ".",
+  "directory_name_include": true,
+  "ignore": "see below"
+}
+```
 
-  If `depth` is not specified: The whole directory will be traversed.
+`directory_src` may be a relative or absolute path.
 
-  If `depth` is 0. No subdirectories will be traversed.
+Example: `/home/maerki/project_xy/zulup_backup.json`
 
-  If `depth` is 1. Traverse one directory down.
+`zulup_backup.json` has set `"directory_src": "."`.
 
-  Rationale: If a directory is known to have many files/directories but no more `zulup.json`. So this `depth` instruction prevents searching the whole tree for more `zulup.json` files.
+If `"directory_name_include": true` the added files are `project_xy/README.md`, `project_xy/image.jpg` ...
 
-* Backup
-
-  ```json
-  {
-    "backup": {
-      "backup_name": "project_xy",
-      "directory_target": "/mnt/backup",
-      "directory_src": ".",
-      "directory_name_include": true,
-      "ignore": "see below"
-    }
-  }
-  ```
-
-  `directory_src` may be a relative or absolute path.
-
-  Example: `/home/maerki/project_xy/zulup.json`
-
-  `zulup.json` has set `"directory_src": "."`.
-
-  If `"directory_name_include": true` the added files are `project_xy/README.md`, `project_xy/image.jpg` ...
-
-  If `"directory_name_include": false` the added files are `README.md`, `image.jpg` ...
+If `"directory_name_include": false` the added files are `README.md`, `image.jpg` ...
 
 * Include/Exclude options
 
@@ -167,7 +188,7 @@ This is the file which is stored with every snapshot.
 
 ## `zulup` backup sequence
 
-* Loop over the directory structure and find all backups to be done based on `zulup.json`.
+* Loop over the directory structure and discover backup roots based on `zulup_backup.json` and `zulup_scan.json`.
 * For each backup:
   * Do minimal checks
     * Traverse `directory_src` and collect files according to `ignore`: We call it `current_filelist`.
@@ -241,8 +262,8 @@ On normal exit, `zulup` must explicitly call `process.terminate()` and `process.
 zulup backup <directories>
 ```
 
-Searches <directories> for zulup.json files.
-For every zulup.json found a backup is done.
+Searches <directories> for `zulup_backup.json` / `zulup_scan.json` files.
+For every `zulup_backup.json` found, a backup is done.
 
 ```bash
 zulup backup --full <directories>
@@ -254,7 +275,7 @@ As above, but does a full backup.
 zulup snapshots <directory>
 ```
 
-Reads <directory>/zulup.json and lists all paths to metafiles for all snapshots.
+Reads `<directory>/zulup_backup.json` and lists all paths to metafiles for all snapshots.
 
 ```bash
 zulup list <absolute-path-to-metafile.json>
