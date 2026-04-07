@@ -81,7 +81,7 @@ class TraverseBackup:
             metafile = backup_directory.last_snapshot.metafile
             backup_directory.verify_history(metafile=metafile)
 
-    def do_backup(self, full: bool) -> None:
+    def do_backup(self, full: bool, snapshot_datetime: str | None = None) -> None:
         """
         See AGENTS.md
 
@@ -107,7 +107,8 @@ class TraverseBackup:
                 last_files = last_snapshot.metafile.files
 
         # Merge
-        snapshot_datetime = now_text()
+        if snapshot_datetime is None:
+            snapshot_datetime = now_text()
         merged_files = self.current_files.merge_files(
             last_files=last_files,
             snapshot_datetime=snapshot_datetime,
@@ -219,6 +220,9 @@ class ListTraverseBackup(list[TraverseBackup]):
         for traverse_backup in self:
             traverse_backup.verify_history()
 
-    def do_backup(self, full: bool) -> None:
+    def do_backup(self, full: bool, snapshot_datetime: str | None = None) -> None:
         for traverse_backup in self:
-            traverse_backup.do_backup(full=full)
+            traverse_backup.do_backup(
+                full=full,
+                snapshot_datetime=snapshot_datetime,
+            )
