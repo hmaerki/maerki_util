@@ -10,8 +10,8 @@ import tempfile
 import typing
 from contextlib import contextmanager
 
+from . import util_constants
 from .util_backup_directory import BackupDirectory, SnapshotEntry
-from .util_constants import LOGFILE_SUFFIX, ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON, now_text
 from .util_json_metafile import (
     CurrentFileEntries,
     CurrentFileEntry,
@@ -126,7 +126,7 @@ class TraverseBackup:
 
         # Merge
         if snapshot_datetime is None:
-            snapshot_datetime = now_text()
+            snapshot_datetime = util_constants.now_text()
         merged_files = self.current_files.merge_files(
             last_files=last_files,
             snapshot_datetime=snapshot_datetime,
@@ -134,12 +134,15 @@ class TraverseBackup:
 
         snapshot_type = "full" if last_snapshot is None else "incr"
         backup_name = self.backup_json.backup_name
-        snapshot_stem = f"{backup_name}_{snapshot_datetime}_{snapshot_type}"
-        filename_log = self.directory_target / f"{snapshot_stem}{LOGFILE_SUFFIX}"
+        filename_tar = (
+            self.directory_target
+            / f"{backup_name}_{snapshot_datetime}_{snapshot_type}{util_constants.TARFILE_SUFFIX}"
+        )
 
-        with _snapshot_logfile(filename_log=filename_log):
-            logger.info(f"snapshot logfile: {filename_log}")
-
+        logger.info(f"snapshot: {filename_tar}")
+        with _snapshot_logfile(
+            filename_log=filename_tar.with_suffix(util_constants.LOGFILE_SUFFIX)
+        ):
             # Build history from previous metafile
             history: list[MetafileSnapshot] = []
             if last_snapshot is not None:
@@ -148,7 +151,7 @@ class TraverseBackup:
 
             tarfile_size = self.do_tar(
                 merged_files=merged_files,
-                filename_target=self.directory_target / f"{snapshot_stem}.tgz",
+                filename_target=filename_tar,
             )
 
             metafile = Metafile(
@@ -160,7 +163,7 @@ class TraverseBackup:
                 current=MetafileSnapshot(
                     snapshot_datetime=snapshot_datetime,
                     snapshot_type=snapshot_type,
-                    snapshot_stem=snapshot_stem,
+                    snapshot_stem=filename_tar.stem,
                     tarfile_size=tarfile_size,
                 ),
                 history=history,
@@ -230,7 +233,10 @@ class TraverseBackup:
             ]
 
             for name in sorted(filenames):
-                if name in (ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON):
+                if name in (
+                    util_constants.ZULUP_BACKUP_JSON,
+                    util_constants.ZULUP_SCAN_JSON,
+                ):
                     continue
                 rel_path = f"{rel_prefix}{name}" if rel_prefix else name
                 if ignore.is_included(name, rel_path, is_dir=False):

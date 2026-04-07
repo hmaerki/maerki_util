@@ -16,20 +16,27 @@ class TarExtract:
     def __init__(self, filename_tar: pathlib.Path) -> None:
         self.filename_tar = filename_tar
 
-    @staticmethod
-    def _tar_flag() -> str:
-        return "-z" if sys.platform == "win32" else "--zstd"
-
     def list(self) -> set[str]:
-        args = ["tar", self._tar_flag(), "-tf", str(self.filename_tar)]
+        args = [
+            "tar",
+            "-z" if sys.platform == "win32" else "--zstd",
+            "-tf",
+            str(self.filename_tar),
+        ]
         logger.debug(f"Calling: {' '.join(args)}")
         result = subprocess.run(args, capture_output=True, text=True, check=True)
-        return set(line.strip() for line in result.stdout.splitlines() if line.strip())
+        return {line.strip() for line in result.stdout.splitlines() if line.strip()}
 
     def restore(self, members: list[str]) -> None:
         if not members:
             return
-        args = ["tar", self._tar_flag(), "-xf", str(self.filename_tar), *members]
+        args = [
+            "tar",
+            "-z" if sys.platform == "win32" else "--zstd",
+            "-xf",
+            str(self.filename_tar),
+            *members,
+        ]
         logger.debug(f"Calling: {' '.join(args)}")
         subprocess.run(args, check=True)
 
