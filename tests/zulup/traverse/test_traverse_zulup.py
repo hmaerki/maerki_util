@@ -13,9 +13,8 @@ def test_traverse_finds_correct_zulup_backup_json() -> None:
     traverse.collect(DIRECTORY_TESTDATA)
 
     backup_names = sorted(
-        entry.zulup_json.backup.backup_name
+        entry.zulup_json.backup_name
         for entry in traverse.list_dir_zulup_json
-        if entry.zulup_json.backup is not None
     )
     assert backup_names == ["project_rs", "project_xy"]
 

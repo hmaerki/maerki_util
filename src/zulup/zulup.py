@@ -11,7 +11,7 @@ import typer
 from . import util_constants, util_systemd_inhibit, util_zulup
 from .util_backup_directory import BackupDirectory
 from .util_json_metafile import Metafile, MetafileSnapshot
-from .util_json_zulup import ZulupJson
+from .util_json_zulup import ZulupBackupJson
 
 logger = logging.getLogger(__file__)
 
@@ -23,10 +23,10 @@ def _load_backup_directory_from_zulup_backup_json(
     directory: pathlib.Path,
 ) -> BackupDirectory:
     filename = directory / util_constants.ZULUP_BACKUP_JSON
-    zulup_json = ZulupJson.from_file(filename)
+    backup_json = ZulupBackupJson.from_file(filename)
     return BackupDirectory(
-        directory=pathlib.Path(zulup_json.backup.directory_target),
-        backup_name=zulup_json.backup.backup_name,
+        directory=pathlib.Path(backup_json.directory_target),
+        backup_name=backup_json.backup_name,
     )
 
 

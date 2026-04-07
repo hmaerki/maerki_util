@@ -7,7 +7,7 @@ import pathlib
 import typing
 
 from zulup.util_constants import ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON
-from zulup.util_json_zulup import ZulupJson, ZulupScanJson
+from zulup.util_json_zulup import ZulupBackupJson, ZulupScanJson
 
 logger = logging.getLogger(__name__)
 
@@ -18,11 +18,11 @@ if typing.TYPE_CHECKING:
 @dataclasses.dataclass(frozen=True)
 class DirectoryZulupJson:
     directory: pathlib.Path
-    zulup_json: ZulupJson
+    zulup_json: ZulupBackupJson
 
     def __post_init__(self) -> None:
         assert isinstance(self.directory, pathlib.Path)
-        assert isinstance(self.zulup_json, ZulupJson)
+        assert isinstance(self.zulup_json, ZulupBackupJson)
 
 
 class TraverseZulup:
@@ -31,8 +31,7 @@ class TraverseZulup:
 
     def get_zulup_entry(self, backup_name: str) -> DirectoryZulupJson:
         for entry in self.list_dir_zulup_json:
-            assert entry.zulup_json.backup is not None
-            if entry.zulup_json.backup.backup_name == backup_name:
+            if entry.zulup_json.backup_name == backup_name:
                 return entry
         raise ValueError(f"Backup '{backup_name}' not found")
 
@@ -54,7 +53,7 @@ class TraverseZulup:
             )
 
         if backup_path.exists():
-            zulup_json = ZulupJson.from_file(backup_path)
+            zulup_json = ZulupBackupJson.from_file(backup_path)
             self.list_dir_zulup_json.append(
                 DirectoryZulupJson(directory=directory, zulup_json=zulup_json)
             )

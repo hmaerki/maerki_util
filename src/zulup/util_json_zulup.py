@@ -53,7 +53,7 @@ class ZulupIgnore(list[str]):
 
 
 @dataclasses.dataclass(frozen=True)
-class ZulupBackup:
+class ZulupBackupJson:
     backup_name: str
     directory_target: str
     directory_src: str
@@ -66,16 +66,8 @@ class ZulupBackup:
                 f"backup_name '{self.backup_name}' does not match {BACKUP_NAME_RE.pattern}!"
             )
 
-
-@dataclasses.dataclass(frozen=True)
-class ZulupJson:
-    backup: ZulupBackup
-
-    def __post_init__(self) -> None:
-        assert isinstance(self.backup, ZulupBackup)
-
     @staticmethod
-    def from_file(filename: pathlib.Path) -> ZulupJson:
+    def from_file(filename: pathlib.Path) -> ZulupBackupJson:
         try:
             data = json.loads(filename.read_text())
         except json.JSONDecodeError as e:
@@ -84,24 +76,23 @@ class ZulupJson:
             raise ValueError(msg) from e
 
         ignore: list[str] | None = data.get("ignore")
-        backup = ZulupBackup(
+        return ZulupBackupJson(
             backup_name=data["backup_name"],
             directory_target=data["directory_target"],
             directory_src=data["directory_src"],
             directory_name_include=data["directory_name_include"],
             ignore=ignore,
         )
-        return ZulupJson(backup=backup)
 
     def to_file(self, filename: pathlib.Path) -> None:
         data: dict[str, object] = {
-            "backup_name": self.backup.backup_name,
-            "directory_target": self.backup.directory_target,
-            "directory_src": self.backup.directory_src,
-            "directory_name_include": self.backup.directory_name_include,
+            "backup_name": self.backup_name,
+            "directory_target": self.directory_target,
+            "directory_src": self.directory_src,
+            "directory_name_include": self.directory_name_include,
         }
-        if self.backup.ignore is not None:
-            data["ignore"] = self.backup.ignore
+        if self.ignore is not None:
+            data["ignore"] = self.ignore
         filename.write_text(json.dumps(data, indent=4) + "\n")
 
 

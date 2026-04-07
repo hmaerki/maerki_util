@@ -19,7 +19,7 @@ from .util_json_metafile import (
     MetafileFileEntry,
     MetafileSnapshot,
 )
-from .util_json_zulup import ZulupBackup, ZulupIgnore
+from .util_json_zulup import ZulupBackupJson, ZulupIgnore
 from .util_traverse_zulup import DirectoryZulupJson
 
 logger = logging.getLogger(__name__)
@@ -28,9 +28,8 @@ logger = logging.getLogger(__name__)
 class TraverseBackup:
     def __init__(self, dir_zulup_json: DirectoryZulupJson) -> None:
         assert isinstance(dir_zulup_json, DirectoryZulupJson)
-        assert dir_zulup_json.zulup_json.backup is not None
         self.dir_zulup_json = dir_zulup_json
-        backup: ZulupBackup = dir_zulup_json.zulup_json.backup
+        backup: ZulupBackupJson = dir_zulup_json.zulup_json
         ignore = ZulupIgnore(backup.ignore or [])
 
         self.files: list[str] = []
@@ -46,9 +45,8 @@ class TraverseBackup:
         return self.dir_zulup_json.directory / self.backup.directory_src
 
     @property
-    def backup(self) -> ZulupBackup:
-        assert self.dir_zulup_json.zulup_json.backup is not None
-        return self.dir_zulup_json.zulup_json.backup
+    def backup(self) -> ZulupBackupJson:
+        return self.dir_zulup_json.zulup_json
 
     @property
     def backup_directory(self) -> BackupDirectory:
