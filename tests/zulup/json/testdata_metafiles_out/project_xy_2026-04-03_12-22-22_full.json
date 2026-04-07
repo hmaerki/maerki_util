@@ -1,0 +1,30 @@
+{
+    "backup": {
+        "backup_name": "project_xy",
+        "hostname": "maerki-ideapad-320",
+        "parent": "/home/maerki/Downloads"
+    },
+    "current": {
+        "snapshot_datetime": "2026-04-03_12-22-22",
+        "snapshot_stem": "project_xy_2026-04-03_12-22-22_full",
+        "snapshot_type": "full",
+        "tarfile_size": 5678
+    },
+    "files": [
+        {
+            "modified": "2026-03-31_07-50-42.124",
+            "path": "Fedora-Server-netinst-x86_64-43-1.6.iso",
+            "size": 1182896128,
+            "snapshot_datetime": "2026-04-03_12-22-22",
+            "verb": "added"
+        },
+        {
+            "modified": "2026-03-31_07-50-42.124",
+            "path": "usb_specificaton/Audio40.pdf",
+            "size": 123456,
+            "snapshot_datetime": "2026-04-03_12-22-22",
+            "verb": "added"
+        }
+    ],
+    "history": []
+}

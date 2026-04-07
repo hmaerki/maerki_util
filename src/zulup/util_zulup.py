@@ -1,0 +1,31 @@
+from __future__ import annotations
+
+import logging
+import pathlib
+import time
+
+from zulup.util_traverse_zulup import TraverseZulup
+
+logger = logging.getLogger(__file__)
+
+
+class Zulup:
+    def __init__(self) -> None:
+        self.begin_s = time.monotonic()
+
+    @property
+    def duration_s(self) -> float:
+        return time.monotonic() - self.begin_s
+
+    def log_duration(self, tag: str) -> None:
+        logger.debug(f"{tag}: {self.duration_s:.3f}s.")
+
+    def traverse_directories(
+        self,
+        directories: list[pathlib.Path],
+    ) -> TraverseZulup:
+        traverse = TraverseZulup()
+        for directory in directories:
+            logger.debug(f"traverse {directory}")
+            traverse.collect(directory=directory)
+        return traverse

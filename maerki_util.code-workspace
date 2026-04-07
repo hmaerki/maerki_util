@@ -5,6 +5,41 @@
 		}
 	],
 	"settings": {
-
+		"[python]": {
+			"editor.formatOnSave": true,
+			"editor.defaultFormatter": "charliermarsh.ruff"
+		},
+		"ruff.enable": true,
+		"ruff.fixAll": true,
+		"ruff.lint.enable": true,
+		"editor.wordWrap": "off",
+		"python.testing.pytestArgs": [
+			"-v",
+			"-s",
+			"tests"
+		],
+		"python.testing.cwd": "${workspaceFolder}",
+		"python.testing.unittestEnabled": false,
+		"python.testing.pytestEnabled": true,
+		"search.exclude": {
+			"**/.venv": true
+		},
+		"files.exclude": {
+			"**/.venv": true
+		},
+		"files.associations": {
+			"*.color": "ansi"
+		},
+		"files.watcherExclude": {
+			"**/.git/objects/**": true,
+			"**/.git/subtree-cache/**": true,
+			"**/node_modules/*/**": true
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"charliermarsh.ruff",
+			"ms-python.python",
+		]
 	}
 }

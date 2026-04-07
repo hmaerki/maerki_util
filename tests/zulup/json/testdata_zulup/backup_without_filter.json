@@ -1,0 +1,6 @@
+{
+    "backup_name": "project_rs",
+    "directory_target": "/mnt/backup",
+    "directory_src": "/home/maerki/project_rs",
+    "directory_name_include": false
+}

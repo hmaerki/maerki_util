@@ -1,0 +1,50 @@
+{
+    "backup": {
+        "backup_name": "project_xy",
+        "parent": "/home/maerki/Downloads",
+        "hostname": "maerki-ideapad-320"
+    },
+    "current": {
+        "snapshot_datetime": "2026-04-03_14-22-22",
+        "snapshot_type": "incr",
+        "snapshot_stem": "project_xy_2026-04-03_14-22-22_incr",
+        "tarfile_size": 9012
+    },
+    "history": [
+        {
+            "snapshot_datetime": "2026-04-03_12-22-22",
+            "snapshot_type": "full",
+            "snapshot_stem": "project_xy_2026-04-03_12-22-22_full",
+            "tarfile_size": 5678
+        },
+        {
+            "snapshot_datetime": "2026-04-03_13-22-22",
+            "snapshot_type": "incr",
+            "snapshot_stem": "project_xy_2026-04-03_13-22-22_incr",
+            "tarfile_size": 3456
+        }
+    ],
+    "files": [
+        {
+            "path": "Fedora-Server-netinst-x86_64-43-1.6.iso",
+            "size": 1182896128,
+            "modified": "2026-03-31_07-50-42.124",
+            "verb": "untouched",
+            "snapshot_datetime": "2026-04-03_12-22-22"
+        },
+        {
+            "path": "usb_specificaton/Audio40.pdf",
+            "size": 123456,
+            "modified": "2026-03-31_07-50-42.124",
+            "verb": "modified",
+            "snapshot_datetime": "2026-04-03_13-22-22"
+        },
+        {
+            "path": "old_notes.txt",
+            "size": 4096,
+            "modified": "2026-03-20_10-00-00.000",
+            "verb": "removed",
+            "snapshot_datetime": "2026-04-03_14-22-22"
+        }
+    ]
+}
