@@ -8,7 +8,7 @@ from zulup.util_constants import ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON
 
 if TYPE_CHECKING:
     from zulup.util_backup_directory import BackupDirectory
-    from zulup.util_traverse_backup import TraverseBackup
+    from zulup.util_traverse_zulup import DirectoryBackupJson
 
 
 class TestProjectDirectory:
@@ -46,7 +46,7 @@ class TestProjectDirectory:
     def create_scan_json(self, patterns: list[str]) -> pathlib.Path:
         return self.create_file(ZULUP_SCAN_JSON, json.dumps(patterns, indent=4) + "\n")
 
-    def get_traverse_backup(self) -> TraverseBackup:
+    def get_directory_backup_json(self) -> DirectoryBackupJson:
         from zulup.util_traverse_zulup import TraverseZulup
 
         traverse = TraverseZulup()
@@ -56,7 +56,7 @@ class TestProjectDirectory:
     def do_backup(
         self, full: bool = False, snapshot_datetime: str | None = None
     ) -> None:
-        backup = self.get_traverse_backup()
+        backup = self.get_directory_backup_json()
         backup.do_backup(full=full, snapshot_datetime=snapshot_datetime)
 
     def get_backup_directory(self) -> BackupDirectory:

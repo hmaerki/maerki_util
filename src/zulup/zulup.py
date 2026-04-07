@@ -8,9 +8,8 @@ import typer
 
 from . import util_constants, util_systemd_inhibit, util_zulup
 from .util_json_metafile import Metafile
-from .util_json_zulup import ZulupBackupJson
+from .util_json_zulup import BackupJson
 from .util_tarfile import TarExtract
-from .util_traverse_backup import TraverseBackup
 
 logger = logging.getLogger(__file__)
 
@@ -72,10 +71,9 @@ def backup(
             f"Found {len(traverse.list_dir_zulup_json)} {util_constants.ZULUP_BACKUP_JSON}"
         )
         for dir_zulup_json in traverse.list_dir_zulup_json:
-            traverse_backup = TraverseBackup(dir_zulup_json)
-            traverse_backup.verify_history()
+            dir_zulup_json.verify_history()
             zulup.log_duration("verify_history")
-            traverse_backup.do_backup(full=full)
+            dir_zulup_json.do_backup(full=full)
             zulup.log_duration("backup")
 
         zulup.log_duration("done")
@@ -91,7 +89,7 @@ def snapshots(
     ],
 ) -> None:
     filename = directory.resolve() / util_constants.ZULUP_BACKUP_JSON
-    backup_json = ZulupBackupJson.from_file(filename)
+    backup_json = BackupJson.from_file(filename)
     backup_directory = backup_json.backup_directory
     for snapshot in backup_directory.snapshots:
         typer.echo(str(snapshot.filename_metafile.resolve()))

@@ -20,30 +20,16 @@ from .util_json_metafile import (
     MetafileFileEntry,
     MetafileSnapshot,
 )
-from .util_json_zulup import ZulupBackupJson, ZulupIgnore
+from .util_json_zulup import BackupJson
 from .util_logging import snapshot_logfile
-from .util_traverse_zulup import DirectoryZulupJson
+from .util_traverse_zulup import BackupRunContext, DirectoryBackupJson
 
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass(frozen=True)
-class BackupRunContext:
-    last_files: list[MetafileFileEntry]
-    last_snapshot: SnapshotEntry | None
-    history: list[MetafileSnapshot]
-    snapshot_datetime: str
-    snapshot_type: str
-    filename_tar: pathlib.Path
-
-    @property
-    def is_incr(self) -> bool:
-        return self.last_snapshot is not None
-
-
 class TraverseBackup:
-    def __init__(self, dir_zulup_json: DirectoryZulupJson) -> None:
-        assert isinstance(dir_zulup_json, DirectoryZulupJson)
+    def __init__(self, dir_zulup_json: DirectoryBackupJson) -> None:
+        assert isinstance(dir_zulup_json, DirectoryBackupJson)
         self.dir_zulup_json = dir_zulup_json
 
     @property
@@ -55,7 +41,7 @@ class TraverseBackup:
         return pathlib.Path(self.backup_json.directory_target)
 
     @property
-    def backup_json(self) -> ZulupBackupJson:
+    def backup_json(self) -> BackupJson:
         return self.dir_zulup_json.backup_json
 
     @property

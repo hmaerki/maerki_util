@@ -57,7 +57,7 @@ class ZulupIgnore(list[str]):
 
 
 @dataclasses.dataclass(frozen=True)
-class ZulupBackupJson:
+class BackupJson:
     backup_name: str
     directory_target: str
     directory_src: str
@@ -71,7 +71,7 @@ class ZulupBackupJson:
             )
 
     @staticmethod
-    def from_file(filename: pathlib.Path) -> ZulupBackupJson:
+    def from_file(filename: pathlib.Path) -> BackupJson:
         try:
             data = json.loads(filename.read_text())
         except json.JSONDecodeError as e:
@@ -80,7 +80,7 @@ class ZulupBackupJson:
             raise ValueError(msg) from e
 
         ignore: list[str] | None = data.get("ignore")
-        return ZulupBackupJson(
+        return BackupJson(
             backup_name=data["backup_name"],
             directory_target=data["directory_target"],
             directory_src=data["directory_src"],
@@ -110,7 +110,7 @@ class ZulupBackupJson:
 
 
 @dataclasses.dataclass(frozen=True)
-class ZulupScanJson:
+class ScanJson:
     patterns: list[str]
 
     def __post_init__(self) -> None:
@@ -119,7 +119,7 @@ class ZulupScanJson:
             assert isinstance(pattern, str)
 
     @staticmethod
-    def from_file(filename: pathlib.Path) -> ZulupScanJson:
+    def from_file(filename: pathlib.Path) -> ScanJson:
         try:
             data = json.loads(filename.read_text())
         except json.JSONDecodeError as e:
@@ -134,7 +134,7 @@ class ZulupScanJson:
             if not isinstance(value, str):
                 raise ValueError(f"{filename}: index {index}: expected string")
 
-        return ZulupScanJson(patterns=data)
+        return ScanJson(patterns=data)
 
     def to_file(self, filename: pathlib.Path) -> None:
         filename.write_text(json.dumps(self.patterns, indent=4) + "\n")

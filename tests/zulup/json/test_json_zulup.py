@@ -5,7 +5,7 @@ import pathlib
 
 import pytest
 
-from zulup.util_json_zulup import ZulupBackupJson, ZulupScanJson
+from zulup.util_json_zulup import BackupJson, ScanJson
 
 DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
 DIRECTORY_TESTDATA = DIRECTORY_OF_THIS_FILE / "testdata_zulup"
@@ -27,7 +27,7 @@ def _get_testdata_files(prefix: str) -> list[pathlib.Path]:
     ids=[f.name for f in _get_testdata_files("backup_")],
 )
 def test_backup_json_round_trip(testfile: pathlib.Path) -> None:
-    backup_json = ZulupBackupJson.from_file(testfile)
+    backup_json = BackupJson.from_file(testfile)
     output_file = DIRECTORY_TESTDATA_OUT / testfile.name
     backup_json.to_file(output_file)
 
@@ -42,7 +42,7 @@ def test_backup_json_round_trip(testfile: pathlib.Path) -> None:
     ids=[f.name for f in _get_testdata_files("scan_")],
 )
 def test_scan_json_round_trip(testfile: pathlib.Path) -> None:
-    scan_json = ZulupScanJson.from_file(testfile)
+    scan_json = ScanJson.from_file(testfile)
     output_file = DIRECTORY_TESTDATA_OUT / testfile.name
     scan_json.to_file(output_file)
 
@@ -56,7 +56,7 @@ def test_scan_json_round_trip(testfile: pathlib.Path) -> None:
     ["valid_name", "project123", "A_B_C"],
 )
 def test_backup_name_valid(name: str) -> None:
-    ZulupBackupJson(
+    BackupJson(
         backup_name=name,
         directory_target="/mnt/backup",
         directory_src=".",
@@ -70,7 +70,7 @@ def test_backup_name_valid(name: str) -> None:
 )
 def test_backup_name_invalid(name: str) -> None:
     with pytest.raises(ValueError, match="backup_name"):
-        ZulupBackupJson(
+        BackupJson(
             backup_name=name,
             directory_target="/mnt/backup",
             directory_src=".",
