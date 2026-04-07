@@ -136,8 +136,10 @@ class DirectoryBackupJson:
         * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
         """
 
-        context = self._build_run_context(
-            full=full, snapshot_datetime=snapshot_datetime
+        context = self.backup_directory.build_run_context(
+            full=full,
+            snapshot_datetime=snapshot_datetime,
+            directory_target=self.directory_target,
         )
 
         # Merge
@@ -174,37 +176,6 @@ class DirectoryBackupJson:
             metafile.to_file(self.directory_target / metafile.current.metafile_name)
 
             metafile.stats()
-
-    def _build_run_context(
-        self, full: bool, snapshot_datetime: str | None
-    ) -> BackupRunContext:
-        # Get last metafile's file entries (empty if no previous backup or full backup)
-        last_files: list[MetafileFileEntry] = []
-        last_snapshot: SnapshotEntry | None = None
-        history: list[MetafileSnapshot] = []
-        backup_directory = self.backup_directory
-        if not full and backup_directory.last_snapshot is not None:
-            last_snapshot = backup_directory.last_snapshot
-            last_files = last_snapshot.metafile.files
-            prev_metafile = last_snapshot.metafile
-            history = [prev_metafile.current] + prev_metafile.history
-
-        snapshot_datetime = snapshot_datetime or util_constants.now_text()
-        is_incr = last_snapshot is not None
-        snapshot_type = "incr" if is_incr else "full"
-        backup_name = self.backup_json.backup_name
-        filename_tar = (
-            self.directory_target
-            / f"{backup_name}_{snapshot_datetime}_{snapshot_type}{util_constants.TARFILE_SUFFIX}"
-        )
-        return BackupRunContext(
-            last_files=last_files,
-            last_snapshot=last_snapshot,
-            history=history,
-            snapshot_datetime=snapshot_datetime,
-            snapshot_type=snapshot_type,
-            filename_tar=filename_tar,
-        )
 
     def do_tar(
         self,

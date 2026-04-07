@@ -2,10 +2,15 @@ from __future__ import annotations
 
 import dataclasses
 import pathlib
+import typing
 
 from zulup.util_constants import METAFILE_SUFFIX, TARFILE_SUFFIX
 from zulup.util_json_metafile import Metafile
 from zulup.util_tarfile import verify_tarfile
+
+if typing.TYPE_CHECKING:
+    from zulup.util_json_metafile import MetafileFileEntry, MetafileSnapshot
+    from zulup.util_traverse_zulup import BackupRunContext
 
 
 @dataclasses.dataclass(frozen=True)
@@ -73,3 +78,37 @@ class BackupDirectory:
             verify_tarfile(
                 directory=self.directory, metafile_snapshot=metafile_snapshot
             )
+
+    def build_run_context(
+        self, full: bool, snapshot_datetime: str | None, directory_target: pathlib.Path
+    ) -> BackupRunContext:
+        """Build BackupRunContext from backup state."""
+        from zulup import util_constants
+        from zulup.util_traverse_zulup import BackupRunContext
+
+        # Get last metafile's file entries (empty if no previous backup or full backup)
+        last_files: list[MetafileFileEntry] = []
+        last_snapshot: SnapshotEntry | None = None
+        history: list[MetafileSnapshot] = []
+
+        if not full and self.last_snapshot is not None:
+            last_snapshot = self.last_snapshot
+            last_files = last_snapshot.metafile.files
+            prev_metafile = last_snapshot.metafile
+            history = [prev_metafile.current] + prev_metafile.history
+
+        snapshot_datetime = snapshot_datetime or util_constants.now_text()
+        is_incr = last_snapshot is not None
+        snapshot_type = "incr" if is_incr else "full"
+        filename_tar = (
+            directory_target
+            / f"{self.backup_name}_{snapshot_datetime}_{snapshot_type}{util_constants.TARFILE_SUFFIX}"
+        )
+        return BackupRunContext(
+            last_files=last_files,
+            last_snapshot=last_snapshot,
+            history=history,
+            snapshot_datetime=snapshot_datetime,
+            snapshot_type=snapshot_type,
+            filename_tar=filename_tar,
+        )
