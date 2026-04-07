@@ -10,7 +10,7 @@ from zulup.util_tarfile import verify_tarfile
 
 if typing.TYPE_CHECKING:
     from zulup.util_json_metafile import MetafileFileEntry, MetafileSnapshot
-    from zulup.util_traverse_zulup import BackupRunContext
+    from zulup.util_traverse_zulup import BackupArguments
 
 
 @dataclasses.dataclass(frozen=True)
@@ -79,12 +79,12 @@ class BackupDirectory:
                 directory=self.directory, metafile_snapshot=metafile_snapshot
             )
 
-    def build_run_context(
+    def backup_arguments(
         self, full: bool, snapshot_datetime: str | None, directory_target: pathlib.Path
-    ) -> BackupRunContext:
+    ) -> BackupArguments:
         """Build BackupRunContext from backup state."""
         from zulup import util_constants
-        from zulup.util_traverse_zulup import BackupRunContext
+        from zulup.util_traverse_zulup import BackupArguments
 
         # Get last metafile's file entries (empty if no previous backup or full backup)
         last_files: list[MetafileFileEntry] = []
@@ -104,7 +104,7 @@ class BackupDirectory:
             directory_target
             / f"{self.backup_name}_{snapshot_datetime}_{snapshot_type}{util_constants.TARFILE_SUFFIX}"
         )
-        return BackupRunContext(
+        return BackupArguments(
             last_files=last_files,
             last_snapshot=last_snapshot,
             history=history,

@@ -6,9 +6,13 @@ import enum
 import json
 import logging
 import pathlib
+import typing
 
 from zulup.util_constants import METAFILE_SUFFIX, TARFILE_SUFFIX
 from zulup.util_json import check_enum
+
+if typing.TYPE_CHECKING:
+    from zulup.util_traverse_zulup import BackupArguments
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +69,12 @@ class CurrentFileEntries(list[CurrentFileEntry]):
     @property
     def files(self) -> list[str]:
         return [f.path for f in self]
+
+    def merge(self, args: BackupArguments) -> list[MetafileFileEntry]:
+        return self.merge_files(
+            last_files=args.last_files,
+            snapshot_datetime=args.snapshot_datetime,
+        )
 
     def merge_files(
         self,

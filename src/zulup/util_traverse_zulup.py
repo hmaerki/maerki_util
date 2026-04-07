@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
-class BackupRunContext:
+class BackupArguments:
     last_files: list[MetafileFileEntry]
     last_snapshot: SnapshotEntry | None
     history: list[MetafileSnapshot]
@@ -40,6 +40,15 @@ class BackupRunContext:
     @property
     def is_incr(self) -> bool:
         return self.last_snapshot is not None
+
+    def create_metafile_snapshot(self, tarfile_size: int) -> MetafileSnapshot:
+        """Create MetafileSnapshot from this context and tarfile size."""
+        return MetafileSnapshot(
+            snapshot_datetime=self.snapshot_datetime,
+            snapshot_type=self.snapshot_type,
+            snapshot_stem=self.filename_tar.stem,
+            tarfile_size=tarfile_size,
+        )
 
 
 @dataclasses.dataclass
@@ -136,25 +145,21 @@ class DirectoryBackupJson:
         * Rename `<snapshot_stem>.tgz_tmp` to `<snapshot_stem>.tgz`
         """
 
-        context = self.backup_directory.build_run_context(
+        args = self.backup_directory.backup_arguments(
             full=full,
             snapshot_datetime=snapshot_datetime,
             directory_target=self.directory_target,
         )
 
-        # Merge
-        merged_files = self.current_files.merge_files(
-            last_files=context.last_files,
-            snapshot_datetime=context.snapshot_datetime,
-        )
+        merged_files = self.current_files.merge(args)
 
-        logger.info(f"snapshot: {context.filename_tar}")
+        logger.info(f"snapshot: {args.filename_tar}")
         with snapshot_logfile(
-            filename_log=context.filename_tar.with_suffix(util_constants.LOGFILE_SUFFIX)
+            filename_log=args.filename_tar.with_suffix(util_constants.LOGFILE_SUFFIX)
         ):
             tarfile_size = self.do_tar(
                 merged_files=merged_files,
-                filename_target=context.filename_tar,
+                filename_target=args.filename_tar,
             )
 
             metafile = Metafile(
@@ -163,13 +168,8 @@ class DirectoryBackupJson:
                     parent=str(self.directory_src),
                     hostname=socket.gethostname(),
                 ),
-                current=MetafileSnapshot(
-                    snapshot_datetime=context.snapshot_datetime,
-                    snapshot_type=context.snapshot_type,
-                    snapshot_stem=context.filename_tar.stem,
-                    tarfile_size=tarfile_size,
-                ),
-                history=context.history,
+                current=args.create_metafile_snapshot(tarfile_size),
+                history=args.history,
                 files=merged_files,
             )
 
