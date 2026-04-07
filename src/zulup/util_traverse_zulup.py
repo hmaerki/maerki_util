@@ -23,7 +23,6 @@ from .util_json_metafile import (
     MetafileSnapshot,
 )
 from .util_json_zulup import BackupJson, ScanJson, ZulupIgnore
-from .util_logging import snapshot_logfile
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +128,37 @@ class DirectoryBackupJson:
             metafile = backup_directory.last_snapshot.metafile
             backup_directory.verify_history(metafile=metafile)
 
+    def backup_arguments(
+        self, full: bool, snapshot_datetime: str | None
+    ) -> BackupArguments:
+        # Get last metafile's file entries (empty if no previous backup or full backup)
+        last_files: list[MetafileFileEntry] = []
+        last_snapshot: SnapshotEntry | None = None
+        history: list[MetafileSnapshot] = []
+        backup_directory = self.backup_directory
+
+        if not full and backup_directory.last_snapshot is not None:
+            last_snapshot = backup_directory.last_snapshot
+            last_files = last_snapshot.metafile.files
+            prev_metafile = last_snapshot.metafile
+            history = [prev_metafile.current] + prev_metafile.history
+
+        snapshot_datetime = snapshot_datetime or util_constants.now_text()
+        is_incr = last_snapshot is not None
+        snapshot_type = "incr" if is_incr else "full"
+        filename_tar = (
+            self.directory_target
+            / f"{self.backup_json.backup_name}_{snapshot_datetime}_{snapshot_type}{util_constants.TARFILE_SUFFIX}"
+        )
+        return BackupArguments(
+            last_files=last_files,
+            last_snapshot=last_snapshot,
+            history=history,
+            snapshot_datetime=snapshot_datetime,
+            snapshot_type=snapshot_type,
+            filename_tar=filename_tar,
+        )
+
     def do_backup(self, args: BackupArguments) -> None:
         """
         See AGENTS.md
@@ -148,28 +178,25 @@ class DirectoryBackupJson:
         merged_files = self.current_files.merge(args)
 
         logger.info(f"snapshot: {args.filename_tar}")
-        with snapshot_logfile(
-            filename_log=args.filename_tar.with_suffix(util_constants.LOGFILE_SUFFIX)
-        ):
-            tarfile_size = self.do_tar(
-                merged_files=merged_files,
-                filename_target=args.filename_tar,
-            )
+        tarfile_size = self.do_tar(
+            merged_files=merged_files,
+            filename_target=args.filename_tar,
+        )
 
-            metafile = Metafile(
-                backup=MetafileBackup(
-                    backup_name=self.backup_json.backup_name,
-                    parent=str(self.directory_src),
-                    hostname=socket.gethostname(),
-                ),
-                current=args.create_metafile_snapshot(tarfile_size),
-                history=args.history,
-                files=merged_files,
-            )
+        metafile = Metafile(
+            backup=MetafileBackup(
+                backup_name=self.backup_json.backup_name,
+                parent=str(self.directory_src),
+                hostname=socket.gethostname(),
+            ),
+            current=args.create_metafile_snapshot(tarfile_size),
+            history=args.history,
+            files=merged_files,
+        )
 
-            metafile.to_file(self.directory_target / metafile.current.metafile_name)
+        metafile.to_file(self.directory_target / metafile.current.metafile_name)
 
-            metafile.stats()
+        metafile.stats()
 
     def do_tar(
         self,

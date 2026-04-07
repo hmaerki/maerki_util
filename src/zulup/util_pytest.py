@@ -4,7 +4,8 @@ import json
 import pathlib
 from typing import TYPE_CHECKING
 
-from zulup.util_constants import ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON
+from zulup.util_constants import LOGFILE_SUFFIX, ZULUP_BACKUP_JSON, ZULUP_SCAN_JSON
+from zulup.util_logging import snapshot_logfile
 
 if TYPE_CHECKING:
     from zulup.util_backup_directory import BackupDirectory
@@ -57,12 +58,14 @@ class TestProjectDirectory:
         self, full: bool = False, snapshot_datetime: str | None = None
     ) -> None:
         backup = self.get_directory_backup_json()
-        args = backup.backup_directory.backup_arguments(
+        args = backup.backup_arguments(
             full=full,
             snapshot_datetime=snapshot_datetime,
-            directory_target=backup.directory_target,
         )
-        backup.do_backup(args=args)
+        with snapshot_logfile(
+            filename_log=args.filename_tar.with_suffix(LOGFILE_SUFFIX)
+        ):
+            backup.do_backup(args=args)
 
     def get_backup_directory(self) -> BackupDirectory:
         from zulup.util_backup_directory import BackupDirectory
