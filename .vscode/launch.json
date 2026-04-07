@@ -44,10 +44,12 @@
             "request": "launch",
             "module": "zulup.zulup",
             "args": [
+                "backup",
                 "/home/maerki/work_antenna",
                 "/home/maerki/work_heizung"
             ],
             // "args": [
+            //     "backup",
             //     "."
             // ],
             // "cwd": "/home/maerki/work_heizung",

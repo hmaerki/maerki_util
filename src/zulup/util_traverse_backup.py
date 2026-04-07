@@ -7,8 +7,6 @@ import socket
 import subprocess
 import sys
 import tempfile
-import typing
-from contextlib import contextmanager
 
 from . import util_constants
 from .util_backup_directory import BackupDirectory, SnapshotEntry
@@ -22,27 +20,10 @@ from .util_json_metafile import (
     MetafileSnapshot,
 )
 from .util_json_zulup import ZulupBackupJson, ZulupIgnore
+from .util_logging import snapshot_logfile
 from .util_traverse_zulup import DirectoryZulupJson
 
 logger = logging.getLogger(__name__)
-
-
-@contextmanager
-def _snapshot_logfile(filename_log: pathlib.Path) -> typing.Iterator[None]:
-    root_logger = logging.getLogger()
-
-    file_handler = logging.FileHandler(filename_log, encoding="utf-8")
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(
-        logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
-    )
-    root_logger.addHandler(file_handler)
-
-    try:
-        yield
-    finally:
-        root_logger.removeHandler(file_handler)
-        file_handler.close()
 
 
 class TraverseBackup:
@@ -140,7 +121,7 @@ class TraverseBackup:
         )
 
         logger.info(f"snapshot: {filename_tar}")
-        with _snapshot_logfile(
+        with snapshot_logfile(
             filename_log=filename_tar.with_suffix(util_constants.LOGFILE_SUFFIX)
         ):
             # Build history from previous metafile
@@ -241,16 +222,3 @@ class TraverseBackup:
                 rel_path = f"{rel_prefix}{name}" if rel_prefix else name
                 if ignore.is_included(name, rel_path, is_dir=False):
                     self.files.append(rel_path)
-
-
-class ListTraverseBackup(list[TraverseBackup]):
-    def verify_history(self) -> None:
-        for traverse_backup in self:
-            traverse_backup.verify_history()
-
-    def do_backup(self, full: bool, snapshot_datetime: str | None = None) -> None:
-        for traverse_backup in self:
-            traverse_backup.do_backup(
-                full=full,
-                snapshot_datetime=snapshot_datetime,
-            )

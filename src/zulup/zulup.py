@@ -10,6 +10,7 @@ from . import util_constants, util_systemd_inhibit, util_zulup
 from .util_json_metafile import Metafile
 from .util_json_zulup import ZulupBackupJson
 from .util_tarfile import TarExtract
+from .util_traverse_backup import TraverseBackup
 
 logger = logging.getLogger(__file__)
 
@@ -66,17 +67,17 @@ def backup(
 
         zulup = util_zulup.Zulup()
         zulup.log_duration("zulup")
-        list_traverse_backup = zulup.traverse_directories(directories=directories)
+        traverse = zulup.traverse_directories(directories=directories)
         zulup.log_duration(
-            f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_BACKUP_JSON}"
+            f"Found {len(traverse.list_dir_zulup_json)} {util_constants.ZULUP_BACKUP_JSON}"
         )
-        list_traverse_backup.verify_history()
-        zulup.log_duration("verify_history")
-        list_traverse_backup.do_backup(full=full)
-        zulup.log_duration("backup")
-        zulup.log_duration(
-            f"traversed {len(list_traverse_backup)} {util_constants.ZULUP_BACKUP_JSON}"
-        )
+        for dir_zulup_json in traverse.list_dir_zulup_json:
+            traverse_backup = TraverseBackup(dir_zulup_json)
+            traverse_backup.verify_history()
+            zulup.log_duration("verify_history")
+            traverse_backup.do_backup(full=full)
+            zulup.log_duration("backup")
+
         zulup.log_duration("done")
 
 

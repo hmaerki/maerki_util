@@ -4,7 +4,6 @@ import logging
 import pathlib
 import time
 
-from zulup.util_traverse_backup import ListTraverseBackup, TraverseBackup
 from zulup.util_traverse_zulup import TraverseZulup
 
 logger = logging.getLogger(__file__)
@@ -24,13 +23,9 @@ class Zulup:
     def traverse_directories(
         self,
         directories: list[pathlib.Path],
-    ) -> ListTraverseBackup:
+    ) -> TraverseZulup:
         traverse = TraverseZulup()
         for directory in directories:
             logger.debug(f"traverse {directory}")
             traverse.collect(directory=directory)
-
-        list_traverse_backup = ListTraverseBackup(
-            [TraverseBackup(z) for z in traverse.list_dir_zulup_json]
-        )
-        return list_traverse_backup
+        return traverse
