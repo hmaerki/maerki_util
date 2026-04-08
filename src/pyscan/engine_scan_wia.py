@@ -1,4 +1,4 @@
-﻿import os
+import os
 
 import win32com
 import win32com.client
@@ -168,13 +168,11 @@ class scanner:
     }
     iHorizontalExtent, iVerticalExtent = dictExtent[strPaperSize][iDPI]
     """
-        sizeInPixelsAt1200dpi = (
-            {  # See http://www.a4papersize.org/a4-paper-size-in-pixels.php
-                "A4": (9921, 14006),  # 210mm x 297mm
-                "Letter": (10200, 13200),  # 216mm x 280mm
-                "Max": (10200, 14006),  # 216mm x 297mm
-            }
-        )
+        sizeInPixelsAt1200dpi = {  # See http://www.a4papersize.org/a4-paper-size-in-pixels.php
+            "A4": (9921, 14006),  # 210mm x 297mm
+            "Letter": (10200, 13200),  # 216mm x 280mm
+            "Max": (10200, 14006),  # 216mm x 297mm
+        }
         iHorizontalExtent, iVerticalExtent = sizeInPixelsAt1200dpi[strPaperSize]
         iHorizontalExtent = iHorizontalExtent * iDPI / 1200
         iVerticalExtent = iVerticalExtent * iDPI / 1200

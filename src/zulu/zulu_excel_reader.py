@@ -57,11 +57,7 @@ class Entry:
         return list_columns
 
     def dump(self):
-        print(
-            "entry: {} {}: {}".format(
-                self.str_tag_cell, self.str_name_cell, self.obj_row
-            )
-        )
+        print(f"entry: {self.str_tag_cell} {self.str_name_cell}: {self.obj_row}")
 
 
 class Table:
@@ -92,14 +88,14 @@ class Table:
         return d
 
     def dump(self, obj_file):
-        print("table: {}".format(self.str_table_name), file=obj_file)
-        print("columns: {}".format(sorted(self.dict_columns.items())), file=obj_file)
+        print(f"table: {self.str_table_name}", file=obj_file)
+        print(f"columns: {sorted(self.dict_columns.items())}", file=obj_file)
         for obj_row in self.list_rows:
-            print("row: {}".format(self.get_row_as_dict(obj_row)), file=obj_file)
+            print(f"row: {self.get_row_as_dict(obj_row)}", file=obj_file)
 
     def raise_exception(self, str_msg):
         raise ExcelReaderExecption(
-            'Table "{}": {}'.format(self.str_table_name, str_msg), file=obj_file
+            f'Table "{self.str_table_name}": {str_msg}', file=obj_file
         )
 
 
@@ -169,7 +165,7 @@ class ExcelReader:
 
         for str_entry, list_entries in self.dict_entries.items():
             for dict_entry in list_entries:
-                print("entry: {}: {}".format(str_entry, dict_entry), file=obj_file)
+                print(f"entry: {str_entry}: {dict_entry}", file=obj_file)
 
                 # obj_entry.dump()
 

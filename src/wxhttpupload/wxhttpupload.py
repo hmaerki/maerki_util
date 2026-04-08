@@ -44,9 +44,7 @@ class HttpUploadFrame(wx.Frame):
         self.isClosing = False
 
         def get_icon(filename: str):
-            return wx.Icon(
-                str(DIRECTORY_RESOURCES / filename), wx.BITMAP_TYPE_ICO
-            )
+            return wx.Icon(str(DIRECTORY_RESOURCES / filename), wx.BITMAP_TYPE_ICO)
 
         self.dictIcons = {
             "error": get_icon("wxhttpupload_error.ico"),
@@ -337,7 +335,7 @@ class wxhttpuploadApp(wx.App):
                 code = compile(f.read(), strConfigFilename, "exec")
                 global_vars = {}
                 exec(code, global_vars, dictConfig)
-        except IOError:
+        except OSError:
             objLogger.WriteLine(
                 f"Configuration File '{strConfigFilename.name} not found in folder '{strConfigFilename.parent}'."
             )

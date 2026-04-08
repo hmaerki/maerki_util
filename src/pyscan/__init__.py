@@ -1,2 +1,2 @@
-name = 'pyscan'
+name = "pyscan"
 from . import *

@@ -539,7 +539,7 @@ def annotate(
             f"Font '{font_name}' not found for '{strPathOutput}'. "
             "Using Pillow default font."
         )
-        font= PIL.ImageFont.load_default()
+        font = PIL.ImageFont.load_default()
         assert isinstance(font, PIL.ImageFont.FreeTypeFont)
         return font
 
@@ -553,9 +553,7 @@ def annotate(
         iAnnotationWidth += iSpaceingH
         iAnnotationHeight += iSpaceingV
         iWidth, iHeight = image.size
-        if not (iAnnotationWidth > iWidth) | (
-            iAnnotationHeight > iHeight
-        ):
+        if not (iAnnotationWidth > iWidth) | (iAnnotationHeight > iHeight):
             # Genuegend Platz
             break
         iSize = iSize - 1

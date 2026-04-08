@@ -34,13 +34,12 @@
 #   2026-04-03, Hans Maerki, v4.0.3: Logfile refactored from html to text console output.
 #
 
+import logging
 import os
 import re
 import stat
 import sys
 import time
-import logging
-from html import escape
 
 from zulu import zulu_excel_reader
 
@@ -142,12 +141,10 @@ class Zulu:
                     self.sFilenameTemplate = a
         else:
             if not os.path.exists(self.sFilenameStructure):
-                raise ZuluException(
-                    'File "{}" does not exist!'.format(self.sFilenameStructure)
-                )
+                raise ZuluException(f'File "{self.sFilenameStructure}" does not exist!')
 
         sLogFilename = "zulu_errorlog.html"
-        print("Zulu: {} -> {}".format(self.sFilenameStructure, sLogFilename))
+        print(f"Zulu: {self.sFilenameStructure} -> {sLogFilename}")
         self.objLogger = Logger(self.sFilenameStructure)
         self.objLogger.info("python version: " + sys.version)
         try:
@@ -225,7 +222,7 @@ class Zulu:
                 instance = klass()
                 instance.__init__()
                 return instance.doit(self, objTemplate, objProcessingState, sParameter)
-        except Exception as e:
+        except Exception:
             self.objLogger.error(
                 'Error in call to "<!--Zulu:Python:%s-->". See traceback.' % sText,
                 objTemplate.strTemplateFilename,
@@ -277,7 +274,7 @@ class Zulu:
         objHandlerTag = HandlerTag(objProcessingState)
         objTemplate.replace_tags(objHandlerTag, objProcessingState)
         strTemplateFilename = objTemplate.strTemplate
-        with open(strTemplateFilename, "r", encoding="utf-8") as f:
+        with open(strTemplateFilename, encoding="utf-8") as f:
             objTemplate = Template(f.read(), strTemplateFilename)
         objProcessingState.dictGlobalTags["ZuluTemplateName"] = strTemplateFilename
         objProcessingState.dictGlobalTags["ZuluFilenameTemplate"] = strTemplateFilename
@@ -306,7 +303,7 @@ class Zulu:
             objProcessingState.strInputFilename = strInputFilename
 
             try:
-                with open(strInputFilename, "r", encoding="utf-8") as f:
+                with open(strInputFilename, encoding="utf-8") as f:
                     try:
                         text = f.read()
                     except UnicodeDecodeError as err:
@@ -314,7 +311,7 @@ class Zulu:
                             f"{strInputFilename}: UnicodeDecodeError {err}"
                         )
                         return
-            except IOError as err:
+            except OSError as err:
                 self.objLogger.error(
                     "%s does not exist (%s)" % (strInputFilename, str(err))
                 )
@@ -411,9 +408,9 @@ class Zulu:
             # if it hasn't been changed: To rewrite a file will reset the
             # archive bit.
             try:
-                if not strOutputFilename in dictOutputFiles:
+                if strOutputFilename not in dictOutputFiles:
                     # We don't know this file: Load it into the cache
-                    with open(strOutputFilename, "r", encoding="utf-8") as f:
+                    with open(strOutputFilename, encoding="utf-8") as f:
                         try:
                             text = f.read()
                         except UnicodeDecodeError as err:
@@ -425,7 +422,7 @@ class Zulu:
                 if dictOutputFiles[strOutputFilename] == objTemplate.strTemplate:
                     # Content didn't change
                     return
-            except IOError as e:
+            except OSError:
                 pass
             # We have to write the file
             dictOutputFiles[strOutputFilename] = objTemplate.strTemplate
@@ -433,7 +430,7 @@ class Zulu:
         if False:
             try:
                 f = open(strOutputFilename, "w", encoding="utf-8")
-            except IOError as e:
+            except OSError as e:
                 if e.errno == 13:  # Permission denied
                     self.objLogger.error(
                         'This file is write protected. Please remove the write protection and try again. The error message was "%s"'
@@ -885,6 +882,7 @@ class Logger:
             f = logger.error
         f(f"Errors: {self.iErrors}, Warnings: {self.iWarnings}")
 
+
 #
 # PageNavigation
 #
@@ -1120,7 +1118,7 @@ def main_():
     try:
         zulu.open()
         zulu.zulu()
-    except ZuluException as e:
+    except ZuluException:
         # Error was already logged
         pass
     except:

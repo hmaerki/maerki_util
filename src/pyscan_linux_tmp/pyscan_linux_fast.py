@@ -3,15 +3,13 @@ Fast Scanner Script with Device Caching
 Optimized version that avoids slow sane.get_devices() calls by using cached device names.
 """
 
-import sys
-import os
 import json
+import os
+import sys
 from datetime import datetime
 from pathlib import Path
 
 import sane
-from PIL import Image
-
 
 # Cache file for storing the last known working device
 DEVICE_CACHE_FILE = Path.home() / ".cache" / "pyscan_device_cache.json"
@@ -21,7 +19,7 @@ def load_device_cache():
     """Load cached device information."""
     try:
         if DEVICE_CACHE_FILE.exists():
-            with open(DEVICE_CACHE_FILE, 'r') as f:
+            with open(DEVICE_CACHE_FILE) as f:
                 return json.load(f)
     except Exception:
         pass
@@ -35,9 +33,9 @@ def save_device_cache(device_name, device_info):
         cache_data = {
             "device_name": device_name,
             "device_info": device_info,
-            "last_used": datetime.now().isoformat()
+            "last_used": datetime.now().isoformat(),
         }
-        with open(DEVICE_CACHE_FILE, 'w') as f:
+        with open(DEVICE_CACHE_FILE, "w") as f:
             json.dump(cache_data, f, indent=2)
     except Exception as e:
         print(f"Warning: Could not save device cache: {e}")
@@ -56,7 +54,7 @@ def try_device_direct(device_name):
 def find_scanner_fast():
     """Find scanner using multiple speed optimization strategies."""
     print("Looking for Canon LiDE 220 scanner...")
-    
+
     # Strategy 1: Try cached device first
     cache = load_device_cache()
     if cache.get("device_name"):
@@ -65,46 +63,46 @@ def find_scanner_fast():
         if try_device_direct(cached_device):
             print(f"✓ Found scanner using cache: {cached_device}")
             return cached_device, "Found in cache"
-    
+
     # Strategy 2: Try common device name patterns for Canon LiDE scanners
     print("Trying common device patterns...")
     common_patterns = [
-        'genesys:libusb:003:005',  # Your specific device
-        'genesys:libusb:001:005',  # USB bus variations
-        'genesys:libusb:002:005',
-        'genesys:libusb:003:004',
-        'genesys:libusb:003:006',
-        'genesys:libusb:001:004',
-        'genesys:libusb:002:004',
-        'canon:libusb:003:005',    # Alternative driver names
-        'canon:libusb:001:005',
-        'canon_lide_220:libusb:003:005',
+        "genesys:libusb:003:005",  # Your specific device
+        "genesys:libusb:001:005",  # USB bus variations
+        "genesys:libusb:002:005",
+        "genesys:libusb:003:004",
+        "genesys:libusb:003:006",
+        "genesys:libusb:001:004",
+        "genesys:libusb:002:004",
+        "canon:libusb:003:005",  # Alternative driver names
+        "canon:libusb:001:005",
+        "canon_lide_220:libusb:003:005",
     ]
-    
+
     for device_pattern in common_patterns:
         print(f"  Trying: {device_pattern}")
         if try_device_direct(device_pattern):
             print(f"✓ Found scanner: {device_pattern}")
             save_device_cache(device_pattern, "Canon LiDE 220")
             return device_pattern, "Found by pattern matching"
-    
+
     # Strategy 3: Use environment variable if set
-    env_device = os.environ.get('PYSCAN_DEVICE')
+    env_device = os.environ.get("PYSCAN_DEVICE")
     if env_device:
         print(f"Trying environment device: {env_device}")
         if try_device_direct(env_device):
             print(f"✓ Found scanner from environment: {env_device}")
             save_device_cache(env_device, "Canon LiDE 220 (from env)")
             return env_device, "Found from environment variable"
-    
+
     # Strategy 4: Last resort - full device enumeration
     print("Fast methods failed, performing full device scan...")
     try:
         devices = sane.get_devices()
-        
+
         for device in devices:
             print(f"   Available: {device[1]} ({device[0]})")
-        
+
         for device in devices:
             if (
                 "canon" in device[1].lower()
@@ -116,10 +114,10 @@ def find_scanner_fast():
                 print(f"✓ Found scanner: {device_info} ({device_name})")
                 save_device_cache(device_name, device_info)
                 return device_name, device_info
-                
+
     except Exception as e:
         print(f"Error during device enumeration: {e}")
-    
+
     return None, None
 
 
@@ -135,7 +133,7 @@ def auto_scan():
 
         # Find Canon scanner using fast method
         canon_device, device_info = find_scanner_fast()
-        
+
         if not canon_device:
             print("Canon LiDE 220 scanner not found!")
             print("\nTroubleshooting tips:")
@@ -228,7 +226,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--clear-cache":
         clear_cache()
         sys.exit(0)
-    
+
     result = auto_scan()
     if result:
         print(f"\nScan saved as: {result}")

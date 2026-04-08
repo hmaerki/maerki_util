@@ -18,7 +18,7 @@ try:
     with open(strConfigFile) as f:
         code = compile(f.read(), strConfigFile, "exec")
         exec(code, _dictGlobal, dictConfigConfig)
-except IOError as e:
+except OSError:
     raise Exception(r"Konfigurationsdatei nicht gefunden: %s" % strConfigFile)
     # return False
 

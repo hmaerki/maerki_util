@@ -1,5 +1,3 @@
-
-
 def main():
     from pyscan import wxPyScanConsole
 

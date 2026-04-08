@@ -18,7 +18,9 @@ from .discover import FILENAME_USB_DEVICE, discover_canon_lide
 def auto_scan():
     filename_usb_device = pathlib.Path(FILENAME_USB_DEVICE)
     if not filename_usb_device.exists():
-        print(f"{FILENAME_USB_DEVICE}: File does not exist yet. Running: pyscan_linux_discover")
+        print(
+            f"{FILENAME_USB_DEVICE}: File does not exist yet. Running: pyscan_linux_discover"
+        )
         device = discover_canon_lide()
     try:
         device = filename_usb_device.read_text()
@@ -55,7 +57,7 @@ def auto_scan():
 
         return output_path
 
-    except Exception as e:
+    except Exception:
         try:
             sane.exit()
         except:

@@ -11,7 +11,6 @@ import wx
 import wx.xrc
 
 import pyscan.engine_scan_wia
-import pyscan.utils as utils
 
 # constants
 strVersion = "v1.1.0"

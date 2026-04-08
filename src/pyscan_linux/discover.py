@@ -42,9 +42,7 @@ def discover_canon_lide():
             or "lide" in device[1].lower()
             or "genesys" in device[0].lower()
         ):
-            print(
-                f"Write '{device[0]}' into '{FILENAME_USB_DEVICE}'!"
-            )
+            print(f"Write '{device[0]}' into '{FILENAME_USB_DEVICE}'!")
             pathlib.Path(FILENAME_USB_DEVICE).write_text(device[0])
             break
     else:

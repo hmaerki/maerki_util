@@ -4,7 +4,8 @@ strDirectory = "."
 bDebug = True
 
 # Load PyImagesToPdf-Framework
-import os, re
+import os
+import re
 
 from pyimages2pdf import pyimages2pdf
 

@@ -11,7 +11,6 @@ from datetime import datetime
 from pathlib import Path
 
 import sane
-from PIL import Image
 
 
 def auto_scan():
@@ -79,7 +78,7 @@ def auto_scan():
         output_path = f"scan_300dpi_{timestamp}.png"
 
         # Scan the document
-        print(f"Scanning document at 300 DPI...")
+        print("Scanning document at 300 DPI...")
         print("Please make sure your document is placed on the scanner bed.")
 
         # Start scanning
@@ -94,10 +93,10 @@ def auto_scan():
         pil_image.save(output_path, optimize=True)
 
         # Print scan results
-        print(f"✓ Scan completed successfully!")
+        print("✓ Scan completed successfully!")
         print(f"  Output file: {output_path}")
         print(f"  Image size: {pil_image.size[0]} x {pil_image.size[1]} pixels")
-        print(f"  Resolution: 300 DPI")
+        print("  Resolution: 300 DPI")
         print(f"  Color mode: {pil_image.mode}")
         print(f"  File size: {Path(output_path).stat().st_size / 1024 / 1024:.1f} MB")
 

@@ -1,2 +1,2 @@
-name = 'pyckup'
+name = "pyckup"
 from .pyckup import *

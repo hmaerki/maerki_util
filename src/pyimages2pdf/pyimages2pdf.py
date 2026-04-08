@@ -1,4 +1,4 @@
-﻿"""
+"""
 Dieses Modul erstellt die PDF-Dokumente.
 Es wird 'reportlab' von http://www.reportlab.org/rl_toolkit.html verwendet.
 """
@@ -6,7 +6,6 @@ Es wird 'reportlab' von http://www.reportlab.org/rl_toolkit.html verwendet.
 bDebugDrawGrid = False
 
 import os
-import pathlib
 import re
 import shutil
 import subprocess

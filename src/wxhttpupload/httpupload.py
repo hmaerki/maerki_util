@@ -50,7 +50,7 @@ class Mediator:
             config_text = Path(strConfigFilename).read_text(encoding="utf-8")
             code = compile(config_text, strConfigFilename, "exec")
             exec(code, {}, self.dictConfig)
-        except OSError as e:
+        except OSError:
             self.writeLine(
                 f"Configuration File '{strConfigFilename}' not found in Folder '{os.getcwd()}'."
             )
@@ -140,7 +140,9 @@ class http_upload_core:
         ) = urlparse.urlparse(objMediator.getArgument("remote"))
         self.strLocal = os.path.normpath(objMediator.getArgument("local"))
 
-        strUserPassword = f"{objMediator.getArgument('user')}:{objMediator.getArgument('password')}"
+        strUserPassword = (
+            f"{objMediator.getArgument('user')}:{objMediator.getArgument('password')}"
+        )
         strUserPassword = base64.encodebytes(bytes(strUserPassword, "utf-8"))
         strUserPassword = strUserPassword.decode("utf-8").replace("\n", "")
         self.strAuthorization = f"Basic {strUserPassword}"
@@ -319,9 +321,7 @@ class http_upload_core:
             # File hasn't changed
             return 0
 
-        objMediator.setStatus(
-            f"{self.iFilesUploaded + 1}: File '{strRelativePath}'"
-        )
+        objMediator.setStatus(f"{self.iFilesUploaded + 1}: File '{strRelativePath}'")
 
         iErrors = self.http_upload_file(strPath)
         if iErrors == 0:
@@ -383,7 +383,7 @@ class http_upload_core:
             self.objFileTimestamps = open(self.strFilenameTimestamps, "w")
         else:
             if os.path.exists(self.strFilenameTimestamps):
-                self.objFileTimestamps = open(self.strFilenameTimestamps, "r")
+                self.objFileTimestamps = open(self.strFilenameTimestamps)
                 for strLine in self.objFileTimestamps:
                     strLine = strLine.strip()
                     if len(strLine) == 0:
@@ -515,7 +515,7 @@ class Logger:
             sFilename = self.sFilenameStructure
         strMessage = f'<a href="{sFilename}">{sFilename}</a>: <code class="{sClass}">{html.escape(sInfo)}</code><br>'
         strMessage = f'<code class="{sClass}">{html.escape(sInfo)}</code><br>'
-        if not strMessage in self.dictMessages:
+        if strMessage not in self.dictMessages:
             self.file.write(strMessage)
             self.dictMessages[strMessage] = ""
         self.file.flush()
@@ -550,8 +550,10 @@ class Logger:
 
 # ----------------------------------------------------------------------------
 
+
 def main():
     HttpUpload(Mediator())
+
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,3 @@
-﻿
 """
 Imaging Algorithms using PIL.
 The documentation may be found here
@@ -13,7 +12,6 @@ from PIL import (
     ImageFilter,
     ImageMath,
     ImageOps,
-    ImagePalette,
     ImageStat,
 )
 
