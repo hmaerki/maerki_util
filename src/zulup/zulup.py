@@ -7,9 +7,8 @@ import typing
 import typer
 
 from . import util_constants, util_systemd_inhibit, util_zulup
-from .util_json_metafile import Metafile
+from .util_json_metafile import Metafile, TarfilesGrouped
 from .util_json_zulup import BackupJson
-from .util_tarfile import TarExtract
 
 logger = logging.getLogger(__file__)
 
@@ -123,51 +122,10 @@ def restore(
         typer.Argument(help="Files to restore. If omitted, all files are restored."),
     ] = None,
 ) -> None:
-    filename_metafile = filename_metafile.resolve()
-    snapshot_directory = filename_metafile.parent
-    metafile = Metafile.from_file(filename_metafile)
-    snapshot_map = metafile.by_datetime
+    metafile = Metafile.from_file(filename_metafile.resolve())
 
-    wanted = set(files) if files else None
-    entries = [entry for entry in metafile.files if entry.verb != "removed"]
-    if wanted is not None:
-        entries = [entry for entry in entries if entry.path in wanted]
-        missing = sorted(wanted - {entry.path for entry in entries})
-        if missing:
-            raise ValueError(f"Files not found in snapshot: {missing}")
-
-    grouped_tarfiles: dict[pathlib.Path, list[str]] = {}
-    for entry in entries:
-        snapshot = snapshot_map.get(entry.snapshot_datetime)
-        if snapshot is None:
-            raise ValueError(
-                f"No snapshot found for datetime {entry.snapshot_datetime}"
-            )
-        filename_tar = snapshot_directory / snapshot.tarfile_name
-        grouped_tarfiles.setdefault(filename_tar, []).append(entry.path)
-
-    for filename_tar, rel_paths in grouped_tarfiles.items():
-        tar_extract = TarExtract(filename_tar)
-        tarfiles = tar_extract.list_tarfiles()
-        parent_name = pathlib.Path(metafile.backup.parent).name
-        tarfiles_to_restore: list[str] = []
-
-        for rel_path in rel_paths:
-            candidates = [
-                rel_path,
-                f"{parent_name}/{rel_path}",
-                f"{metafile.backup.backup_name}/{rel_path}",
-            ]
-            selected = next(
-                (candidate for candidate in candidates if candidate in tarfiles), None
-            )
-            if selected is None:
-                raise FileNotFoundError(
-                    f"'{rel_path}' not found in tarfile '{filename_tar}'"
-                )
-            tarfiles_to_restore.append(selected)
-
-        tar_extract.restore(tarfiles_to_restore)
+    grouped_tarfiles = TarfilesGrouped.grouped_tarfiles(metafile, files)
+    grouped_tarfiles.restore(metafile)
 
 
 if __name__ == "__main__":

@@ -200,6 +200,7 @@ class DirectoryBackupJson:
             current=args.create_metafile_snapshot(tarfile_size),
             history=args.history,
             files=merged_files,
+            filename=pathlib.Path("dummmy"),
         )
 
         metafile.to_file(self.directory_target / metafile.current.metafile_name)

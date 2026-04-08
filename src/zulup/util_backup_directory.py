@@ -5,7 +5,6 @@ import pathlib
 
 from zulup.util_constants import METAFILE_SUFFIX, TARFILE_SUFFIX
 from zulup.util_json_metafile import Metafile
-from zulup.util_tarfile import verify_tarfile
 
 
 @dataclasses.dataclass(frozen=True)
@@ -70,6 +69,4 @@ class BackupDirectory:
                 f"'{metafile.current.snapshot_stem}': {missing}"
             )
         for metafile_snapshot in metafile.history:
-            verify_tarfile(
-                directory=self.directory, metafile_snapshot=metafile_snapshot
-            )
+            metafile_snapshot.verify_tarfile(directory=self.directory)

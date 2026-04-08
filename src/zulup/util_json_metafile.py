@@ -8,11 +8,12 @@ import logging
 import pathlib
 import typing
 
-from zulup.util_constants import METAFILE_SUFFIX, TARFILE_SUFFIX
-from zulup.util_json import check_enum
+from .util_constants import METAFILE_SUFFIX, TARFILE_SUFFIX
+from .util_json import check_enum
+from .util_tarfile import TarExtract
 
 if typing.TYPE_CHECKING:
-    from zulup.util_traverse_zulup import BackupArguments
+    from .util_traverse_zulup import BackupArguments
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +153,71 @@ class MetafileSnapshot:
     def metafile_name(self) -> str:
         return self.snapshot_stem + METAFILE_SUFFIX
 
+    def verify_tarfile(self, directory: pathlib.Path) -> None:
+        if self.tarfile_size is None:
+            return
+        filename_tar = directory / self.tarfile_name
+        if not filename_tar.is_file():
+            raise FileNotFoundError(f"Tarfile not found: '{filename_tar}'")
+        actual_size = filename_tar.stat().st_size
+        if actual_size != self.tarfile_size:
+            raise ValueError(
+                f"Size mismatch for '{filename_tar}': "
+                f"expected {self.tarfile_size}, got {actual_size}"
+            )
+
+
+class TarfilesGrouped(dict[pathlib.Path, list[str]]):
+    @staticmethod
+    def grouped_tarfiles(
+        metafile: Metafile, wanted: list[str] | None
+    ) -> TarfilesGrouped:
+        wanted_set = set(wanted) if wanted else None
+        entries = [entry for entry in metafile.files if entry.verb != EnumVerb.REMOVED]
+        if wanted_set is not None:
+            entries = [entry for entry in entries if entry.path in wanted_set]
+            missing = sorted(wanted_set - {entry.path for entry in entries})
+            if missing:
+                raise ValueError(f"Files not found in snapshot: {missing}")
+
+        grouped_tarfiles = TarfilesGrouped()
+        snapshot_map = metafile.by_datetime
+        for entry in entries:
+            snapshot = snapshot_map.get(entry.snapshot_datetime)
+            if snapshot is None:
+                raise ValueError(
+                    f"No snapshot found for datetime {entry.snapshot_datetime}"
+                )
+            filename_tar = metafile.filename.parent / snapshot.tarfile_name
+            grouped_tarfiles.setdefault(filename_tar, []).append(entry.path)
+        return grouped_tarfiles
+
+    def restore(self, metafile: Metafile) -> None:
+
+        for filename_tar, rel_paths in self.items():
+            tar_extract = TarExtract(filename_tar)
+            tarfiles = tar_extract.list_tarfiles()
+            parent_name = pathlib.Path(metafile.backup.parent).name
+            tarfiles_to_restore: list[str] = []
+
+            for rel_path in rel_paths:
+                candidates = [
+                    rel_path,
+                    f"{parent_name}/{rel_path}",
+                    f"{metafile.backup.backup_name}/{rel_path}",
+                ]
+                selected = next(
+                    (candidate for candidate in candidates if candidate in tarfiles),
+                    None,
+                )
+                if selected is None:
+                    raise FileNotFoundError(
+                        f"'{rel_path}' not found in tarfile '{filename_tar}'"
+                    )
+                tarfiles_to_restore.append(selected)
+
+            tar_extract.restore(tarfiles_to_restore)
+
 
 @dataclasses.dataclass(frozen=True)
 class Metafile:
@@ -159,12 +225,14 @@ class Metafile:
     current: MetafileSnapshot
     history: list[MetafileSnapshot]
     files: list[MetafileFileEntry]
+    filename: pathlib.Path
 
     def __post_init__(self) -> None:
         assert isinstance(self.backup, MetafileBackup)
         assert isinstance(self.current, MetafileSnapshot)
         assert isinstance(self.history, list)
         assert isinstance(self.files, list)
+        assert isinstance(self.filename, pathlib.Path)
 
     @staticmethod
     def from_file(filename: pathlib.Path) -> Metafile:
@@ -178,7 +246,17 @@ class Metafile:
             current=current,
             history=history,
             files=files,
+            filename=filename,
         )
+
+    def to_file(self, filename: pathlib.Path) -> None:
+        data = {
+            "backup": dataclasses.asdict(self.backup),
+            "current": self._snapshot_dict(self.current),
+            "history": [self._snapshot_dict(entry) for entry in self.history],
+            "files": [dataclasses.asdict(entry) for entry in self.files],
+        }
+        filename.write_text(json.dumps(data, indent=4, sort_keys=True) + "\n")
 
     @staticmethod
     def _snapshot_dict(snapshot: MetafileSnapshot) -> dict[str, object]:
@@ -188,6 +266,20 @@ class Metafile:
     def by_datetime(self) -> dict[str, MetafileSnapshot]:
         snapshots = [self.current, *self.history]
         return {snapshot.snapshot_datetime: snapshot for snapshot in snapshots}
+
+    def verify_history(self, directory: pathlib.Path) -> None:
+        missing: list[str] = []
+        for metafile_snapshot in self.history:
+            metafile_path = directory / metafile_snapshot.metafile_name
+            if not metafile_path.is_file():
+                missing.append(str(metafile_path))
+        if missing:
+            raise ValueError(
+                f"Missing metafile(s) referenced in history of "
+                f"'{self.current.snapshot_stem}': {missing}"
+            )
+        for metafile_snapshot in self.history:
+            metafile_snapshot.verify_tarfile(directory=directory)
 
     @property
     def stat_total_file(self) -> list[MetafileFileEntry]:
@@ -213,15 +305,6 @@ class Metafile:
         logger.info(
             f"Total: {len(self.stat_total_file)} files, {self.stat_total_size_byte / 1_000_000:.1f} MByte. Backup: {len(self.stat_backup_file)} files, {self.stat_backup_size_byte / 1_000_000:.1f} MByte, {duration_s:.1f}s, {speed_bytes_s / 1_000_000:.1f}MByte/s."
         )
-
-    def to_file(self, filename: pathlib.Path) -> None:
-        data = {
-            "backup": dataclasses.asdict(self.backup),
-            "current": self._snapshot_dict(self.current),
-            "history": [self._snapshot_dict(entry) for entry in self.history],
-            "files": [dataclasses.asdict(entry) for entry in self.files],
-        }
-        filename.write_text(json.dumps(data, indent=4, sort_keys=True) + "\n")
 
 
 def _format_modified(mtime: float) -> str:
