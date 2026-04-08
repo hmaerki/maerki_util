@@ -267,19 +267,14 @@ class Metafile:
         snapshots = [self.current, *self.history]
         return {snapshot.snapshot_datetime: snapshot for snapshot in snapshots}
 
-    def verify_history(self, directory: pathlib.Path) -> None:
-        missing: list[str] = []
+    def verify_history(self) -> None:
         for metafile_snapshot in self.history:
-            metafile_path = directory / metafile_snapshot.metafile_name
+            metafile_path = self.filename.parent / metafile_snapshot.metafile_name
             if not metafile_path.is_file():
-                missing.append(str(metafile_path))
-        if missing:
-            raise ValueError(
-                f"Missing metafile(s) referenced in history of "
-                f"'{self.current.snapshot_stem}': {missing}"
-            )
-        for metafile_snapshot in self.history:
-            metafile_snapshot.verify_tarfile(directory=directory)
+                raise ValueError(
+                    f"{self.current.snapshot_stem}: Missing metafile referenced in history: {metafile_path}"
+                )
+            metafile_snapshot.verify_tarfile(directory=self.filename.parent)
 
     @property
     def stat_total_file(self) -> list[MetafileFileEntry]:

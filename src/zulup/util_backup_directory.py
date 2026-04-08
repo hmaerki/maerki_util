@@ -58,15 +58,4 @@ class BackupDirectory:
         return self.snapshots[-1]
 
     def verify_history(self, metafile: Metafile) -> None:
-        missing: list[str] = []
-        for metafile_snapshot in metafile.history:
-            metafile_path = self.directory / metafile_snapshot.metafile_name
-            if not metafile_path.is_file():
-                missing.append(str(metafile_path))
-        if missing:
-            raise ValueError(
-                f"Missing metafile(s) referenced in history of "
-                f"'{metafile.current.snapshot_stem}': {missing}"
-            )
-        for metafile_snapshot in metafile.history:
-            metafile_snapshot.verify_tarfile(directory=self.directory)
+        metafile.verify_history()

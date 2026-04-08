@@ -123,7 +123,7 @@ class DirectoryBackupJson:
         backup_directory = self.backup_directory
         if backup_directory.last_snapshot is not None:
             metafile = backup_directory.last_snapshot.metafile
-            backup_directory.verify_history(metafile=metafile)
+            metafile.verify_history()
 
     def backup_arguments(
         self, full: bool, snapshot_datetime: str | None
