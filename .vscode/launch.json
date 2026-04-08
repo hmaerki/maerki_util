@@ -22,6 +22,16 @@
             "justMyCode": false,
         },
         {
+            "name": "pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["-k", "test_ignore_dot_git_directories_recursively"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
             "name": "pyscan.wxPyScan",
             "type": "debugpy",
             "request": "launch",

@@ -136,7 +136,7 @@ def restore(
         if missing:
             raise ValueError(f"Files not found in snapshot: {missing}")
 
-    grouped_members: dict[pathlib.Path, list[str]] = {}
+    grouped_tarfiles: dict[pathlib.Path, list[str]] = {}
     for entry in entries:
         snapshot = snapshot_map.get(entry.snapshot_datetime)
         if snapshot is None:
@@ -144,13 +144,13 @@ def restore(
                 f"No snapshot found for datetime {entry.snapshot_datetime}"
             )
         filename_tar = snapshot_directory / snapshot.tarfile_name
-        grouped_members.setdefault(filename_tar, []).append(entry.path)
+        grouped_tarfiles.setdefault(filename_tar, []).append(entry.path)
 
-    for filename_tar, rel_paths in grouped_members.items():
+    for filename_tar, rel_paths in grouped_tarfiles.items():
         tar_extract = TarExtract(filename_tar)
-        members = tar_extract.list()
+        tarfiles = tar_extract.list_tarfiles()
         parent_name = pathlib.Path(metafile.backup.parent).name
-        members_to_restore: list[str] = []
+        tarfiles_to_restore: list[str] = []
 
         for rel_path in rel_paths:
             candidates = [
@@ -159,15 +159,15 @@ def restore(
                 f"{metafile.backup.backup_name}/{rel_path}",
             ]
             selected = next(
-                (candidate for candidate in candidates if candidate in members), None
+                (candidate for candidate in candidates if candidate in tarfiles), None
             )
             if selected is None:
                 raise FileNotFoundError(
                     f"'{rel_path}' not found in tarfile '{filename_tar}'"
                 )
-            members_to_restore.append(selected)
+            tarfiles_to_restore.append(selected)
 
-        tar_extract.restore(members_to_restore)
+        tar_extract.restore(tarfiles_to_restore)
 
 
 if __name__ == "__main__":

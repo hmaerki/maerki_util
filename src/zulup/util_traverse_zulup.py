@@ -8,7 +8,6 @@ import pathlib
 import socket
 import subprocess
 import sys
-import tempfile
 import time
 
 from zulup.util_logging import snapshot_logfile
@@ -37,10 +36,6 @@ class BackupArguments:
     snapshot_datetime: str
     snapshot_type: str
     filename_tar: pathlib.Path
-
-    @property
-    def is_incr(self) -> bool:
-        return self.last_snapshot is not None
 
     def create_metafile_snapshot(self, tarfile_size: int) -> MetafileSnapshot:
         """Create MetafileSnapshot from this context and tarfile size."""
@@ -216,7 +211,7 @@ class DirectoryBackupJson:
         merged_files: list[MetafileFileEntry],
         filename_target: pathlib.Path,
     ) -> int:
-        tar_files = [
+        tarfiles = [
             entry.path
             for entry in merged_files
             if entry.verb in (EnumVerb.ADDED, EnumVerb.MODIFIED)
@@ -226,28 +221,29 @@ class DirectoryBackupJson:
         if self.backup_json.directory_name_include:
             directory_src = directory_src.parent
             dir_name = self.directory.name
-            tar_files = [f"{dir_name}/{f}" for f in tar_files]
+            tarfiles = [f"{dir_name}/{f}" for f in tarfiles]
 
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-            temp_filename = pathlib.Path(temp_file.name)
-            temp_file.write("\n".join(tar_files) + "\n")
-        try:
-            if sys.platform == "win32":
-                compression = ["-zcf"]
-            else:
-                compression = ["--zstd", "-cf"]
-            args = [
-                "tar",
-                "--files-from",
-                str(temp_filename),
-                *compression,
-                str(filename_target),
-            ]
-            logger.debug(f"Calling: {' '.join(args)}")
-            subprocess.run(args, cwd=directory_src, check=True)
-            return filename_target.stat().st_size
-        finally:
-            temp_filename.unlink(missing_ok=True)
+        if sys.platform == "win32":
+            compression = ["-zcf"]
+        else:
+            compression = ["--zstd", "-cf"]
+        args = [
+            "tar",
+            "--files-from",
+            "-",
+            *compression,
+            str(filename_target),
+        ]
+        logger.debug(f"Calling: {' '.join(args)} (tarfiles={len(tarfiles)} via stdin)")
+        tarfiles_text = "\n".join(tarfiles) + "\n"
+        subprocess.run(
+            args,
+            cwd=directory_src,
+            input=tarfiles_text,
+            text=True,
+            check=True,
+        )
+        return filename_target.stat().st_size
 
 
 class TraverseZulup:

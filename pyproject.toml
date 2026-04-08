@@ -31,6 +31,7 @@ dependencies = [
 dev = [
     # "-e .
     "pytest",
+    "pytest-cov",
     "mypy",
     "ruff",
 ]
@@ -120,3 +121,12 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "ad_low_noise_float_2023_decoder.*"
 ignore_missing_imports = true
+
+[tool.pylint.messages_control]
+disable = [
+    "logging-fstring-interpolation",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "missing-module-docstring",
+    "line-too-long",
+]
