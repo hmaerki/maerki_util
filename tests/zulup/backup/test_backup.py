@@ -43,3 +43,30 @@ def test_backup_incr(project: TestProjectDirectory) -> None:
     assert files_by_path["b.txt"].verb == EnumVerb.MODIFIED
     assert files_by_path["c.txt"].verb == EnumVerb.REMOVED
     assert files_by_path["d.txt"].verb == EnumVerb.ADDED
+
+
+def test_backup_skips_when_no_file_was_added_or_modified(
+    project: TestProjectDirectory,
+) -> None:
+    project.create_file("a.txt", "a-v1\n")
+    project.create_backup_json(directory_name_include=False, ignore=[".git/"])
+
+    project.do_backup(snapshot_datetime="2026-04-07_10-00-00")
+    project.do_backup(snapshot_datetime="2026-04-07_10-00-01")
+
+    backup_directory = project.get_backup_directory()
+    assert len(backup_directory.snapshots) == 1
+
+
+def test_backup_skips_when_only_files_were_removed(
+    project: TestProjectDirectory,
+) -> None:
+    project.create_file("a.txt", "a-v1\n")
+    project.create_backup_json(directory_name_include=False, ignore=[".git/"])
+
+    project.do_backup(snapshot_datetime="2026-04-07_10-00-00")
+    (project.src / "a.txt").unlink()
+    project.do_backup(snapshot_datetime="2026-04-07_10-00-01")
+
+    backup_directory = project.get_backup_directory()
+    assert len(backup_directory.snapshots) == 1

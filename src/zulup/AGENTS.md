@@ -220,6 +220,7 @@ This is the file which is stored with every snapshot.
     * `removed`: if the file is gone.
     * `untouched`: If the file size and modification time have not changed.
     * `modified`: else
+  * If no file was added or modified: skip this backup (removed-only changes are not snapshotted)
   * Create a file list as input into `tar --files-from`: All files which are `added` or `modified`.
   * Call `tar --zstd --files-from ... -cf <directory_target>/<snapshot_stem>.tgz_tmp`.
   * Read the file size of `<directory_target>/<snapshot_stem>.tgz_tmp` and store it as `tarfile_size` in `current` of `new_metafile`.

@@ -175,6 +175,7 @@ class DirectoryBackupJson:
             * `removed`: if the file is gone.
             * `untouched`: If the file size and modification time have not changed.
             * `modified`: else
+        * If no file was added or modified: skip this backup (removed-only changes are not snapshotted)
         * Create a file list as input into `tar --files-from`: All files which are `added` or `modified`.
         * Call `tar --zstd --files-from ... -cf <directory_target>/<snapshot_stem>.tgz_tmp`.
         * Read the file size of `<directory_target>/<snapshot_stem>.tgz_tmp` and store it as `tarfile_size` in `current` of `new_metafile`.
@@ -184,6 +185,12 @@ class DirectoryBackupJson:
 
         begin_s = time.monotonic()
         merged_files = self.current_files.merge(args)
+
+        if not any(
+            entry.verb in (EnumVerb.ADDED, EnumVerb.MODIFIED) for entry in merged_files
+        ):
+            logger.info("Skipping backup: no files added or modified")
+            return
 
         logger.info(f"snapshot: {args.filename_tar}")
         tarfile_size = self.do_tar(
