@@ -298,7 +298,7 @@ class Metafile:
         except ZeroDivisionError:
             speed_bytes_s = 0.0
         logger.info(
-            f"Total: {len(self.stat_total_file)} files, {self.stat_total_size_byte / 1_000_000:.1f} MByte. Backup: {len(self.stat_backup_file)} files, {self.stat_backup_size_byte / 1_000_000:.1f} MByte, {duration_s:.1f}s, {speed_bytes_s / 1_000_000:.1f}MByte/s."
+            f"{self.backup.backup_name}: Total: {len(self.stat_total_file)} files, {self.stat_total_size_byte / 1_000_000:.1f} MByte. Backup: {len(self.stat_backup_file)} files, {self.stat_backup_size_byte / 1_000_000:.1f} MByte, {duration_s:.1f}s, {speed_bytes_s / 1_000_000:.1f}MByte/s."
         )
 
 

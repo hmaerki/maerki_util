@@ -189,10 +189,12 @@ class DirectoryBackupJson:
         if not any(
             entry.verb in (EnumVerb.ADDED, EnumVerb.MODIFIED) for entry in merged_files
         ):
-            logger.info("Skipping backup: no files added or modified")
+            logger.info(
+                f"{self.backup_json.backup_name}: Skipping: no files added or modified"
+            )
             return
 
-        logger.info(f"snapshot: {args.filename_tar}")
+        logger.info(f"{self.backup_json.backup_name}: {args.filename_tar}")
         tarfile_size = self.do_tar(
             merged_files=merged_files,
             filename_target=args.filename_tar,
@@ -242,7 +244,9 @@ class DirectoryBackupJson:
             *compression,
             str(filename_target),
         ]
-        logger.debug(f"Calling: {' '.join(args)} (tarfiles={len(tarfiles)} via stdin)")
+        logger.debug(
+            f"{self.backup_json.backup_name}: Calling: {' '.join(args)} (tarfiles={len(tarfiles)} via stdin)"
+        )
         tarfiles_text = "\n".join(tarfiles) + "\n"
         subprocess.run(
             args,
