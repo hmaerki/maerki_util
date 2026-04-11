@@ -26,7 +26,10 @@
             "type": "debugpy",
             "request": "launch",
             "module": "pytest",
-            "args": ["-k", "test_ignore_dot_git_directories_recursively"],
+            "args": [
+                "-k",
+                "test_ignore_dot_git_directories_recursively"
+            ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": false,
@@ -118,6 +121,32 @@
             "module": "pyscan_linux.scan",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/src/pyscan_linux",
+            "justMyCode": false,
+        },
+        {
+            "name": "klangspiel_rechnung2026 clipboard",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "klangspiel_rechnung2026.klangspiel_rechnung2026",
+            "console": "integratedTerminal",
+            "args": [
+                "clipboard",
+                "--debug"
+            ],
+            "cwd": "${workspaceFolder}/tests/klangspiel_rechnung2026/testdata_clipboard_result",
+            "justMyCode": false,
+        },
+        {
+            "name": "klangspiel_rechnung2026 json_update",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "klangspiel_rechnung2026.klangspiel_rechnung2026",
+            "console": "integratedTerminal",
+            "args": [
+                "json_update",
+                "--debug"
+            ],
+            "cwd": "${workspaceFolder}/tests/klangspiel_rechnung2026/testdata_clipboard_result",
             "justMyCode": false,
         }
     ]

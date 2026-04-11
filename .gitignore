@@ -15,3 +15,8 @@ src/alpuma_tests/top/sub/b/index.zulu_content.html
 src/alpuma_tests/top/sub/b/thumbs/0208.jpg
 src/pyimages2pdf/samplefolder/belege.pdf
 tests/zulup/testdata_metafiles_out/
+tests/klangspiel_rechnung2026/testdata_clipboard_result/
+tests/klangspiel_rechnung2026/testdata_xml_result/**/*.pdf
+tests/klangspiel_rechnung2026/testdata_xml_result/**/*.typ
+tests/klangspiel_rechnung2026/testdata_xml_result/**/*.png
+tests/klangspiel_rechnung2026/testdata_xml_result/**/*.sh

@@ -1,0 +1,67 @@
+{
+  "address1": "11 Kranichweg",
+  "address2": "",
+  "city": "Muri b. Bern",
+  "comments": "",
+  "company1": "",
+  "company2": "",
+  "datum": "2026-04-01",
+  "einschreiben": "",
+  "email": "roger.koch@muri-be.ch",
+  "firstname": "Roger",
+  "ftotal": "116.00",
+  "ftotalmwst": "0.15",
+  "g": "20.80",
+  "gewichttotal": "Total Gewicht Lieferung ohne Verpackung ca. 88 Gramm",
+  "invoice_address1": "11 Kranichweg",
+  "invoice_address2": "",
+  "invoice_city": "Muri b. Bern",
+  "invoice_company1": "",
+  "invoice_company2": "",
+  "invoice_firstname": "Roger",
+  "invoice_lastname": "Koch",
+  "invoice_zipcode": "3074",
+  "land": "",
+  "lastname": "Koch",
+  "lieferadresse": "Roger Koch\n11 Kranichweg\n3074 Muri b. Bern",
+  "lieferadresseinfo": "Lieferadresse: Roger Koch, 11 Kranichweg, 3074 Muri b. Bern",
+  "phone": "079 519 54 75",
+  "priority": "",
+  "rechnungsadresse": "Roger Koch\n11 Kranichweg\n3074 Muri b. Bern",
+  "versandkosten": "2.00",
+  "za": "Ja",
+  "zeit": "08-49-34",
+  "zipcode": "3074",
+  "rechnung_nr": "123",
+  "erhalten": true,
+  "positionen": [
+    {
+      "anzahl": "1",
+      "wo": "U62",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/unikat/briefmarken#d4842 ",
+      "preis": "57.00"
+    },
+    {
+      "anzahl": "1",
+      "wo": "U07",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/unikat/briefmarkenbogen#ad1433 ",
+      "preis": "19.00"
+    },
+    {
+      "anzahl": "1",
+      "wo": "U10",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/unikat/briefmarkenbogen#ad3744 ",
+      "preis": "19.00"
+    },
+    {
+      "anzahl": "1",
+      "wo": "U12",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/unikat/briefmarkenbogen#d3940 ",
+      "preis": "19.00"
+    }
+  ]
+}
