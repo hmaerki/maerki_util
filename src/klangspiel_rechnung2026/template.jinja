@@ -1,0 +1,41 @@
+#set page(margin: 1.5cm)
+
+= RECHNUNG
+
+*Datum:* {datum} {zeit}
+
+*Adresse:*
+{adresse}
+
+*Telefon:* {telefon}
+*Email:* {email}
+
+*Bemerkungen:*
+{bemerkungen}
+
+*Zahlung:* {za}
+
+== Positionen
+
+#table(
+	columns: (auto, auto, auto, 1fr, auto),
+	align: (left, left, left, left, right),
+	stroke: 0.4pt,
+	inset: 6pt,
+	table.header(
+		[Anzahl],
+		[Einheit],
+		[Wo],
+		[Text],
+		[Preis]
+	),
+{position_rows}
+)
+
+*Gewicht:* {gewicht_total}
+
+*Versandkosten Schweiz:* CHF {versandkosten}
+*Versandkosten EU:* CHF {versandkosten_eu}
+
+*Total CHF:* {total_chf}
+*Total g:* {g}

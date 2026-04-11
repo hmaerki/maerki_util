@@ -24,6 +24,7 @@ dependencies = [
     # "wxPython==4.2.5",
     "python-sane==2.9.2; sys_platform == 'linux'",
     "pywin32==311; sys_platform == 'win32'",
+    "typst==0.14.8"
 ]
 
 [project.optional-dependencies]
@@ -43,6 +44,7 @@ httpupload = "httpupload.httpupload:app"
 alpuma = "alpuma.alpuma:main"
 zulu = "zulu.zulu:main"
 zulup = "zulup.zulup:app"
+klangspiel_rechnung2026 = "klangspiel_rechnung2026.klangspiel_rechnung2026:app"
 
 [project.urls]
 Homepage = "https://github.com/hmaerki/maerki_util"
