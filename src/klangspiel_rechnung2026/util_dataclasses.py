@@ -5,6 +5,7 @@ import json
 import pathlib
 import re
 import typing
+from decimal import Decimal
 
 
 @dataclasses.dataclass(slots=True, frozen=True)
@@ -29,8 +30,29 @@ class RechnungData:
     gewicht_total: str
     versandkosten: str
     versandkosten_eu: str
-    total_chf: str
+    fTotal: str
     g: str
+
+    @property
+    def calculated_fTotalCHF(self) -> Decimal:
+        def _decimal_or_zero(value: str) -> Decimal:
+            normalized = value.strip().replace(",", ".")
+            if normalized == "":
+                return Decimal("0")
+            return Decimal(normalized)
+
+        total = Decimal("0")
+        for position in self.positionen:
+            anzahl = _decimal_or_zero(position.anzahl)
+            preis = _decimal_or_zero(position.preis)
+            total += anzahl * preis
+
+        total += _decimal_or_zero(self.versandkosten)
+        return total
+
+    @property
+    def fTotalCHF(self) -> Decimal:
+        return Decimal(self.fTotal)
 
     def write_json(self, filename_json: pathlib.Path) -> None:
         filename_json.write_text(
@@ -83,7 +105,7 @@ class RechnungData:
             gewicht_total=RechnungData._value_as_str(data_dict, "gewicht_total"),
             versandkosten=RechnungData._value_as_str(data_dict, "versandkosten"),
             versandkosten_eu=RechnungData._value_as_str(data_dict, "versandkosten_eu"),
-            total_chf=RechnungData._value_as_str(data_dict, "total_chf"),
+            fTotal=RechnungData._value_as_str(data_dict, "fTotal"),
             g=RechnungData._value_as_str(data_dict, "g"),
         )
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+from decimal import Decimal
 
 from klangspiel_rechnung2026.util_dataclasses import RechnungData
 
@@ -53,7 +54,9 @@ def render(data: RechnungData, filename_template: pathlib.Path | None = None) ->
         gewicht_total=_typst_escape(data.gewicht_total),
         versandkosten=_typst_escape(data.versandkosten),
         versandkosten_eu=_typst_escape(data.versandkosten_eu),
-        total_chf=_typst_escape(data.total_chf),
+        calculated_fTotalCHF=_typst_escape(
+            f"{data.calculated_fTotalCHF.quantize(Decimal('0.01'))}"
+        ),
         g=_typst_escape(data.g),
     )
     return rendered.rstrip() + "\n"

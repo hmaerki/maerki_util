@@ -56,5 +56,5 @@
 *Versandkosten Schweiz:* CHF 2.00
 *Versandkosten EU:* CHF 
 
-*Total CHF:* 
+*Total CHF:* 116.00
 *Total g:* 20.80

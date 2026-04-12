@@ -66,7 +66,7 @@ class XmlParser:
             gewicht_total=_clean_value(xml_values.get("GewichtTotal")),
             versandkosten=_clean_value(xml_values.get("Versandkosten")),
             versandkosten_eu=_clean_value(xml_values.get("VersandkostenEU")),
-            total_chf=_clean_value(xml_values.get("total_chf")),
+            fTotal=_clean_value(xml_values.get("fTotal")),
             g=_clean_value(xml_values.get("g")),
         )
 
