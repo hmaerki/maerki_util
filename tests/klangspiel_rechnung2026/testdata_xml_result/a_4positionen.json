@@ -1,0 +1,44 @@
+{
+  "adresse": "",
+  "telefon": "",
+  "email": "",
+  "bemerkungen": "",
+  "za": "Ja",
+  "datum": "2026-04-01",
+  "zeit": "08-49-34",
+  "positionen": [
+    {
+      "anzahl": "1",
+      "wo": "U62",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/unikat/briefmarken#d4842",
+      "preis": "57.00"
+    },
+    {
+      "anzahl": "1",
+      "wo": "U07",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/unikat/briefmarkenbogen#ad1433",
+      "preis": "19.00"
+    },
+    {
+      "anzahl": "1",
+      "wo": "U10",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/unikat/briefmarkenbogen#ad3744",
+      "preis": "19.00"
+    },
+    {
+      "anzahl": "1",
+      "wo": "U12",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/unikat/briefmarkenbogen#d3940",
+      "preis": "19.00"
+    }
+  ],
+  "gewicht_total": "Total Gewicht Lieferung ohne Verpackung ca. 88 Gramm",
+  "versandkosten": "2.00",
+  "versandkosten_eu": "",
+  "total_chf": "",
+  "g": "20.80"
+}
