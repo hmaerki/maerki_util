@@ -1,10 +1,52 @@
 import pathlib
 import xml.etree.ElementTree as ET
 
-from klangspiel_rechnung2026.util_dataclasses import RechnungData, parse_positions
+from klangspiel_rechnung2026.util_dataclasses import (
+    POSITION_TAG_RE,
+    Position,
+    RechnungData,
+)
 
 
 class XmlParser:
+    @staticmethod
+    def _position_sort_key(item: tuple[int, dict[str, str]]) -> int:
+        return item[0]
+
+    @staticmethod
+    def _clean_value(value: str | None) -> str:
+        if value is None:
+            return ""
+        return value.strip()
+
+    @staticmethod
+    def parse_positions(xml_values: dict[str, str]) -> list[Position]:
+        positions_raw: dict[int, dict[str, str]] = {}
+        for key, value in xml_values.items():
+            match = POSITION_TAG_RE.match(key)
+            if match is None:
+                continue
+            idx = int(match.group("idx"))
+            field = match.group("field")
+            fields = positions_raw.setdefault(idx, {})
+            fields[field] = XmlParser._clean_value(value)
+
+        positions: list[Position] = []
+        for _idx, fields in sorted(
+            positions_raw.items(),
+            key=XmlParser._position_sort_key,
+        ):
+            positions.append(
+                Position(
+                    anzahl=fields.get("Anzahl", ""),
+                    wo=fields.get("wo", ""),
+                    unit=fields.get("Unit", ""),
+                    text=fields.get("Text", ""),
+                    preis=fields.get("Preis", ""),
+                )
+            )
+        return positions
+
     @staticmethod
     def from_xml_values(xml_values: dict[str, str]) -> RechnungData:
         def _clean_value(value: str | None) -> str:
@@ -20,7 +62,7 @@ class XmlParser:
             za=_clean_value(xml_values.get("za")),
             datum=_clean_value(xml_values.get("Datum")),
             zeit=_clean_value(xml_values.get("Zeit")),
-            positionen=parse_positions(xml_values),
+            positionen=XmlParser.parse_positions(xml_values),
             gewicht_total=_clean_value(xml_values.get("GewichtTotal")),
             versandkosten=_clean_value(xml_values.get("Versandkosten")),
             versandkosten_eu=_clean_value(xml_values.get("VersandkostenEU")),
