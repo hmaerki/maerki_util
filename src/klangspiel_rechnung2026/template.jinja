@@ -35,8 +35,9 @@ Hombrechtikon {{ data.datum|typ }}
 #table(
   columns: (1fr, auto, auto),
   align: (left, right, right),
-  stroke: 0.4pt,
-  inset: 6pt,
+  // stroke: 0.4pt,
+  stroke: none,
+  inset: 4pt,
   table.header(
     [*Produkt*],
     [*Anzahl à*],
@@ -52,13 +53,12 @@ Hombrechtikon {{ data.datum|typ }}
   [{{ data.versandkosten|typ }}],
   table.cell(colspan: 2, align: right)[*Rechnungsbetrag*],
   [*{{ data.calculated_fTotalCHF|typ }}*],
+
+  table.cell(colspan: 2, align: right)[Davon sind MWST 8.1 % (CHE-108.547.136-MWST)],
+  [{{ data.ftotalmwst|typ }}],
 )
 
-#v(0.3cm)
-
-Davon sind MWST 8.1 % (CHE-108.547.136-MWST) #h(1em) {{ data.ftotalmwst|typ }}
-
-#v(0.5cm)
+#v(1fr)
 
 {% if data.za == "Ja" %}
 _Ich habe Ihre Zahlung erhalten, vielen Dank._

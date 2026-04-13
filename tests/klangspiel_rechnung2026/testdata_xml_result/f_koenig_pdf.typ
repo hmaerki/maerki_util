@@ -37,8 +37,9 @@ Lieferadresse: Nick König, Reinhold-Frei-Strasse 23, 8049 Zurich
 #table(
   columns: (1fr, auto, auto),
   align: (left, right, right),
-  stroke: 0.4pt,
-  inset: 6pt,
+  // stroke: 0.4pt,
+  stroke: none,
+  inset: 4pt,
   table.header(
     [*Produkt*],
     [*Anzahl à*],
@@ -55,13 +56,12 @@ Lieferadresse: Nick König, Reinhold-Frei-Strasse 23, 8049 Zurich
   [1.60],
   table.cell(colspan: 2, align: right)[*Rechnungsbetrag*],
   [*10.90*],
+
+  table.cell(colspan: 2, align: right)[Davon sind MWST 8.1 % (CHE-108.547.136-MWST)],
+  [0.81],
 )
 
-#v(0.3cm)
-
-Davon sind MWST 8.1 % (CHE-108.547.136-MWST) #h(1em) 0.81
-
-#v(0.5cm)
+#v(1fr)
 
 _Ich habe Ihre Zahlung erhalten, vielen Dank._
 
