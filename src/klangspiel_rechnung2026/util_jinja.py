@@ -23,8 +23,6 @@ def _typst_escape(value: str) -> str:
     ).strip()
 
 
-def _typst_cell(value: str) -> str:
-    return _typst_escape(value.replace("\n", " ").strip())
 
 
 def render(data: RechnungData) -> str:
