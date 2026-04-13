@@ -2,11 +2,7 @@ import logging
 import pathlib
 import xml.etree.ElementTree as ET
 
-from klangspiel_rechnung2026.util_dataclasses import (
-    POSITION_TAG_RE,
-    Position,
-    RechnungData,
-)
+from .util_dataclasses import Position, RechnungData
 
 logger = logging.getLogger(__file__)
 
@@ -23,55 +19,48 @@ class XmlParser:
         return value.strip()
 
     @staticmethod
-    def parse_positions(xml_values: dict[str, str]) -> list[Position]:
-        positions_raw: dict[int, dict[str, str]] = {}
-        for key, value in xml_values.items():
-            match = POSITION_TAG_RE.match(key)
-            if match is None:
-                continue
-            idx = int(match.group("idx"))
-            field = match.group("field")
-            fields = positions_raw.setdefault(idx, {})
-            fields[field] = XmlParser._clean_value(value)
-
-        positions: list[Position] = []
-        for _idx, fields in sorted(
-            positions_raw.items(),
-            key=XmlParser._position_sort_key,
-        ):
-            positions.append(
-                Position(
-                    anzahl=fields["Anzahl"],
-                    wo=fields["wo"],
-                    unit=fields["Unit"],
-                    text=fields["Text"],
-                    preis=fields["Preis"],
-                )
-            )
-        return positions
-
-    @staticmethod
     def from_xml_values(xml_values: dict[str, str]) -> RechnungData:
         def _clean_value(value: str | None) -> str:
+            assert value is not None
             if value is None:
                 return ""
             return value.strip()
 
         try:
+
+            class X:
+                def __init__(self, xml_values: dict[str, str]) -> None:
+                    self.positions: list[Position] = []
+                    ipos = 0
+                    while True:
+                        ipos += 1
+
+                        def get_pos(ipos: int, tag: str) -> str:
+                            return xml_values[f"Pos{ipos}{tag}"]
+
+                        try:
+                            self.positions.append(
+                                Position(
+                                    anzahl=get_pos(ipos, "Anzahl"),
+                                    wo=get_pos(ipos, "wo"),
+                                    unit=get_pos(ipos, "Unit"),
+                                    text=get_pos(ipos, "Text"),
+                                    preis=get_pos(ipos, "Preis"),
+                                )
+                            )
+                        except KeyError:
+                            break
+                    self.kwargs = {
+                        k.lower(): _clean_value(xml_values[k])
+                        for k in sorted(xml_values.keys())
+                        if (not k.startswith("Pos")) and (k != "links")
+                    }
+
+            x = X(xml_values)
+
             return RechnungData(
-                adresse=_clean_value(xml_values["adresse"]),
-                telefon=_clean_value(xml_values["Telefon"]),
-                email=_clean_value(xml_values["Email"]),
-                bemerkungen=_clean_value(xml_values["Bemerkungen"]),
-                za=_clean_value(xml_values["za"]),
-                datum=_clean_value(xml_values["Datum"]),
-                zeit=_clean_value(xml_values["Zeit"]),
-                positionen=XmlParser.parse_positions(xml_values),
-                gewicht_total=_clean_value(xml_values["GewichtTotal"]),
-                versandkosten=_clean_value(xml_values["Versandkosten"]),
-                versandkosten_eu=_clean_value(xml_values["VersandkostenEU"]),
-                fTotal=_clean_value(xml_values["fTotal"]),
-                g=_clean_value(xml_values["g"]),
+                positionen=x.positions,
+                **x.kwargs,
             )
         except KeyError as e:
             logger.error(f"{e}: Valid keys are {sorted(xml_values.keys())}")

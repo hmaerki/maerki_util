@@ -59,7 +59,7 @@ def create(
 
     filename_xml = typer.prompt("XML file path")
     data = XmlParser.parse_file(pathlib.Path(filename_xml))
-    data.write_datamatrix_png(filename_png=filename_xml.with_suffix(".png"))
+    # data.write_datamatrix_png(filename_png=filename_xml.with_suffix(".png"))
 
 
 if __name__ == "__main__":

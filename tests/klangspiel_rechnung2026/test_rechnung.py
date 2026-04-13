@@ -24,7 +24,9 @@ def cleanup_result_directory() -> None:
 
 
 @pytest.fixture(
-    params=sorted(path for path in DIRECTORY_TESTDATA_XML.iterdir() if path.is_file()),
+    params=sorted(
+        path for path in DIRECTORY_TESTDATA_XML.iterdir() if path.suffix == ".xml"
+    ),
     ids=lambda path: path.name,
 )
 def filename_xml(request: pytest.FixtureRequest) -> pathlib.Path:
@@ -32,10 +34,11 @@ def filename_xml(request: pytest.FixtureRequest) -> pathlib.Path:
 
 
 def test_rechnung(filename_xml: pathlib.Path) -> None:
-    data1 = XmlParser.parse_file(filename_xml=filename_xml)
-    data1.write_datamatrix_png(filename_xml.with_suffix(".png"))
-
     filename_json = DIRECTORY_TESTDATA_RESULT / f"{filename_xml.stem}.json"
+
+    data1 = XmlParser.parse_file(filename_xml=filename_xml)
+
+    data1.write_datamatrix_png(filename_json.with_suffix(".png"))
     data1.write_json(filename_json)
 
     diffCHF = data1.fTotalCHF - data1.calculated_fTotalCHF

@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import decimal
 import pathlib
-from decimal import Decimal
+
+import jinja2
 
 from klangspiel_rechnung2026.util_dataclasses import RechnungData
+
+FILENAME_TEMPLATE = pathlib.Path(__file__).with_name("template.jinja")
+assert FILENAME_TEMPLATE.is_file()
 
 
 def _typst_escape(value: str) -> str:
@@ -15,48 +20,24 @@ def _typst_escape(value: str) -> str:
         .replace("[", "\\[")
         .replace("]", "\\]")
         .replace("*", "\\*")
-    )
+    ).strip()
 
 
 def _typst_cell(value: str) -> str:
     return _typst_escape(value.replace("\n", " ").strip())
 
 
-def _format_position_rows(data: RechnungData) -> str:
-    lines: list[str] = []
-    for pos in data.positionen:
-        lines.extend(
-            [
-                f"  [{_typst_cell(pos.anzahl)}],",
-                f"  [{_typst_cell(pos.unit)}],",
-                f"  [{_typst_cell(pos.wo)}],",
-                f"  [{_typst_cell(pos.text)}],",
-                f"  [CHF {_typst_cell(pos.preis)}],",
-            ]
-        )
-    return "\n".join(lines)
+def render(data: RechnungData) -> str:
+    template_text = FILENAME_TEMPLATE.read_text(encoding="utf-8")
 
+    def typ_filter(value: str) -> str:
+        if isinstance(value, decimal.Decimal):
+            return value
+        assert isinstance(value, str), repr(value)
+        return _typst_escape(value)
 
-def render(data: RechnungData, filename_template: pathlib.Path | None = None) -> str:
-    if filename_template is None:
-        filename_template = pathlib.Path(__file__).with_name("template.jinja")
-    template = filename_template.read_text(encoding="utf-8")
-
-    rendered = template.format(
-        adresse=_typst_escape(data.adresse),
-        telefon=_typst_escape(data.telefon),
-        email=_typst_escape(data.email),
-        bemerkungen=_typst_escape(data.bemerkungen),
-        za=_typst_escape(data.za),
-        datum=_typst_escape(data.datum),
-        zeit=_typst_escape(data.zeit),
-        position_rows=_format_position_rows(data),
-        gewicht_total=_typst_escape(data.gewicht_total),
-        versandkosten=_typst_escape(data.versandkosten),
-        versandkosten_eu=_typst_escape(data.versandkosten_eu),
-        calculated_fTotalCHF=_typst_escape(
-            f"{data.calculated_fTotalCHF.quantize(Decimal('0.01'))}"
-        ),
-        g=_typst_escape(data.g),
-    )
+    env = jinja2.Environment(loader=jinja2.BaseLoader())
+    env.filters["typ"] = typ_filter
+    template = env.from_string(template_text)
+    rendered = template.render(data=data)
     return rendered.rstrip() + "\n"

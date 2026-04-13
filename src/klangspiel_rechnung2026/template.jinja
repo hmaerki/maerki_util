@@ -2,18 +2,28 @@
 
 = RECHNUNG
 
-*Datum:* {datum} {zeit}
+*Datum:* {{ data.datum|typ }} {{ data.zeit|typ }}
+
+
 
 *Adresse:*
-{adresse}
+{{ data.address1|typ }}
+{{ data.address2|typ }}
+{{ data.zipcode|typ }} {{ data.city|typ }}
 
-*Telefon:* {telefon}
-*Email:* {email}
+
+
+*Telefon:* {{ data.phone|typ }}
+*Email:* {{ data.email|typ }}
+
+
 
 *Bemerkungen:*
-{bemerkungen}
+{{ data.comments|typ }}
 
-*Zahlung:* {za}
+
+
+*Zahlung:* {{ data.za|typ }}
 
 == Positionen
 
@@ -29,13 +39,24 @@
 		[Text],
 		[Preis]
 	),
-{position_rows}
+{% for position in data.positionen %}
+	[{{ position.anzahl|typ }}],
+	[{{ position.unit|typ }}],
+	[{{ position.wo|typ }}],
+	[{{ position.text|typ }}],
+	[CHF {{ position.preis|typ }}],
+{% endfor %}
 )
 
-*Gewicht:* {gewicht_total}
 
-*Versandkosten Schweiz:* CHF {versandkosten}
-*Versandkosten EU:* CHF {versandkosten_eu}
 
-*Total CHF:* {calculated_fTotalCHF}
-*Total g:* {g}
+*Gewicht:* {{ data.gewichttotal|typ }}
+
+
+
+*Versandkosten Schweiz:* CHF {{ data.versandkosten|typ }}
+
+
+
+*Total CHF:* {{ data.calculated_fTotalCHF|typ }}
+*Total g:* {{ data.g|typ }}
