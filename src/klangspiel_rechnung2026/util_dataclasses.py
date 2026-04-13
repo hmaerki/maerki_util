@@ -103,14 +103,6 @@ class RechnungData:
         Generate a Data Matrix barcode with content YYMMDDHHmmSS<email> and save as PNG.
         out_path: output PNG file
         """
-        # try:
-        #     y, m, d = self.datum.split("-")
-        #     h, mi, s = self.zeit.split("-")
-        #     code = f"{y[2:]}{m}{d}{h}{mi}{s}{self.email}"
-        # except Exception as e:
-        #     raise ValueError(
-        #         f"Invalid datum/zeit format: {self.datum} {self.zeit}"
-        #     ) from e
         datetime = f"{self.datum[2:]}{self.zeit}".replace("-", "")
         code = f"{datetime}{self.email}"
 
