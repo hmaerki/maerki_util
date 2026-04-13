@@ -106,7 +106,7 @@ class RechnungData:
         out_path: output PNG file
         """
         datetime = f"{self.datum[2:]}{self.zeit}".replace("-", "")
-        code = f"{datetime}{self.email}"
+        code = f'"{datetime}{self.email}"'
 
         barcode = treepoem.generate_barcode(
             barcode_type="datamatrix",

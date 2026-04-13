@@ -5,7 +5,6 @@
   #text(size: 9pt)[
     www.klangspiel.ch \
     Switzerland \
-    Tel: +41 55 508 22 72
 
     Peter Märki
 
@@ -73,9 +72,12 @@ Lieferadresse: Roger Koch, 11 Kranichweg, 3074 Muri b. Bern
   [0.15],
 )
 
-#v(1fr)
+#v(1cm)
 
 _Ich habe Ihre Zahlung erhalten, vielen Dank._
+
+#v(1fr)
+
 
 Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Konto Raiffeisenbank Männedorf IBAN CH69 8080 8003 1598 6252 0, IID 80808, SWIFT: RAIFCH22, Begünstigter: Peter Märki, Zelglistrasse 49, 8634 Hombrechtikon. Bei Bankzahlung: Bitte Ref Nr. angeben. Nach Möglichkeit mit Giro, damit keine Spesen anfallen.
 
