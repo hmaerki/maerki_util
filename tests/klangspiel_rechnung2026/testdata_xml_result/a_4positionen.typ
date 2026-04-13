@@ -21,22 +21,22 @@
 
 #pad(left: 10cm)[
 #text(size: 12pt, weight: "bold")[
-{{ data.invoice_company1|typ }} {{ data.invoice_company2|typ }} \
-{{ data.invoice_firstname|typ }} {{ data.invoice_lastname|typ }} \
-{{ data.invoice_address1|typ }} {{ data.invoice_address2|typ }} \
-{{ data.invoice_zipcode|typ }} {{ data.invoice_city|typ }}
+  \
+Roger Koch \
+11 Kranichweg  \
+3074 Muri b. Bern
 ]
 ]
 
 
 #v(1cm)
 
-Hombrechtikon {{ data.datum|typ }}
+Hombrechtikon 2026-04-01
 
 #v(0.5cm)
 
 *Rechnung* \
-{{ data.lieferadresseinfo|typ }}
+Lieferadresse: Roger Koch, 11 Kranichweg, 3074 Muri b. Bern
 
 #v(0.3cm)
 
@@ -51,34 +51,39 @@ Hombrechtikon {{ data.datum|typ }}
     [*Anzahl à*],
     [*Total CHF*],
   ),
-  {% for position in data.positionen %}
-  [{{ position.text|typ }}],
-  [{{ position.anzahl|typ }} #h(2em) {{ position.calculated_total|typ }}],
-  [{{ position.preis|typ }}],
-  {% endfor %}
+  [www.klangspiel.ch/unikat/briefmarken\#d4842],
+  [1 #h(2em) 57.00],
+  [57.00],
+  [www.klangspiel.ch/unikat/briefmarkenbogen\#ad1433],
+  [1 #h(2em) 19.00],
+  [19.00],
+  [www.klangspiel.ch/unikat/briefmarkenbogen\#ad3744],
+  [1 #h(2em) 19.00],
+  [19.00],
+  [www.klangspiel.ch/unikat/briefmarkenbogen\#d3940],
+  [1 #h(2em) 19.00],
+  [19.00],
   [Versandkosten (Lieferung Schweiz)],
   [],
-  [{{ data.versandkosten|typ }}],
+  [2.00],
   table.cell(colspan: 2, align: right)[*Rechnungsbetrag*],
-  [*{{ data.calculated_fTotalCHF|typ }}*],
+  [*116.00*],
 
   table.cell(colspan: 2, align: right)[Davon sind MWST 8.1 % (CHE-108.547.136-MWST)],
-  [{{ data.ftotalmwst|typ }}],
+  [0.15],
 )
 
 #v(1fr)
 
-{% if data.za == "Ja" %}
 _Ich habe Ihre Zahlung erhalten, vielen Dank._
 
-{% endif %}
 Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Konto Raiffeisenbank Männedorf IBAN CH69 8080 8003 1598 6252 0, IID 80808, SWIFT: RAIFCH22, Begünstigter: Peter Märki, Zelglistrasse 49, 8634 Hombrechtikon. Bei Bankzahlung: Bitte Ref Nr. angeben. Nach Möglichkeit mit Giro, damit keine Spesen anfallen.
 
 Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 
 #page(paper: "a5", flipped: true, margin: (left: 1cm, top: 2cm, right: 1cm, bottom: 2cm))[
 	#place(top + left, dx: 2cm, dy: 8cm)[
-		#image("{{ filename_datamatrix_png }}")
+		#image("a_4positionen.png")
 	]
 
 	#place(top + left, dx: 2cm, dy: 3cm)[
@@ -96,10 +101,10 @@ Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 	
 	#pad(left: 8cm, top: 6cm)[
 		#text(size: 24pt, weight: "bold")[
-			{{ data.company1|typ }} {{ data.company2|typ }} \
-			{{ data.firstname|typ }} {{ data.lastname|typ }} \
-			{{ data.address1|typ }}	{{ data.address2|typ }} \
-			{{ data.zipcode|typ }} {{ data.city|typ }}
+			  \
+			Roger Koch \
+			11 Kranichweg	 \
+			3074 Muri b. Bern
 		]  
 	]
 ]

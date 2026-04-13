@@ -38,14 +38,15 @@ def test_rechnung(filename_xml: pathlib.Path) -> None:
 
     data1 = XmlParser.parse_file(filename_xml=filename_xml)
 
-    data1.write_datamatrix_png(filename_json.with_suffix(".png"))
+    filename_datamatrix_png = filename_json.with_suffix(".png")
+    data1.write_datamatrix_png(filename_datamatrix_png)
     data1.write_json(filename_json)
 
     diffCHF = data1.fTotalCHF - data1.calculated_fTotalCHF
     assert abs(diffCHF) < 0.10, (data1.fTotalCHF, data1.calculated_fTotalCHF)
 
     data2 = RechnungData.read_json(filename_json)
-    text_typ = render(data2)
+    text_typ = render(data2, filename_datamatrix_png=filename_datamatrix_png)
 
     filename_typst = DIRECTORY_TESTDATA_RESULT / f"{filename_xml.stem}.typ"
     filename_typst.write_text(text_typ, encoding="utf-8")

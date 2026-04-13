@@ -23,39 +23,7 @@ def _typst_escape(value: str) -> str:
     ).strip()
 
 
-def _typst_address_block(data: RechnungData, prefix: str = "") -> str:
-    lines: list[str] = []
-    for field in ("company1", "company2"):
-        value: str = getattr(data, f"{prefix}{field}")
-        if value.strip():
-            lines.append(_typst_escape(value))
-    firstname: str = getattr(data, f"{prefix}firstname")
-    lastname: str = getattr(data, f"{prefix}lastname")
-    name = f"{_typst_escape(firstname)} {_typst_escape(lastname)}".strip()
-    if name:
-        lines.append(name)
-    for field in ("address1", "address2"):
-        value = getattr(data, f"{prefix}{field}")
-        if value.strip():
-            lines.append(_typst_escape(value))
-    zipcode: str = getattr(data, f"{prefix}zipcode")
-    city: str = getattr(data, f"{prefix}city")
-    zip_city = f"{_typst_escape(zipcode)} {_typst_escape(city)}".strip()
-    if zip_city:
-        lines.append(zip_city)
-    return " \\\n".join(lines)
-
-
-def _line_total_filter(position: Position) -> str:
-    anzahl = int(position.anzahl.strip())
-    preis_str = position.preis.strip().replace(",", ".")
-    if not preis_str:
-        return "0.00"
-    total = anzahl * decimal.Decimal(preis_str)
-    return f"{total:.2f}"
-
-
-def render(data: RechnungData) -> str:
+def render(data: RechnungData, filename_datamatrix_png: pathlib.Path) -> str:
     template_text = FILENAME_TEMPLATE.read_text(encoding="utf-8")
 
     def typ_filter(value: str) -> str:
@@ -70,9 +38,9 @@ def render(data: RechnungData) -> str:
         lstrip_blocks=True,
     )
     env.filters["typ"] = typ_filter
-    env.filters["line_total"] = _line_total_filter
-    env.filters["invoice_address"] = lambda d: _typst_address_block(d, "invoice_")
-    env.filters["delivery_address"] = lambda d: _typst_address_block(d, "")
     template = env.from_string(template_text)
-    rendered = template.render(data=data)
+    rendered = template.render(
+        data=data,
+        filename_datamatrix_png=filename_datamatrix_png.name,
+    )
     return rendered.rstrip() + "\n"

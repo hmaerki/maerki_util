@@ -21,22 +21,22 @@
 
 #pad(left: 10cm)[
 #text(size: 12pt, weight: "bold")[
-{{ data.invoice_company1|typ }} {{ data.invoice_company2|typ }} \
-{{ data.invoice_firstname|typ }} {{ data.invoice_lastname|typ }} \
-{{ data.invoice_address1|typ }} {{ data.invoice_address2|typ }} \
-{{ data.invoice_zipcode|typ }} {{ data.invoice_city|typ }}
+  \
+  \
+  \
+ 
 ]
 ]
 
 
 #v(1cm)
 
-Hombrechtikon {{ data.datum|typ }}
+Hombrechtikon 2026-02-04
 
 #v(0.5cm)
 
 *Rechnung* \
-{{ data.lieferadresseinfo|typ }}
+
 
 #v(0.3cm)
 
@@ -51,34 +51,28 @@ Hombrechtikon {{ data.datum|typ }}
     [*Anzahl à*],
     [*Total CHF*],
   ),
-  {% for position in data.positionen %}
-  [{{ position.text|typ }}],
-  [{{ position.anzahl|typ }} #h(2em) {{ position.calculated_total|typ }}],
-  [{{ position.preis|typ }}],
-  {% endfor %}
+  [www.klangspiel.ch/trinkente_klein_gruen 34.20 abzüglich 2.6% Rabatt],
+  [2 #h(2em) 66.62],
+  [33.31],
   [Versandkosten (Lieferung Schweiz)],
   [],
-  [{{ data.versandkosten|typ }}],
+  [9.00],
   table.cell(colspan: 2, align: right)[*Rechnungsbetrag*],
-  [*{{ data.calculated_fTotalCHF|typ }}*],
+  [*75.62*],
 
   table.cell(colspan: 2, align: right)[Davon sind MWST 8.1 % (CHE-108.547.136-MWST)],
-  [{{ data.ftotalmwst|typ }}],
+  [5.67],
 )
 
 #v(1fr)
 
-{% if data.za == "Ja" %}
-_Ich habe Ihre Zahlung erhalten, vielen Dank._
-
-{% endif %}
 Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Konto Raiffeisenbank Männedorf IBAN CH69 8080 8003 1598 6252 0, IID 80808, SWIFT: RAIFCH22, Begünstigter: Peter Märki, Zelglistrasse 49, 8634 Hombrechtikon. Bei Bankzahlung: Bitte Ref Nr. angeben. Nach Möglichkeit mit Giro, damit keine Spesen anfallen.
 
 Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 
 #page(paper: "a5", flipped: true, margin: (left: 1cm, top: 2cm, right: 1cm, bottom: 2cm))[
 	#place(top + left, dx: 2cm, dy: 8cm)[
-		#image("{{ filename_datamatrix_png }}")
+		#image("e_rabatt.png")
 	]
 
 	#place(top + left, dx: 2cm, dy: 3cm)[
@@ -96,10 +90,10 @@ Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 	
 	#pad(left: 8cm, top: 6cm)[
 		#text(size: 24pt, weight: "bold")[
-			{{ data.company1|typ }} {{ data.company2|typ }} \
-			{{ data.firstname|typ }} {{ data.lastname|typ }} \
-			{{ data.address1|typ }}	{{ data.address2|typ }} \
-			{{ data.zipcode|typ }} {{ data.city|typ }}
+			  \
+			Ruth Kilchenmann \
+			Meilenerstrasse 62	 \
+			8132 Egg
 		]  
 	]
 ]

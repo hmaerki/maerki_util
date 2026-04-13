@@ -17,6 +17,10 @@ class Position:
     text: str
     preis: str
 
+    @property
+    def calculated_total(self) -> Decimal:
+        return int(self.anzahl) * Decimal(self.preis)
+
 
 @dataclasses.dataclass(slots=True, frozen=True)
 class RechnungData:
@@ -65,9 +69,7 @@ class RechnungData:
 
         total = Decimal("0")
         for position in self.positionen:
-            anzahl = int(position.anzahl)
-            preis = _decimal_or_zero(position.preis)
-            total += anzahl * preis
+            total += position.calculated_total
 
         total += _decimal_or_zero(self.versandkosten)
         return total

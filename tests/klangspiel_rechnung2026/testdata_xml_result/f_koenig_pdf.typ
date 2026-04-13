@@ -1,5 +1,5 @@
 #set page(paper: "a4", margin: (top: 1.5cm, bottom: 2cm, left: 2cm, right: 1.5cm))
-#set text(size: 10pt)
+#set text(size: 10pt, font: "Liberation Sans")
 
 #align(right)[
   #text(size: 9pt)[
@@ -19,9 +19,15 @@
 
 #v(0.5cm)
 
+#pad(left: 10cm)[
+#text(size: 12pt, weight: "bold")[
+  \
 Matthias König \
-Reinhold-Frei-Strasse 23 \
+Reinhold-Frei-Strasse 23  \
 8049 Zurich
+]
+]
+
 
 #v(1cm)
 
@@ -69,10 +75,30 @@ Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Kont
 
 Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 
-#page(margin: (left: 2cm, top: 5cm, right: 2cm, bottom: 2cm))[
-  #text(size: 12pt)[
-    Nick König \
-Reinhold-Frei-Strasse 23 \
-8049 Zurich
-  ]
+#page(paper: "a5", flipped: true, margin: (left: 1cm, top: 2cm, right: 1cm, bottom: 2cm))[
+	#place(top + left, dx: 2cm, dy: 8cm)[
+		#image("f_koenig_pdf.png")
+	]
+
+	#place(top + left, dx: 2cm, dy: 3cm)[
+		#rotate(-90deg)[
+			#text(size: 12pt)[
+				Absender: \
+				www.klangspiel.ch \
+				Peter Märki \
+				Zelglistrasse 49 \
+				CH-8634 Hombrechtikon
+			]
+		]
+	]
+
+	
+	#pad(left: 8cm, top: 6cm)[
+		#text(size: 24pt, weight: "bold")[
+			  \
+			Nick König \
+			Reinhold-Frei-Strasse 23	 \
+			8049 Zurich
+		]  
+	]
 ]
