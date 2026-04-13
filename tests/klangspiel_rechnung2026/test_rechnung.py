@@ -53,15 +53,3 @@ def test_rechnung(filename_xml: pathlib.Path) -> None:
     util_typst.render_pdf(
         text_typ=text_typ, filename_pdf=filename_typst.with_suffix(".pdf")
     )
-
-    # assert data.adresse.startswith("Fornerod Jean-Claude")
-    # assert len(data.positionen) == 1
-    # assert data.positionen[0].preis == "98.00"
-    # assert "RECHNUNG" in text_typ
-    # assert "#table(" in text_typ
-    # assert "[Anzahl]" in text_typ
-    # assert "[Einheit]" in text_typ
-    # assert "[1]," in text_typ
-    # assert "[Stück]," in text_typ
-    # assert "*Total CHF:* 104.30" in text_typ
-    # assert filename_typst.read_text(encoding="utf-8") == text_typ

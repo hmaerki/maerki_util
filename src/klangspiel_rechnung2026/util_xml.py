@@ -30,20 +30,25 @@ class XmlParser:
 
             class X:
                 def __init__(self, xml_values: dict[str, str]) -> None:
-                    self.positions: list[Position] = []
+                    self.positionen: list[Position] = []
                     ipos = 0
                     while True:
                         ipos += 1
 
-                        def get_pos(ipos: int, tag: str) -> str:
-                            return xml_values[f"Pos{ipos}{tag}"]
+                        def get_pos(ipos: int, tag: str, optional=False) -> str:
+                            try:
+                                return xml_values[f"Pos{ipos}{tag}"]
+                            except KeyError:
+                                if optional:
+                                    return ""
+                                raise
 
                         try:
-                            self.positions.append(
+                            self.positionen.append(
                                 Position(
                                     anzahl=get_pos(ipos, "Anzahl"),
-                                    wo=get_pos(ipos, "wo"),
-                                    unit=get_pos(ipos, "Unit"),
+                                    wo=get_pos(ipos, "wo", optional=True),
+                                    unit=get_pos(ipos, "Unit", optional=True),
                                     text=get_pos(ipos, "Text"),
                                     preis=get_pos(ipos, "Preis"),
                                 )
@@ -59,7 +64,7 @@ class XmlParser:
             x = X(xml_values)
 
             return RechnungData(
-                positionen=x.positions,
+                positionen=x.positionen,
                 **x.kwargs,
             )
         except KeyError as e:

@@ -1,0 +1,51 @@
+{
+  "address1": "Reinhold-Frei-Strasse 23",
+  "address2": "",
+  "city": "Zurich",
+  "comments": "",
+  "company1": "",
+  "company2": "",
+  "datum": "2026-02-22",
+  "einschreiben": "",
+  "email": "klangspiel@streams.ch",
+  "firstname": "Nick",
+  "ftotal": "10.90",
+  "ftotalmwst": "0.81",
+  "g": "7.74",
+  "gewichttotal": "Total Gewicht Lieferung ohne Verpackung ca. 25 Gramm",
+  "invoice_address1": "Reinhold-Frei-Strasse 23",
+  "invoice_address2": "",
+  "invoice_city": "Zurich",
+  "invoice_company1": "",
+  "invoice_company2": "",
+  "invoice_firstname": "Matthias",
+  "invoice_lastname": "König",
+  "invoice_zipcode": "8049",
+  "land": "",
+  "lastname": "König",
+  "lieferadresse": "Nick König\nReinhold-Frei-Strasse 23\n8049 Zurich",
+  "lieferadresseinfo": "Lieferadresse: Nick König, Reinhold-Frei-Strasse 23, 8049 Zurich",
+  "phone": "0793536814",
+  "priority": "",
+  "rechnungsadresse": "Matthias König\nReinhold-Frei-Strasse 23\n8049 Zurich",
+  "versandkosten": "1.60",
+  "za": "Ja",
+  "zeit": "21-34-27",
+  "zipcode": "8049",
+  "positionen": [
+    {
+      "anzahl": "1",
+      "wo": "L23.3 6.3",
+      "unit": "Stück",
+      "text": "www.klangspiel.ch/cointrap_transparent ",
+      "preis": " 4.30"
+    },
+    {
+      "anzahl": "1",
+      "wo": "",
+      "unit": " ",
+      "text": "Kleinmengenzuschlag",
+      "preis": "5.00"
+    }
+  ]
+}

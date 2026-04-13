@@ -65,7 +65,7 @@ class RechnungData:
 
         total = Decimal("0")
         for position in self.positionen:
-            anzahl = _decimal_or_zero(position.anzahl)
+            anzahl = int(position.anzahl)
             preis = _decimal_or_zero(position.preis)
             total += anzahl * preis
 
