@@ -1,62 +1,75 @@
-#set page(margin: 1.5cm)
+#set page(paper: "a4", margin: (top: 1.5cm, bottom: 2cm, left: 2cm, right: 1.5cm))
+#set text(size: 10pt)
 
-= RECHNUNG
+#align(right)[
+  #text(size: 9pt)[
+    www.klangspiel.ch \
+    Switzerland \
+    Tel: +41 55 508 22 72
 
-*Datum:* {{ data.datum|typ }} {{ data.zeit|typ }}
+    Peter Märki
 
+    Zelglistrasse 49 \
+    peter\@klangspiel.ch
 
+    8634 Hombrechtikon \
+    CHE-108.547.136
+  ]
+]
 
-*Adresse:*
-{{ data.address1|typ }}
-{{ data.address2|typ }}
-{{ data.zipcode|typ }} {{ data.city|typ }}
+#v(0.5cm)
 
+{{ data|invoice_address }}
 
+#v(1cm)
 
-*Telefon:* {{ data.phone|typ }}
-*Email:* {{ data.email|typ }}
+Hombrechtikon {{ data.datum|typ }}
 
+#v(0.5cm)
 
+*Rechnung* \
+{{ data.lieferadresseinfo|typ }}
 
-*Bemerkungen:*
-{{ data.comments|typ }}
-
-
-
-*Zahlung:* {{ data.za|typ }}
-
-== Positionen
+#v(0.3cm)
 
 #table(
-	columns: (auto, auto, auto, 1fr, auto),
-	align: (left, left, left, left, right),
-	stroke: 0.4pt,
-	inset: 6pt,
-	table.header(
-		[Anzahl],
-		[Einheit],
-		[Wo],
-		[Text],
-		[Preis]
-	),
-{% for position in data.positionen %}
-	[{{ position.anzahl|typ }}],
-	[{{ position.unit|typ }}],
-	[{{ position.wo|typ }}],
-	[{{ position.text|typ }}],
-	[CHF {{ position.preis|typ }}],
-{% endfor %}
+  columns: (1fr, auto, auto),
+  align: (left, right, right),
+  stroke: 0.4pt,
+  inset: 6pt,
+  table.header(
+    [*Produkt*],
+    [*Anzahl à*],
+    [*Total CHF*],
+  ),
+  {% for position in data.positionen %}
+  [{{ position.text|typ }}],
+  [{{ position.anzahl|typ }} #h(2em) {{ position.preis|typ }}],
+  [{{ position|line_total }}],
+  {% endfor %}
+  [Versandkosten (Lieferung Schweiz)],
+  [],
+  [{{ data.versandkosten|typ }}],
+  table.cell(colspan: 2, align: right)[*Rechnungsbetrag*],
+  [*{{ data.calculated_fTotalCHF|typ }}*],
 )
 
+#v(0.3cm)
 
+Davon sind MWST 8.1 % (CHE-108.547.136-MWST) #h(1em) {{ data.ftotalmwst|typ }}
 
-*Gewicht:* {{ data.gewichttotal|typ }}
+#v(0.5cm)
 
+{% if data.za == "Ja" %}
+_Ich habe Ihre Zahlung erhalten, vielen Dank._
 
+{% endif %}
+Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Konto Raiffeisenbank Männedorf IBAN CH69 8080 8003 1598 6252 0, IID 80808, SWIFT: RAIFCH22, Begünstigter: Peter Märki, Zelglistrasse 49, 8634 Hombrechtikon. Bei Bankzahlung: Bitte Ref Nr. angeben. Nach Möglichkeit mit Giro, damit keine Spesen anfallen.
 
-*Versandkosten Schweiz:* CHF {{ data.versandkosten|typ }}
+Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 
-
-
-*Total CHF:* {{ data.calculated_fTotalCHF|typ }}
-*Total g:* {{ data.g|typ }}
+#page(margin: (left: 2cm, top: 5cm, right: 2cm, bottom: 2cm))[
+  #text(size: 12pt)[
+    {{ data|delivery_address }}
+  ]
+]

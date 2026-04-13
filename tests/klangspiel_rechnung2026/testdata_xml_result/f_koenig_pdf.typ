@@ -1,68 +1,78 @@
-#set page(margin: 1.5cm)
+#set page(paper: "a4", margin: (top: 1.5cm, bottom: 2cm, left: 2cm, right: 1.5cm))
+#set text(size: 10pt)
 
-= RECHNUNG
+#align(right)[
+  #text(size: 9pt)[
+    www.klangspiel.ch \
+    Switzerland \
+    Tel: +41 55 508 22 72
 
-*Datum:* 2026-02-22 21-34-27
+    Peter Märki
 
+    Zelglistrasse 49 \
+    peter\@klangspiel.ch
 
+    8634 Hombrechtikon \
+    CHE-108.547.136
+  ]
+]
 
-*Adresse:*
-Reinhold-Frei-Strasse 23
+#v(0.5cm)
 
+Matthias König \
+Reinhold-Frei-Strasse 23 \
 8049 Zurich
 
+#v(1cm)
 
+Hombrechtikon 2026-02-22
 
-*Telefon:* 0793536814
-*Email:* klangspiel\@streams.ch
+#v(0.5cm)
 
+*Rechnung* \
+Lieferadresse: Nick König, Reinhold-Frei-Strasse 23, 8049 Zurich
 
-
-*Bemerkungen:*
-
-
-
-
-*Zahlung:* Ja
-
-== Positionen
+#v(0.3cm)
 
 #table(
-	columns: (auto, auto, auto, 1fr, auto),
-	align: (left, left, left, left, right),
-	stroke: 0.4pt,
-	inset: 6pt,
-	table.header(
-		[Anzahl],
-		[Einheit],
-		[Wo],
-		[Text],
-		[Preis]
-	),
-
-	[1],
-	[Stück],
-	[L23.3 6.3],
-	[www.klangspiel.ch/cointrap_transparent],
-	[CHF 4.30],
-
-	[1],
-	[],
-	[],
-	[Kleinmengenzuschlag],
-	[CHF 5.00],
-
+  columns: (1fr, auto, auto),
+  align: (left, right, right),
+  stroke: 0.4pt,
+  inset: 6pt,
+  table.header(
+    [*Produkt*],
+    [*Anzahl à*],
+    [*Total CHF*],
+  ),
+  [www.klangspiel.ch/cointrap_transparent],
+  [1 #h(2em) 4.30],
+  [4.30],
+  [Kleinmengenzuschlag],
+  [1 #h(2em) 5.00],
+  [5.00],
+  [Versandkosten (Lieferung Schweiz)],
+  [],
+  [1.60],
+  table.cell(colspan: 2, align: right)[*Rechnungsbetrag*],
+  [*10.90*],
 )
 
+#v(0.3cm)
 
+Davon sind MWST 8.1 % (CHE-108.547.136-MWST) #h(1em) 0.81
 
-*Gewicht:* Total Gewicht Lieferung ohne Verpackung ca. 25 Gramm
+#v(0.5cm)
 
+_Ich habe Ihre Zahlung erhalten, vielen Dank._
 
+Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Konto Raiffeisenbank Männedorf IBAN CH69 8080 8003 1598 6252 0, IID 80808, SWIFT: RAIFCH22, Begünstigter: Peter Märki, Zelglistrasse 49, 8634 Hombrechtikon. Bei Bankzahlung: Bitte Ref Nr. angeben. Nach Möglichkeit mit Giro, damit keine Spesen anfallen.
 
-*Versandkosten Schweiz:* CHF 1.60
+Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 
-
-
-*Total CHF:* 10.90
-*Total g:* 7.74
+#page(margin: (left: 2cm, top: 5cm, right: 2cm, bottom: 2cm))[
+  #text(size: 12pt)[
+    Nick König \
+Reinhold-Frei-Strasse 23 \
+8049 Zurich
+  ]
+]

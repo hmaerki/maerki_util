@@ -1,69 +1,77 @@
-#set page(margin: 1.5cm)
+#set page(paper: "a4", margin: (top: 1.5cm, bottom: 2cm, left: 2cm, right: 1.5cm))
+#set text(size: 10pt)
 
-= RECHNUNG
+#align(right)[
+  #text(size: 9pt)[
+    www.klangspiel.ch \
+    Switzerland \
+    Tel: +41 55 508 22 72
 
-*Datum:* 2025-05-13 06-50-50
+    Peter Märki
 
+    Zelglistrasse 49 \
+    peter\@klangspiel.ch
 
+    8634 Hombrechtikon \
+    CHE-108.547.136
+  ]
+]
 
-*Adresse:*
-Rödgener Str. 30a
-Deutschland
-04509 Delitzsch
-
-
-
-*Telefon:* +491721882278
-*Email:* ka.mu\@gmx.de
-
-
-
-*Bemerkungen:*
-Ich kann leider Deutschland als "Land" nicht auswählen. Ich würde mich aber sehr freuen, wenn ich diese Artikel bei Ihnen bestellen könnte, da ich schon lange auf der Suche danach bin und meine Freundin sich diesen Wippstorch schon lange wünscht. Sie hat am 24.05. ihren fünfzigsten Geburtstag. Bitte geben Sie Bescheid ob das klappt.
-Mit freundlichen Grüßen Karsten Müller
+#v(0.5cm)
 
 
 
-*Zahlung:* Ja
+#v(1cm)
 
-== Positionen
+Hombrechtikon 2025-05-13
+
+#v(0.5cm)
+
+*Rechnung* \
+
+
+#v(0.3cm)
 
 #table(
-	columns: (auto, auto, auto, 1fr, auto),
-	align: (left, left, left, left, right),
-	stroke: 0.4pt,
-	inset: 6pt,
-	table.header(
-		[Anzahl],
-		[Einheit],
-		[Wo],
-		[Text],
-		[Preis]
-	),
-
-	[2],
-	[Stück],
-	[L4.1],
-	[www.klangspiel.ch/trinkente_klein_blau 34.20 abzüglich 2.6% Rabatt],
-	[CHF 33.31],
-
-	[2],
-	[Stück],
-	[L6.1],
-	[www.klangspiel.ch/trinkente_klein_gruen 34.20 abzüglich 2.6% Rabatt],
-	[CHF 33.31],
-
+  columns: (1fr, auto, auto),
+  align: (left, right, right),
+  stroke: 0.4pt,
+  inset: 6pt,
+  table.header(
+    [*Produkt*],
+    [*Anzahl à*],
+    [*Total CHF*],
+  ),
+  [www.klangspiel.ch/trinkente_klein_blau 34.20 abzüglich 2.6% Rabatt],
+  [2 #h(2em) 33.31],
+  [66.62],
+  [www.klangspiel.ch/trinkente_klein_gruen 34.20 abzüglich 2.6% Rabatt],
+  [2 #h(2em) 33.31],
+  [66.62],
+  [Versandkosten (Lieferung Schweiz)],
+  [],
+  [9.00],
+  table.cell(colspan: 2, align: right)[*Rechnungsbetrag*],
+  [*142.24*],
 )
 
+#v(0.3cm)
 
+Davon sind MWST 8.1 % (CHE-108.547.136-MWST) #h(1em) 10.67
 
-*Gewicht:* Total Gewicht Lieferung ohne Verpackung ca. 980 Gramm
+#v(0.5cm)
 
+_Ich habe Ihre Zahlung erhalten, vielen Dank._
 
+Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Konto Raiffeisenbank Männedorf IBAN CH69 8080 8003 1598 6252 0, IID 80808, SWIFT: RAIFCH22, Begünstigter: Peter Märki, Zelglistrasse 49, 8634 Hombrechtikon. Bei Bankzahlung: Bitte Ref Nr. angeben. Nach Möglichkeit mit Giro, damit keine Spesen anfallen.
 
-*Versandkosten Schweiz:* CHF 9.00
+Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 
-
-
-*Total CHF:* 142.24
-*Total g:* 97.25
+#page(margin: (left: 2cm, top: 5cm, right: 2cm, bottom: 2cm))[
+  #text(size: 12pt)[
+    Karsten Müller \
+Rödgener Str. 30a \
+Deutschland \
+04509 Delitzsch
+  ]
+]
