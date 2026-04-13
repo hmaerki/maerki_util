@@ -32,6 +32,8 @@
   "za": "Ja",
   "zeit": "08-49-34",
   "zipcode": "3074",
+  "rechnung_nr": "",
+  "erhalten": false,
   "positionen": [
     {
       "anzahl": "1",

@@ -4,10 +4,7 @@ import pathlib
 
 import pytest
 
-from klangspiel_rechnung2026 import util_typst
-from klangspiel_rechnung2026.util_dataclasses import RechnungData
-from klangspiel_rechnung2026.util_jinja import render
-from klangspiel_rechnung2026.util_xml import XmlParser
+from klangspiel_rechnung2026 import util_dataclasses, util_jinja2, util_typst, util_xml
 
 # pylint: disable=redefined-outer-name
 DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
@@ -36,7 +33,7 @@ def filename_xml(request: pytest.FixtureRequest) -> pathlib.Path:
 def test_rechnung(filename_xml: pathlib.Path) -> None:
     filename_json = DIRECTORY_TESTDATA_RESULT / f"{filename_xml.stem}.json"
 
-    data1 = XmlParser.parse_file(filename_xml=filename_xml)
+    data1 = util_xml.XmlParser.parse_file(filename_xml=filename_xml)
 
     filename_datamatrix_png = filename_json.with_suffix(".png")
     data1.write_datamatrix_png(filename_datamatrix_png)
@@ -45,8 +42,10 @@ def test_rechnung(filename_xml: pathlib.Path) -> None:
     diffCHF = data1.fTotalCHF - data1.calculated_fTotalCHF
     assert abs(diffCHF) < 0.10, (data1.fTotalCHF, data1.calculated_fTotalCHF)
 
-    data2 = RechnungData.read_json(filename_json)
-    text_typ = render(data2, filename_datamatrix_png=filename_datamatrix_png)
+    data2 = util_dataclasses.RechnungData.read_json(filename_json)
+    text_typ = util_jinja2.render(
+        data2, filename_datamatrix_png=filename_datamatrix_png
+    )
 
     filename_typst = DIRECTORY_TESTDATA_RESULT / f"{filename_xml.stem}.typ"
     filename_typst.write_text(text_typ, encoding="utf-8")

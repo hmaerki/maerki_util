@@ -32,6 +32,8 @@
   "za": "Ja, ref e-post",
   "zeit": "09-57-52",
   "zipcode": "6003",
+  "rechnung_nr": "",
+  "erhalten": false,
   "positionen": [
     {
       "anzahl": "1",

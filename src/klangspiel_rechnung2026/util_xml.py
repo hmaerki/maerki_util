@@ -76,7 +76,7 @@ class XmlParser:
         marker = "<?xml"
         start = text.find(marker)
         if start < 0:
-            raise ValueError("No XML block found in input file")
+            raise ValueError(f"No XML block found in: {text}")
         return text[start:]
 
     @staticmethod
@@ -93,9 +93,13 @@ class XmlParser:
         return values
 
     @classmethod
-    def parse_file(cls, filename_xml: pathlib.Path) -> RechnungData:
-        text = filename_xml.read_text(encoding="utf-8")
-        xml_text = cls._extract_xml_text(text)
+    def parse_text(cls, raw_text: str) -> RechnungData:
+        xml_text = cls._extract_xml_text(raw_text)
         xml_values = cls._xml_to_flat_dict(xml_text)
         data: RechnungData = cls.from_xml_values(xml_values)
         return data
+
+    @classmethod
+    def parse_file(cls, filename_xml: pathlib.Path) -> RechnungData:
+        raw_text = filename_xml.read_text(encoding="utf-8")
+        return cls.parse_text(raw_text=raw_text)

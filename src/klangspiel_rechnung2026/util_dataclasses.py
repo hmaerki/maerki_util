@@ -8,6 +8,8 @@ from decimal import Decimal
 
 import treepoem
 
+from . import util_jinja2, util_typst
+
 
 @dataclasses.dataclass(slots=True, frozen=True)
 class Position:
@@ -57,7 +59,24 @@ class RechnungData:
     za: str
     zeit: str
     zipcode: str
+    rechnung_nr: str = ""
+    erhalten: bool = False
     positionen: list[Position] = dataclasses.field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.rechnung_nr, str)
+        assert isinstance(self.erhalten, bool)
+
+    @property
+    def directoryname_rechnung_verschickt(self) -> str:
+        """
+        2025-05-13 142.25 klangspielschweiz 2025-05-13_06-50-50_vesr20250528_01_R20250528_01.muller
+        """
+        v = f"{self.datum} {self.ftotal} klangspielschweiz {self.datum}_{self.zeit}_vesr{self.rechnung_nr}_R{self.rechnung_nr}.{self.lastname}"
+        return v
+
+    def replace(self, erhalten: bool, rechnung_nr: str) -> RechnungData:
+        return dataclasses.replace(self, erhalten=erhalten, rechnung_nr=rechnung_nr)
 
     @property
     def calculated_fTotalCHF(self) -> Decimal:
@@ -114,3 +133,38 @@ class RechnungData:
             options={"borderwidth": "10"},
         )
         barcode.convert("1").save(filename_png)
+
+    def xml_json_pdf(
+        self,
+        debug: bool,
+        directory_top: pathlib.Path,
+    ) -> None:
+        directory = directory_top / self.directoryname_rechnung_verschickt
+        directory.mkdir(parents=True, exist_ok=True)
+        filename_json = directory / "original.json"
+        filename_script = filename_json.with_name("run_json_update.sh")
+        filename_script.write_text("""#!/bin/bash
+uv run --with=git+https://github.com/hmaerki/maerki_util.git@main klangspiel_rechnung2026 clipboard
+        """)
+        filename_script.chmod(filename_script.stat().st_mode | 0o111)
+
+        filename_datamatrix_png = filename_json.with_suffix(".png")
+        self.write_datamatrix_png(filename_datamatrix_png)
+        if debug:
+            self.write_json(filename_json)
+
+        text_typ = util_jinja2.render(
+            self,
+            filename_datamatrix_png=filename_datamatrix_png,
+        )
+
+        filename_typst = filename_json.with_suffix(".typ")
+        if debug:
+            filename_typst.write_text(text_typ, encoding="utf-8")
+
+        util_typst.render_pdf(
+            text_typ=text_typ,
+            filename_pdf=filename_typst.with_suffix(".pdf"),
+        )
+
+        print(self)

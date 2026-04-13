@@ -32,6 +32,8 @@
   "za": "Ja",
   "zeit": "06-50-50",
   "zipcode": "04509",
+  "rechnung_nr": "",
+  "erhalten": false,
   "positionen": [
     {
       "anzahl": "2",

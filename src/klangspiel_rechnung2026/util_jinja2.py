@@ -5,7 +5,7 @@ import pathlib
 
 import jinja2
 
-from klangspiel_rechnung2026.util_dataclasses import Position, RechnungData
+from . import util_dataclasses
 
 FILENAME_TEMPLATE = pathlib.Path(__file__).with_name("template.jinja")
 assert FILENAME_TEMPLATE.is_file()
@@ -23,7 +23,9 @@ def _typst_escape(value: str) -> str:
     ).strip()
 
 
-def render(data: RechnungData, filename_datamatrix_png: pathlib.Path) -> str:
+def render(
+    data: util_dataclasses.RechnungData, filename_datamatrix_png: pathlib.Path
+) -> str:
     template_text = FILENAME_TEMPLATE.read_text(encoding="utf-8")
 
     def typ_filter(value: str) -> str:
