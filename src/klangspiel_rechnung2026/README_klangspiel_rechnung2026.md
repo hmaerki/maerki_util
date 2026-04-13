@@ -4,6 +4,24 @@
 
 https://github.com/hmaerki/privat_svn_hans/tree/main/klangspiel/trunk/Verkauf/rechnung_verschickt
 
+echo %1 | ..\klangbar\bin\libdmtx_write.exe -m 12 -d 6 -o barcode_tmp.png
+
+sudo apt install libdmtx-utils
+
+echo Salamibrot | dmtxwrite -m 12 -d 6 -o barcode_tmp.png
+
+```python
+import treepoem
+
+barcode = treepoem.generate_barcode(
+    barcode_type='datamatrix',
+    data='Gurkenbrot',
+    options={'borderwidth': 100},
+)
+
+barcode.convert('1').save('datamatrix.png')
+```
+
 [Beispielrechnung](../rechnung_verschickt/z_rechnung_vorlage_webshop_excel.beispielbestellung.txt)
 
 [Windows Doc Barcode](../rechnung_verschickt/z_vorlage_etikette_barcode.doc)

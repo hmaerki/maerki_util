@@ -7,6 +7,8 @@ import re
 import typing
 from decimal import Decimal
 
+import treepoem
+
 
 @dataclasses.dataclass(slots=True, frozen=True)
 class Position:
@@ -108,6 +110,29 @@ class RechnungData:
             fTotal=RechnungData._value_as_str(data_dict, "fTotal"),
             g=RechnungData._value_as_str(data_dict, "g"),
         )
+
+    def write_datamatrix_png(self, filename_png: pathlib.Path) -> None:
+        """
+        Generate a Data Matrix barcode with content YYMMDDHHmmSS<email> and save as PNG.
+        out_path: output PNG file
+        """
+        # try:
+        #     y, m, d = self.datum.split("-")
+        #     h, mi, s = self.zeit.split("-")
+        #     code = f"{y[2:]}{m}{d}{h}{mi}{s}{self.email}"
+        # except Exception as e:
+        #     raise ValueError(
+        #         f"Invalid datum/zeit format: {self.datum} {self.zeit}"
+        #     ) from e
+        datetime = f"{self.datum[2:]}{self.zeit}".replace("-", "")
+        code = f"{datetime}{self.email}"
+
+        barcode = treepoem.generate_barcode(
+            barcode_type="datamatrix",
+            data=code,
+            options={"borderwidth": "10"},
+        )
+        barcode.convert("1").save(filename_png)
 
 
 POSITION_TAG_RE = re.compile(r"^Pos(?P<idx>\d+)(?P<field>Anzahl|wo|Unit|Text|Preis)$")

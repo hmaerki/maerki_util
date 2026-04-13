@@ -119,6 +119,15 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/src/pyscan_linux",
             "justMyCode": false,
+        },
+        {
+            "name": "klangspiel_rechnung2026 update",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "klangspiel_rechnung2026.klangspiel_rechnung2026",
+            "console": "integratedTerminal","args": ["update"],
+            "cwd": "${workspaceFolder}/tests/klangspiel_rechnung2026/testdata_xml_result",
+            "justMyCode": false,
         }
     ]
 }

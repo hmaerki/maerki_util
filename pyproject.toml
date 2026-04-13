@@ -24,7 +24,8 @@ dependencies = [
     # "wxPython==4.2.5",
     "python-sane==2.9.2; sys_platform == 'linux'",
     "pywin32==311; sys_platform == 'win32'",
-    "typst==0.14.8"
+    "typst==0.14.8",
+    "treepoem==3.28.0"
 ]
 
 [project.optional-dependencies]

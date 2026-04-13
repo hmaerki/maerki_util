@@ -33,6 +33,7 @@ def filename_xml(request: pytest.FixtureRequest) -> pathlib.Path:
 
 def test_rechnung(filename_xml: pathlib.Path) -> None:
     data1 = XmlParser.parse_file(filename_xml=filename_xml)
+    data1.write_datamatrix_png(filename_xml.with_suffix(".png"))
 
     filename_json = DIRECTORY_TESTDATA_RESULT / f"{filename_xml.stem}.json"
     data1.write_json(filename_json)
