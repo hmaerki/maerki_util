@@ -64,8 +64,7 @@ includes = [
 ]
 source-includes = [
     "LICENSE",
-    "README.md",
-    "src/klangspiel_rechnung2026/run_templates/*.sh",
+    "README.md"
 ]
 
 [tool.ruff]

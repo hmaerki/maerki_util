@@ -11,7 +11,7 @@ import treepoem
 
 from . import util_jinja2, util_typst
 
-DIRECTORY_RUN_TEMPLATES = pathlib.Path(__file__).with_name("run_templates")
+DIRECTORY_RUN_TEMPLATES = pathlib.Path(__file__).parent
 assert DIRECTORY_RUN_TEMPLATES.is_dir()
 
 ORIGINAL_JSON = "original.json"
