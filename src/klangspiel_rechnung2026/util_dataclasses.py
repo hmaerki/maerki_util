@@ -11,6 +11,7 @@ import treepoem
 from . import util_jinja2, util_typst
 
 ORIGINAL_JSON = "original.json"
+FILENAME_RECHNUNG_PDF = "rechnung.pdf"
 FILENAME_SONNE_PNG = pathlib.Path(__file__).with_name("template_sonne.png")
 assert FILENAME_SONNE_PNG.is_file()
 
@@ -239,9 +240,7 @@ uv run --with=git+https://github.com/hmaerki/maerki_util.git@main klangspiel_rec
 
         util_typst.render_pdf(
             text_typ=text_typ,
-            filename_pdf=filename_typst.with_name(
-                self.directoryname_rechnung_verschickt
-            ).with_suffix(".pdf"),
+            filename_pdf=filename_typst.with_name(FILENAME_RECHNUNG_PDF),
         )
 
         filename_datamatrix_png.unlink(missing_ok=True)
