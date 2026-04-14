@@ -69,22 +69,10 @@ def json_update(
 
     util_logging.init_logging(debug)
 
-    result_dir = pathlib.Path("tests/klangspiel_rechnung2026/testdata_xml_result")
-    for json_file in sorted(result_dir.glob("*.json")):
-        typ_file = json_file.with_suffix(".typ")
-        pdf_file = json_file.with_suffix(".pdf")
-        datamatrix_file = json_file.with_suffix(".datamatrix.png")
-        logging.info(
-            f"Updating {typ_file}, {pdf_file}, {datamatrix_file} from {json_file}"
-        )
-        data = util_dataclasses.RechnungData.read_json(json_file)
-        text_typ = util_jinja2.render(
-            data,
-            filename_datamatrix_png=json_file.with_suffix(".png"),
-        )
-        typ_file.write_text(text_typ, encoding="utf-8")
-        util_typst.render_pdf(text_typ=text_typ, filename_pdf=pdf_file)
-        data.write_datamatrix_png(filename_png=json_file.with_suffix(".png"))
+    directory_top = pathlib.Path.cwd()
+    util_dataclasses.RechnungData.factory_json_pdf(
+        debug=debug, directory_top=directory_top
+    )
 
 
 if __name__ == "__main__":

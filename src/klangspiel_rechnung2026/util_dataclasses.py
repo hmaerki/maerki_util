@@ -10,6 +10,10 @@ import treepoem
 
 from . import util_jinja2, util_typst
 
+ORIGINAL_JSON = "original.json"
+FILENAME_SONNE_PNG = pathlib.Path(__file__).with_name("template_sonne.png")
+assert FILENAME_SONNE_PNG.is_file()
+
 
 @dataclasses.dataclass(slots=True, frozen=True)
 class Position:
@@ -147,20 +151,27 @@ class RechnungData:
     ) -> None:
         directory = directory_top / self.directoryname_rechnung_verschickt
         directory.mkdir(parents=True, exist_ok=True)
-        filename_json = directory / "original.json"
+        filename_json = directory / ORIGINAL_JSON
         filename_script = filename_json.with_name("run_json_update.sh")
         filename_script.write_text("""#!/bin/bash
-uv run --with=git+https://github.com/hmaerki/maerki_util.git@main klangspiel_rechnung2026 json_update
+uv run --with=git+https://github.com/hmaerki/maerki_util.git@main klangspiel_rechnung2026 json-update
         """)
         filename_script.chmod(filename_script.stat().st_mode | 0o111)
+        self.write_json(filename_json)
+
+        self.json_pdf(debug=debug, filename_json=filename_json)
+
+    def json_pdf(self, debug: bool, filename_json: pathlib.Path) -> None:
+        filename_sonne_png = filename_json.with_name(FILENAME_SONNE_PNG.name)
+        filename_sonne_png.write_bytes(FILENAME_SONNE_PNG.read_bytes())
 
         filename_datamatrix_png = filename_json.with_suffix(".png")
         self.write_datamatrix_png(filename_datamatrix_png)
-        self.write_json(filename_json)
 
         text_typ = util_jinja2.render(
             self,
             filename_datamatrix_png=filename_datamatrix_png,
+            filename_sonne_png=filename_sonne_png,
         )
 
         filename_typst = filename_json.with_suffix(".typ")
@@ -175,3 +186,16 @@ uv run --with=git+https://github.com/hmaerki/maerki_util.git@main klangspiel_rec
         )
 
         filename_datamatrix_png.unlink(missing_ok=True)
+        filename_sonne_png.unlink(missing_ok=True)
+
+    @staticmethod
+    def factory_json_pdf(debug: bool, directory_top: pathlib.Path) -> None:
+        if not directory_top.is_dir():
+            raise ValueError(f"Expected directory: {directory_top}")
+
+        filename_json = directory_top / ORIGINAL_JSON
+        if not filename_json.is_file():
+            raise ValueError(f"Expected json file: {filename_json}")
+
+        data = RechnungData.read_json(filename_json=filename_json)
+        data.json_pdf(debug=debug, filename_json=filename_json)

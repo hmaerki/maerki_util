@@ -137,16 +137,29 @@
             "justMyCode": false,
         },
         {
-            "name": "klangspiel_rechnung2026 json_update",
+            "name": "klangspiel_rechnung2026 json-update",
             "type": "debugpy",
             "request": "launch",
             "module": "klangspiel_rechnung2026.klangspiel_rechnung2026",
             "console": "integratedTerminal",
             "args": [
-                "json_update",
+                "json-update",
                 "--debug"
             ],
             "cwd": "${workspaceFolder}/tests/klangspiel_rechnung2026/testdata_clipboard_result",
+            "justMyCode": false,
+        },
+        {
+            "name": "klangspiel_rechnung2026 json-update König",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "klangspiel_rechnung2026.klangspiel_rechnung2026",
+            "console": "integratedTerminal",
+            "args": [
+                "json-update",
+                "--debug"
+            ],
+            "cwd": "${workspaceFolder}/tests/klangspiel_rechnung2026/testdata_xml_result/f_koenig_pdf_123/2026-02-22 10.90 klangspielschweiz 2026-02-22_21-34-27_vesr123_R123.König",
             "justMyCode": false,
         }
     ]

@@ -24,7 +24,9 @@ def _typst_escape(value: str) -> str:
 
 
 def render(
-    data: util_dataclasses.RechnungData, filename_datamatrix_png: pathlib.Path
+    data: util_dataclasses.RechnungData,
+    filename_datamatrix_png: pathlib.Path,
+    filename_sonne_png: pathlib.Path,
 ) -> str:
     template_text = FILENAME_TEMPLATE.read_text(encoding="utf-8")
 
@@ -44,5 +46,6 @@ def render(
     rendered = template.render(
         data=data,
         filename_datamatrix_png=filename_datamatrix_png.name,
+        filename_sonne_png=filename_sonne_png.name,
     )
     return rendered.rstrip() + "\n"

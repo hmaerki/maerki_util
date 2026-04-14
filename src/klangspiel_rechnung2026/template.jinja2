@@ -1,18 +1,16 @@
 #set page(paper: "a4", margin: (top: 1.5cm, bottom: 2cm, left: 2cm, right: 1.5cm))
 #set text(size: 10pt, font: "Liberation Sans")
 
-#align(right)[
+#align(left)[
   #text(size: 9pt)[
-    www.klangspiel.ch \
-    Switzerland \
+    www.klangspiel.ch
 
-    Peter Märki
-
+    Peter Märki \
     Zelglistrasse 49 \
-    peter\@klangspiel.ch
-
     8634 Hombrechtikon \
     CHE-108.547.136
+
+    peter\@klangspiel.ch
   ]
 ]
 
@@ -76,12 +74,17 @@ Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Kont
 
 Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 
-#page(paper: "a5", flipped: true, margin: (left: 1cm, top: 2cm, right: 1cm, bottom: 2cm))[
-	#place(top + left, dx: 2cm, dy: 8cm)[
+#page(paper: "a5", flipped: true, margin: (left: 0cm, top: 0.2cm, right: 1cm, bottom: 2cm))[
+
+	#place(top + left, dx: 0cm, dy: 0cm)[
+    #image("{{ filename_sonne_png }}", width: 40%)
+	]
+
+	#place(top + left, dx: 3.5cm, dy: 9.5cm)[
 		#image("{{ filename_datamatrix_png }}")
 	]
 
-	#place(top + left, dx: 2cm, dy: 3cm)[
+	#place(top + left, dx: 2.5cm, dy: 5cm)[
 		#rotate(-90deg)[
 			#text(size: 12pt)[
 				Absender: \
@@ -94,7 +97,7 @@ Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 	]
 
 	
-	#pad(left: 8cm, top: 6cm)[
+	#pad(left: 7.7cm, top: 8.5cm)[
 		#text(size: 24pt, weight: "bold")[
 			{{ data.company1|typ }} {{ data.company2|typ }} \
 			{{ data.firstname|typ }} {{ data.lastname|typ }} \
