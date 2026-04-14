@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from zulup.util_traverse_zulup import DirectoryBackupJson
 
 
-class TestProjectDirectory:
+class TtestProjectDirectory:
     NAME = "project_demo"
 
     def __init__(self, tmp_path: pathlib.Path) -> None:

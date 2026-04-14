@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 
-from zulup.util_pytest import TestProjectDirectory
+from zulup.util_pytest import TtestProjectDirectory
 from zulup.util_traverse_zulup import TraverseZulup
 
 DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
@@ -36,7 +36,7 @@ def test_traverse_project_xy_excludes_git() -> None:
     assert all("_git" not in f.lower() for f in backup.files)
 
 
-def test_ignore_dot_git_directories_recursively(project: TestProjectDirectory) -> None:
+def test_ignore_dot_git_directories_recursively(project: TtestProjectDirectory) -> None:
     project.create_file("keep.txt", "ok")
 
     # Top-level .git directory

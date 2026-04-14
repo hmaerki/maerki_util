@@ -5,11 +5,11 @@ import pathlib
 from typer.testing import CliRunner
 
 from zulup.util_backup_directory import BackupDirectory
-from zulup.util_pytest import TestProjectDirectory
+from zulup.util_pytest import TtestProjectDirectory
 from zulup.zulup import app
 
 
-def _create_backup_history(project: TestProjectDirectory) -> BackupDirectory:
+def _create_backup_history(project: TtestProjectDirectory) -> BackupDirectory:
     project.create_file("a.txt", "a-v1\n")
     project.create_file("b.txt", "b-v1\n")
     project.create_file("c.txt", "c-v1\n")
@@ -26,7 +26,7 @@ def _create_backup_history(project: TestProjectDirectory) -> BackupDirectory:
     return project.get_backup_directory()
 
 
-def test_cli_snapshots_lists_snapshot_metafiles(project: TestProjectDirectory) -> None:
+def test_cli_snapshots_lists_snapshot_metafiles(project: TtestProjectDirectory) -> None:
     backup_directory = _create_backup_history(project)
 
     runner = CliRunner()
@@ -40,7 +40,7 @@ def test_cli_snapshots_lists_snapshot_metafiles(project: TestProjectDirectory) -
     assert result.stdout.splitlines() == expected
 
 
-def test_cli_list_omits_removed_files(project: TestProjectDirectory) -> None:
+def test_cli_list_omits_removed_files(project: TtestProjectDirectory) -> None:
     backup_directory = _create_backup_history(project)
     incr_metafile = backup_directory.snapshots[1].filename_metafile
 
@@ -52,7 +52,7 @@ def test_cli_list_omits_removed_files(project: TestProjectDirectory) -> None:
     assert listed == {"a.txt", "b.txt", "d.txt"}
 
 
-def test_cli_restore_restores_selected_files(project: TestProjectDirectory) -> None:
+def test_cli_restore_restores_selected_files(project: TtestProjectDirectory) -> None:
     backup_directory = _create_backup_history(project)
     incr_metafile = backup_directory.snapshots[1].filename_metafile
 

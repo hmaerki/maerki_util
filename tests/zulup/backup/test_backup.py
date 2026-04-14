@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from zulup.util_json_metafile import EnumVerb
-from zulup.util_pytest import TestProjectDirectory
+from zulup.util_pytest import TtestProjectDirectory
 
 
-def test_backup_incr(project: TestProjectDirectory) -> None:
+def test_backup_incr(project: TtestProjectDirectory) -> None:
     project.create_file("a.txt", "a-v1\n")
     project.create_file("b.txt", "b-v1\n")
     project.create_file("c.txt", "c-v1\n")
@@ -46,7 +46,7 @@ def test_backup_incr(project: TestProjectDirectory) -> None:
 
 
 def test_backup_skips_when_no_file_was_added_or_modified(
-    project: TestProjectDirectory,
+    project: TtestProjectDirectory,
 ) -> None:
     project.create_file("a.txt", "a-v1\n")
     project.create_backup_json(directory_name_include=False, ignore=[".git/"])
@@ -59,7 +59,7 @@ def test_backup_skips_when_no_file_was_added_or_modified(
 
 
 def test_backup_skips_when_only_files_were_removed(
-    project: TestProjectDirectory,
+    project: TtestProjectDirectory,
 ) -> None:
     project.create_file("a.txt", "a-v1\n")
     project.create_backup_json(directory_name_include=False, ignore=[".git/"])

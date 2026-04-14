@@ -4,9 +4,9 @@ import pathlib
 
 import pytest
 
-from zulup.util_pytest import TestProjectDirectory
+from zulup.util_pytest import TtestProjectDirectory
 
 
 @pytest.fixture
-def project(tmp_path: pathlib.Path) -> TestProjectDirectory:
-    return TestProjectDirectory(tmp_path=tmp_path)
+def project(tmp_path: pathlib.Path) -> TtestProjectDirectory:
+    return TtestProjectDirectory(tmp_path=tmp_path)
