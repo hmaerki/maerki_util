@@ -23,12 +23,31 @@ uv run --with=git+https://github.com/hmaerki/maerki_util.git@main klangspiel_rec
   Nun wird ein Ordner erstellt:
 
     * run_json_update.sh
-    * bestellung.json
-    * bestellung.pdf
+    * original.json
+    * xy_bestellung.pdf
 
 ### Workflow optional
 
 Falls Anzahl angepasst werden muss.
 
-* Von Hand: bestellung.json editieren
+* Von Hand: original.json editieren
 * terminal: `./run_json_update.sh`
+
+Beispiel original.json
+
+```json
+{
+  ...
+  "ftotal": "116.00",  # NICHT anpassen. Rechnung liest berechneten Wert
+  "ftotalmwst": "0.15",   # Anpassen.
+
+  "positionen": [
+    {
+      "anzahl": "1",  # Anpassen
+      "wo": "U62",  # Anpassen
+      "unit": "Stück",  # Anpassen
+      "text": "www.klangspiel.ch/unikat/briefmarken#d4842 ",
+      "preis": "57.00"  # Anpassen
+    },
+
+```

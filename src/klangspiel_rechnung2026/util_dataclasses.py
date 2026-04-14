@@ -141,6 +141,7 @@ class RechnungData:
             barcode_type="datamatrix",
             data=code,
             options={"borderwidth": "10"},
+            scale=2,
         )
         barcode.convert("1").save(filename_png)
 

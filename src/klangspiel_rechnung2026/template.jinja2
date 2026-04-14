@@ -38,8 +38,8 @@ Hombrechtikon {{ data.datum|typ }}
 #v(0.3cm)
 
 #table(
-  columns: (1fr, auto, auto),
-  align: (left, right, right),
+  columns: (1fr, auto, auto, auto),
+  align: (left, right, right, left),
   // stroke: 0.4pt,
   stroke: none,
   inset: 4pt,
@@ -47,20 +47,27 @@ Hombrechtikon {{ data.datum|typ }}
     [*Produkt*],
     [*Anzahl à*],
     [*Total CHF*],
+    [], // Wo
   ),
   {% for position in data.positionen %}
   [{{ position.text|typ }}],
   [{{ position.anzahl|typ }} #h(2em) {{ position.calculated_total|typ }}],
   [{{ position.preis|typ }}],
+  text(size: 7pt)[{{ position.wo|typ }}],
   {% endfor %}
+
   [Versandkosten (Lieferung Schweiz)],
   [],
   [{{ data.versandkosten|typ }}],
+  [], // Wo
+
   table.cell(colspan: 2, align: right)[*Rechnungsbetrag*],
   [*{{ data.calculated_fTotalCHF|typ }}*],
+  [], // Wo
 
   table.cell(colspan: 2, align: right)[Davon sind MWST 8.1 % (CHE-108.547.136-MWST)],
   [{{ data.ftotalmwst|typ }}],
+  [], // Wo
 )
 
 {% if data.erhalten %}
@@ -74,19 +81,19 @@ Zahlbar innerhalb 30 Tagen netto mit beigelegtem Einzahlungsschein oder auf Kont
 
 Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 
-#page(paper: "a5", flipped: true, margin: (left: 0cm, top: 0.2cm, right: 1cm, bottom: 2cm))[
+#page(paper: "a6", flipped: true, margin: (left: 0cm, top: 0.0cm, right: 0.0cm, bottom: 0.0cm))[
 
-	#place(top + left, dx: 0cm, dy: 0cm)[
+	#place(top + left, dx: -1.8cm, dy: 0cm)[
     #image("{{ filename_sonne_png }}", width: 40%)
 	]
 
-	#place(top + left, dx: 3.5cm, dy: 9.5cm)[
+	#place(bottom + left, dx: 1cm, dy: -1cm)[
 		#image("{{ filename_datamatrix_png }}")
 	]
 
-	#place(top + left, dx: 2.5cm, dy: 5cm)[
+	#place(bottom + left, dx: 0.5cm, dy: -5.5cm)[
 		#rotate(-90deg)[
-			#text(size: 12pt)[
+			#text(size: 9pt)[
 				Absender: \
 				www.klangspiel.ch \
 				Peter Märki \
@@ -97,8 +104,8 @@ Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 	]
 
 	
-	#pad(left: 7.7cm, top: 8.5cm)[
-		#text(size: 24pt, weight: "bold")[
+	#place(bottom + left, dx: 5cm, dy: -3cm)[
+		#text(size: 16pt, weight: "bold")[
 			{{ data.company1|typ }} {{ data.company2|typ }} \
 			{{ data.firstname|typ }} {{ data.lastname|typ }} \
 			{{ data.address1|typ }}	{{ data.address2|typ }} \
