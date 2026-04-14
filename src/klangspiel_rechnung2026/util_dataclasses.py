@@ -29,6 +29,31 @@ class Position:
 
 
 @dataclasses.dataclass(slots=True, frozen=True)
+class Adresse:
+    address1: str
+    address2: str
+    city: str
+    company1: str
+    company2: str
+    firstname: str
+    lastname: str
+    zipcode: str
+
+    @property
+    def is_empty(self) -> bool:
+        return (
+            self.address1
+            + self.address2
+            + self.city
+            + self.company1
+            + self.company2
+            + self.firstname
+            + self.lastname
+            + self.zipcode
+        ).strip() == ""
+
+
+@dataclasses.dataclass(slots=True, frozen=True)
 class RechnungData:
     address1: str
     address2: str
@@ -70,6 +95,39 @@ class RechnungData:
     def __post_init__(self) -> None:
         assert isinstance(self.rechnung_nr, str)
         assert isinstance(self.erhalten, bool)
+
+    @property
+    def get_address(self) -> Adresse:
+        return Adresse(
+            address1=self.address1,
+            address2=self.address2,
+            city=self.city,
+            company1=self.company1,
+            company2=self.company2,
+            firstname=self.firstname,
+            lastname=self.lastname,
+            zipcode=self.zipcode,
+        )
+
+    @property
+    def get_invoice(self) -> Adresse:
+        return Adresse(
+            address1=self.invoice_address1,
+            address2=self.invoice_address2,
+            city=self.invoice_city,
+            company1=self.invoice_company1,
+            company2=self.invoice_company2,
+            firstname=self.invoice_firstname,
+            lastname=self.invoice_lastname,
+            zipcode=self.invoice_zipcode,
+        )
+
+    @property
+    def get_rechnungsadresse(self) -> Adresse:
+        invoice = self.get_invoice
+        if invoice.is_empty:
+            return self.get_address
+        return invoice
 
     @property
     def rechnung_nr_text(self) -> str:

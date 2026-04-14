@@ -18,10 +18,12 @@
 
 #pad(left: 10cm)[
 #text(size: 12pt, weight: "bold")[
-{{ data.invoice_company1|typ }} {{ data.invoice_company2|typ }} \
-{{ data.invoice_firstname|typ }} {{ data.invoice_lastname|typ }} \
-{{ data.invoice_address1|typ }} {{ data.invoice_address2|typ }} \
-{{ data.invoice_zipcode|typ }} {{ data.invoice_city|typ }}
+{{ data.get_rechnungsadresse.company1|typ }} \
+{{ data.get_rechnungsadresse.company2|typ }} \
+{{ data.get_rechnungsadresse.firstname|typ }} {{ data.get_rechnungsadresse.lastname|typ }} \
+{{ data.get_rechnungsadresse.address1|typ }} \
+{{ data.get_rechnungsadresse.address2|typ }} \
+{{ data.get_rechnungsadresse.zipcode|typ }} {{ data.get_rechnungsadresse.city|typ }}
 ]
 ]
 
@@ -106,9 +108,11 @@ Ab der zweiten Mahnung sind Mahnspesen fällig: 50.-.
 	
 	#place(bottom + left, dx: 5cm, dy: -3cm)[
 		#text(size: 16pt, weight: "bold")[
-			{{ data.company1|typ }} {{ data.company2|typ }} \
+			{{ data.company1|typ }} \
+      {{ data.company2|typ }} \
 			{{ data.firstname|typ }} {{ data.lastname|typ }} \
-			{{ data.address1|typ }}	{{ data.address2|typ }} \
+			{{ data.address1|typ }}	\
+      {{ data.address2|typ }} \
 			{{ data.zipcode|typ }} {{ data.city|typ }}
 		]  
 	]
