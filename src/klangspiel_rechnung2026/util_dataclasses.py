@@ -3,12 +3,16 @@ from __future__ import annotations
 import dataclasses
 import json
 import pathlib
+import shutil
 import typing
 from decimal import Decimal
 
 import treepoem
 
 from . import util_jinja2, util_typst
+
+DIRECTORY_RUN_TEMPLATES = pathlib.Path(__file__).with_name("run_templates")
+assert DIRECTORY_RUN_TEMPLATES.is_dir()
 
 ORIGINAL_JSON = "original.json"
 FILENAME_RECHNUNG_PDF = "rechnung.pdf"
@@ -211,12 +215,13 @@ class RechnungData:
     ) -> None:
         directory = directory_top / self.directoryname_rechnung_verschickt
         directory.mkdir(parents=True, exist_ok=True)
+
+        for filename_run in DIRECTORY_RUN_TEMPLATES.glob("*.sh"):
+            filename_script = directory / filename_run.name
+            shutil.copyfile(filename_run, filename_script)
+            filename_script.chmod(filename_script.stat().st_mode | 0o111)
+
         filename_json = directory / ORIGINAL_JSON
-        filename_script = filename_json.with_name("run_json_update.sh")
-        filename_script.write_text("""#!/bin/bash
-uv run --with=git+https://github.com/hmaerki/maerki_util.git@main klangspiel_rechnung2026 json-update
-        """)
-        filename_script.chmod(filename_script.stat().st_mode | 0o111)
         self.write_json(filename_json)
 
         self.json_pdf(debug=debug, filename_json=filename_json)
