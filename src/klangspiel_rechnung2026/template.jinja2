@@ -41,7 +41,7 @@ Hombrechtikon {{ data.datum|typ }}
 
 #table(
   columns: (1fr, auto, auto, auto),
-  align: (left, center, center, left),
+  align: (left, right, right, left),
   // stroke: 0.4pt,
   stroke: none,
   inset: 4pt,
@@ -53,7 +53,7 @@ Hombrechtikon {{ data.datum|typ }}
   ),
   {% for position in data.positionen %}
   [{{ position.text|typ }}],
-  [{{ position.anzahl|typ }} #h(2em) {{ position.preis|typ }}],
+  [{{ position.anzahl|typ }} à {{ position.preis|typ }}],
   [{{ position.calculated_total|typ }}],
   text(size: 7pt)[{{ position.wo|typ }}],
   {% endfor %}
