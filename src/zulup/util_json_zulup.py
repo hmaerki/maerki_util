@@ -19,9 +19,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-BACKUP_NAME_RE = re.compile(r"^[a-zA-Z0-9_\.]+$")
+BACKUP_NAME_RE = re.compile(r"^[a-zA-Z0-9_\-\.]+$")
 """
 Example: home_.config_rustdesk
+Example: docker-dog
 """
 
 
