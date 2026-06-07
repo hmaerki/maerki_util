@@ -187,7 +187,8 @@ class DirectoryBackupJson:
         merged_files = self.current_files.merge(args)
 
         if not any(
-            entry.verb in (EnumVerb.ADDED, EnumVerb.MODIFIED) for entry in merged_files
+            entry.verb in (EnumVerb.ADDED, EnumVerb.MODIFIED, EnumVerb.REMOVED)
+            for entry in merged_files
         ):
             logger.info(
                 f"{self.backup_json.backup_name}: Skipping: no files added or modified"
