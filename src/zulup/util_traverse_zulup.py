@@ -95,11 +95,11 @@ class DirectoryBackupJson:
             ]
 
             for name in sorted(filenames):
-                if name in (
-                    util_constants.ZULUP_BACKUP_JSON,
-                    util_constants.ZULUP_SCAN_JSON,
-                ):
-                    continue
+                # if name in (
+                #     util_constants.ZULUP_BACKUP_JSON,
+                #     util_constants.ZULUP_SCAN_JSON,
+                # ):
+                #     continue
                 rel_path = f"{rel_prefix}{name}" if rel_prefix else name
                 if ignore.is_included(name, rel_path, is_dir=False):
                     files.append(rel_path)
