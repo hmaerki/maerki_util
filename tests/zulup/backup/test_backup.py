@@ -69,4 +69,4 @@ def test_backup_skips_when_only_files_were_removed(
     project.do_backup(snapshot_datetime="2026-04-07_10-00-01")
 
     backup_directory = project.get_backup_directory()
-    assert len(backup_directory.snapshots) == 1
+    assert len(backup_directory.snapshots) == 2

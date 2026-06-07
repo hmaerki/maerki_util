@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pathlib
 
+import pytest
 from typer.testing import CliRunner
 
 from zulup.util_backup_directory import BackupDirectory
@@ -52,19 +53,26 @@ def test_cli_list_omits_removed_files(project: TtestProjectDirectory) -> None:
     assert listed == {"a.txt", "b.txt", "d.txt"}
 
 
-def test_cli_restore_restores_selected_files(project: TtestProjectDirectory) -> None:
+def test_cli_restore_restores_selected_files(
+    project: TtestProjectDirectory,
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     backup_directory = _create_backup_history(project)
     incr_metafile = backup_directory.snapshots[1].filename_metafile
 
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        result = runner.invoke(
-            app,
-            ["restore", str(incr_metafile), "a.txt", "b.txt"],
-        )
+    restore_dir = tmp_path / "restore"
+    restore_dir.mkdir()
+    monkeypatch.chdir(restore_dir)
 
-        assert result.exit_code == 0
-        cwd = pathlib.Path.cwd()
-        assert (cwd / "a.txt").read_text() == "a-v1\n"
-        assert (cwd / "b.txt").read_text() == "b-v2-modified\n"
-        assert not (cwd / "d.txt").exists()
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["restore", str(incr_metafile), "a.txt", "b.txt"],
+    )
+
+    assert result.exit_code == 0
+    cwd = pathlib.Path.cwd()
+    assert (cwd / "a.txt").read_text() == "a-v1\n"
+    assert (cwd / "b.txt").read_text() == "b-v2-modified\n"
+    assert not (cwd / "d.txt").exists()
