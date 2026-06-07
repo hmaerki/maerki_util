@@ -35,6 +35,29 @@ Place `zulup_backup.json` and `zulup_backup.sh` in the project directory to be b
 }
 ```
 
+All members may be left out. The defaults will be used instead.
+
+Defaults may be placed in the home directory:
+**zulup_backup.json**
+```json
+{
+}
+```
+
+**~/zulup_backup_defaults.json**
+```json
+{
+    "backup_name": "<DIRECTORY_NAME>",
+    "directory_target": "/media/maerki/peter_2T_A/backup_zulup",
+    "directory_src": ".",
+    "directory_name_include": true,
+    "ignore": [
+        ".git/",
+        ".venv/"
+    ]
+}
+```
+
 ### Command line
 
 ```bash
