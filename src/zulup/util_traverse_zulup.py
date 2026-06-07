@@ -231,7 +231,7 @@ class DirectoryBackupJson:
         directory_src = self.directory_src
         if self.backup_json.directory_name_include:
             directory_src = directory_src.parent
-            dir_name = self.directory.name
+            dir_name = self.directory_src.name
             tarfiles = [f"{dir_name}/{f}" for f in tarfiles]
 
         if sys.platform == "win32":

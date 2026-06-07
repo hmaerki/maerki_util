@@ -19,7 +19,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-BACKUP_NAME_RE = re.compile(r"^[a-zA-Z0-9_]+$")
+BACKUP_NAME_RE = re.compile(r"^[a-zA-Z0-9_\.]+$")
+"""
+Example: home_.config_rustdesk
+"""
 
 
 class ZulupIgnore(list[str]):
@@ -104,7 +107,13 @@ class BackupJson:
 
         b = BackupJson(**kwargs)  # type: ignore
         if b.backup_name == DIRECTORY_NAME_TOKEN:
-            return dataclasses.replace(b, backup_name=filename.parent.name)
+
+            def slugify_directory_name(directory_name: str) -> str:
+                return directory_name
+
+            return dataclasses.replace(
+                b, backup_name=slugify_directory_name(filename.parent.name)
+            )
         return b
 
     def to_file(self, filename: pathlib.Path) -> None:
