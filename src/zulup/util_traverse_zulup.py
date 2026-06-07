@@ -62,7 +62,8 @@ class DirectoryBackupJson:
 
     @property
     def directory_src(self) -> pathlib.Path:
-        return self.directory / self.backup_json.directory_src
+        directory = self.directory / self.backup_json.directory_src
+        return directory.resolve()
 
     @property
     def directory_target(self) -> pathlib.Path:
