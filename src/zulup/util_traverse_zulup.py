@@ -83,6 +83,15 @@ class DirectoryBackupJson:
         top_len = len(top) + 1  # +1 for trailing separator
         files: list[str] = []
 
+        def is_unicode(filename: str) -> bool:
+            try:
+                filename.encode("utf-8")
+                return True
+            except UnicodeEncodeError as e:
+                filename_encode = filename.encode("utf-8", "replace").decode("utf-8")
+                logger.warning(f"{filename_encode}: Invalid filename ({e}): SKIPPED!")
+                return False
+
         for dirpath, dirnames, filenames in os.walk(top):
             rel_prefix = dirpath[top_len:] + "/" if len(dirpath) > top_len - 1 else ""
 
@@ -95,14 +104,12 @@ class DirectoryBackupJson:
                 )
             ]
 
-            for name in sorted(filenames):
-                # if name in (
-                #     util_constants.ZULUP_BACKUP_JSON,
-                #     util_constants.ZULUP_SCAN_JSON,
-                # ):
-                #     continue
-                rel_path = f"{rel_prefix}{name}" if rel_prefix else name
-                if ignore.is_included(name, rel_path, is_dir=False):
+            for filename in sorted(filenames):
+                if not is_unicode(filename):
+                    continue
+
+                rel_path = f"{rel_prefix}{filename}" if rel_prefix else filename
+                if ignore.is_included(filename, rel_path, is_dir=False):
                     files.append(rel_path)
 
         files.sort()
@@ -192,7 +199,7 @@ class DirectoryBackupJson:
             for entry in merged_files
         ):
             logger.info(
-                f"{self.backup_json.backup_name}: Skipping: no files added or modified"
+                f"{self.backup_json.backup_name}: Skipping: no files added, modified or removed"
             )
             return
 
