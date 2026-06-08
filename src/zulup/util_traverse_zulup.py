@@ -107,7 +107,12 @@ class DirectoryBackupJson:
             for filename in sorted(filenames):
                 if not is_unicode(filename):
                     continue
-
+                _filename = pathlib.Path(dirpath) / filename
+                if not _filename.is_file():
+                    logger.debug(
+                        f"{filename}: Not a file, probably a link or delted in the meantime: SKIPPED"
+                    )
+                    continue
                 rel_path = f"{rel_prefix}{filename}" if rel_prefix else filename
                 if ignore.is_included(filename, rel_path, is_dir=False):
                     files.append(rel_path)
