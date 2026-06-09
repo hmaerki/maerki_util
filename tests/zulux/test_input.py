@@ -8,9 +8,9 @@ import pytest
 from zulux.util_zulux import ZuluxTest
 
 DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
+DIRECTORY_TESTDATA = DIRECTORY_OF_THIS_FILE / "testdata"
 
-
-_INPUT_FILES = sorted(DIRECTORY_OF_THIS_FILE.glob("test_*_input.txt"))
+_INPUT_FILES = sorted(DIRECTORY_TESTDATA.glob("test_*_input.txt"))
 
 
 @pytest.mark.parametrize(
@@ -22,9 +22,8 @@ def test_input(input_file: pathlib.Path) -> None:
     """Run the golden-file test for every test_*_input.txt found in this directory."""
     test_name = input_file.name.removesuffix("_input.txt")
     zt = ZuluxTest(
-        filename_zulux_chmod_json=DIRECTORY_OF_THIS_FILE
-        / f"{test_name}_zulux_chmod.json",
-        filename_expected=DIRECTORY_OF_THIS_FILE / f"{test_name}_expected.txt",
+        filename_zulux_chmod_json=DIRECTORY_TESTDATA / f"{test_name}_zulux_chmod.json",
+        filename_expected=DIRECTORY_TESTDATA / f"{test_name}_expected.txt",
     )
     for line in input_file.read_text().splitlines():
         line = line.strip()
@@ -38,7 +37,7 @@ def test_input(input_file: pathlib.Path) -> None:
 
     result = subprocess.run(
         ["git", "diff", "--quiet", f"{test_name}_expected.txt"],
-        cwd=DIRECTORY_OF_THIS_FILE,
+        cwd=DIRECTORY_TESTDATA,
     )
     assert result.returncode == 0, (
         f"{test_name}_expected.txt differs from committed version."
