@@ -1,0 +1,3 @@
+nobody : staff : rw-r--r-- main.py
+www-data : users : rwxrwx--- wikiwiki/other.cgi
+www-data : users : rwxrwx--- wikiwiki/run.cgi
