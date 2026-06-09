@@ -12,7 +12,6 @@ zulux resets access permissions for files and directories.
 
   The filename must end with `zulux_chmod.json`. The prefix can be anything (e.g. `zulux_chmod.json`, `A_zulux_chmod.json`, `mysite_zulux_chmod.json`).
 
-
 ## *zulux_chmod.json
 
 See: [zulux_chmod.json](src/zulux/examples/ergoinfo_ch/zulux_chmod.json)
@@ -105,6 +104,18 @@ zulux <directories>
 One or multiple directories may be provided. Each directory is traversed recursively until a `*zulux_chmod.json` is found; recursion into that directory then stops.
 After discovery, all found `*zulux_chmod.json` files are applied.
 
+
+```bash
+zulux --dry-run <directories>
+```
+
+prints to stdout (example):
+
+```text
+<directory>/zulux_chmod.json
+chown ci:staff           build/src/
+chmod rwx------          build/src/
+```
 
 ## Implementation
 

@@ -221,3 +221,73 @@ class ZuluxTest(Zulux):
 
     def _write(self, method: str, filename: pathlib.Path) -> None:
         self._f_expected.write(f"{method:<24s} {filename.as_posix()}/\n")
+
+
+class ZuluxReal(Zulux):
+    """
+    Production implementation of Zulux.
+
+    Applies permissions to real files and directories using os.chmod / os.chown.
+    User and group names are resolved to numeric IDs via the pwd/grp modules.
+    """
+
+    def __init__(
+        self,
+        zulux_json: pathlib.Path,
+        directory_root: pathlib.Path,
+    ) -> None:
+        super().__init__(zulux_json)
+        self._directory_root = directory_root
+
+    def _resolve_ids(self, user: str, group: str) -> tuple[int, int]:
+        import grp
+        import pwd
+
+        uid = pwd.getpwnam(user).pw_uid if user else -1
+        gid = grp.getgrnam(group).gr_gid if group else -1
+        return uid, gid
+
+    def _mode_to_int(self, mode: str) -> int:
+        """Convert 'rwxr-xr-x' (9-char) to an integer mode."""
+        bits = [
+            0o400,
+            0o200,
+            0o100,
+            0o040,
+            0o020,
+            0o010,
+            0o004,
+            0o002,
+            0o001,
+        ]
+        result = 0
+        for bit, ch in zip(bits, mode):
+            if ch != "-":
+                result |= bit
+        return result
+
+    def chmod_file(self, filename: pathlib.Path, mode: str) -> None:
+        path = self._directory_root / filename
+        logger.debug("chmod %s %s", mode, path)
+        path.chmod(self._mode_to_int(mode))
+
+    def chown_file(self, filename: pathlib.Path, user: str, group: str) -> None:
+        path = self._directory_root / filename
+        uid, gid = self._resolve_ids(user, group)
+        logger.debug("chown %s:%s %s", user, group, path)
+        import os
+
+        os.chown(path, uid, gid)
+
+    def chmod_directory(self, directory: pathlib.Path, mode: str) -> None:
+        path = self._directory_root / directory
+        logger.debug("chmod %s %s/", mode, path)
+        path.chmod(self._mode_to_int(mode))
+
+    def chown_directory(self, directory: pathlib.Path, user: str, group: str) -> None:
+        path = self._directory_root / directory
+        uid, gid = self._resolve_ids(user, group)
+        logger.debug("chown %s:%s %s/", user, group, path)
+        import os
+
+        os.chown(path, uid, gid)
