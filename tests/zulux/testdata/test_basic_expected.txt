@@ -1,3 +1,6 @@
-nobody : staff : rw-r--r-- main.py
-www-data : users : rwxrwx--- wikiwiki/other.cgi
-www-data : users : rwxrwx--- wikiwiki/run.cgi
+chown www-data:users wikiwiki/run.cgi
+chmod rwxrwx--- wikiwiki/run.cgi
+chown www-data:users wikiwiki/other.cgi
+chmod rwxrwx--- wikiwiki/other.cgi
+chown nobody:staff main.py
+chmod rw-r--r-- main.py

@@ -114,11 +114,19 @@ class Zulux(abc.ABC):
 
     @abc.abstractmethod
     def chmod_file(self, filename: pathlib.Path, mode: str) -> None:
-        """Apply mode (e.g. 'rwxr-xr-x') to filename."""
+        """Apply mode (e.g. 'rwxr-xr-x') to a file."""
 
     @abc.abstractmethod
     def chown_file(self, filename: pathlib.Path, user: str, group: str) -> None:
-        """Apply user and/or group ownership to filename."""
+        """Apply user and/or group ownership to a file."""
+
+    @abc.abstractmethod
+    def chmod_directory(self, directory: pathlib.Path, mode: str) -> None:
+        """Apply mode (e.g. 'rwxr-xr-x') to a directory."""
+
+    @abc.abstractmethod
+    def chown_directory(self, directory: pathlib.Path, user: str, group: str) -> None:
+        """Apply user and/or group ownership to a directory."""
 
     def apply_file(self, filename: pathlib.Path) -> None:
         """
@@ -156,9 +164,9 @@ class Zulux(abc.ABC):
             if _matches_patterns(entry.directories.patterns, name, rel_path):
                 spec = entry.directories.chmod_spec
                 if spec.user or spec.group:
-                    self.chown_file(directory, spec.user, spec.group)
+                    self.chown_directory(directory, spec.user, spec.group)
                 if spec.mode:
-                    self.chmod_file(directory, spec.mode)
+                    self.chmod_directory(directory, spec.mode)
                 return  # first match wins
 
     def apply_directory_self(self) -> None:
@@ -170,9 +178,9 @@ class Zulux(abc.ABC):
             if entry.directory_self_chmod is not None:
                 spec = entry.directory_self_chmod
                 if spec.user or spec.group:
-                    self.chown_file(pathlib.Path("."), spec.user, spec.group)
+                    self.chown_directory(pathlib.Path("."), spec.user, spec.group)
                 if spec.mode:
-                    self.chmod_file(pathlib.Path("."), spec.mode)
+                    self.chmod_directory(pathlib.Path("."), spec.mode)
                 return
 
 
@@ -180,9 +188,11 @@ class ZuluxTest(Zulux):
     """
     Test implementation of Zulux.
 
-    chmod_file() and chown_file() accumulate results in memory.
-    Call write_expected() to write the golden output file in the format:
-        <user> : <group> : <mode> <rel_path>
+    Each chmod/chown call appends one line to an internal list.
+    Call write_expected() to flush the list to the golden output file.
+    Output format - one command per line:
+        chown user:group path
+        chmod mode path
     Directories are written with a trailing /.
     """
 
@@ -193,33 +203,20 @@ class ZuluxTest(Zulux):
     ) -> None:
         super().__init__(filename_zulux_chmod_json)
         self._filename_expected = filename_expected
-        # rel_path -> (user, group, mode)
-        self._results: dict[str, tuple[str, str, str]] = {}
-        # keys of paths that are directories (written with trailing / in output)
-        self._dir_keys: set[str] = set()
+        self._lines: list[str] = []
 
     def chmod_file(self, filename: pathlib.Path, mode: str) -> None:
-        key = filename.as_posix()
-        user, group, _ = self._results.get(key, ("", "", ""))
-        self._results[key] = (user, group, mode)
+        self._lines.append(f"chmod {mode} {filename.as_posix()}\n")
 
     def chown_file(self, filename: pathlib.Path, user: str, group: str) -> None:
-        key = filename.as_posix()
-        _, _, mode = self._results.get(key, ("", "", ""))
-        self._results[key] = (user, group, mode)
+        self._lines.append(f"chown {user}:{group} {filename.as_posix()}\n")
 
-    def apply_directory(self, directory: pathlib.Path) -> None:
-        self._dir_keys.add(directory.as_posix())
-        super().apply_directory(directory)
+    def chmod_directory(self, directory: pathlib.Path, mode: str) -> None:
+        self._lines.append(f"chmod {mode} {directory.as_posix()}/\n")
 
-    def apply_directory_self(self) -> None:
-        self._dir_keys.add(".")
-        super().apply_directory_self()
+    def chown_directory(self, directory: pathlib.Path, user: str, group: str) -> None:
+        self._lines.append(f"chown {user}:{group} {directory.as_posix()}/\n")
 
     def write_expected(self) -> None:
-        """Write accumulated results to the expected output file."""
-        lines = [
-            f"{user} : {group} : {mode} {rel_path + '/' if rel_path in self._dir_keys else rel_path}\n"
-            for rel_path, (user, group, mode) in sorted(self._results.items())
-        ]
-        self._filename_expected.write_text("".join(lines))
+        """Write accumulated lines to the expected output file."""
+        self._filename_expected.write_text("".join(self._lines))

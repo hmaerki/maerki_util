@@ -1,2 +1,4 @@
-www-data : users : rwxr-xr-x docs/
-www-data : users : rwxr-xr-x src/
+chown www-data:users docs/
+chmod rwxr-xr-x docs/
+chown www-data:users src/
+chmod rwxr-xr-x src/

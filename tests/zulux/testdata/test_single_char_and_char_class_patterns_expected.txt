@@ -1,2 +1,4 @@
-x : y : rwxr-xr-x a.py
-a : b : rw-r--r-- file3.txt
+chown a:b file3.txt
+chmod rw-r--r-- file3.txt
+chown x:y a.py
+chmod rwxr-xr-x a.py

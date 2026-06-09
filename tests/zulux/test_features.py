@@ -47,7 +47,7 @@ def test_directory_self_applies_chmod(tmp_path: pathlib.Path) -> None:
     zt = ZuluxTest(filename_zulux_chmod_json=config, filename_expected=expected)
     zt.apply_directory_self()
     zt.write_expected()
-    assert expected.read_text() == "root : root : rwx------ ./\n"
+    assert expected.read_text() == "chown root:root ./\nchmod rwx------ ./\n"
 
 
 def test_no_match_produces_no_output(tmp_path: pathlib.Path) -> None:
@@ -89,7 +89,9 @@ def test_first_entry_wins_not_second(tmp_path: pathlib.Path) -> None:
     zt = ZuluxTest(filename_zulux_chmod_json=config, filename_expected=expected)
     zt.apply_file(pathlib.Path("main.py"))
     zt.write_expected()
-    assert expected.read_text() == "first : first : rw------- main.py\n"
+    assert (
+        expected.read_text() == "chown first:first main.py\nchmod rw------- main.py\n"
+    )
 
 
 def test_directory_not_matched_by_files_section(tmp_path: pathlib.Path) -> None:
