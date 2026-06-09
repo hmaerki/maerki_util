@@ -1,0 +1,18 @@
+[
+    {
+        "files": {
+            "patterns": [
+                "*.conf"
+            ],
+            "chmod": ":staff:rw-r--r--"
+        }
+    },
+    {
+        "files": {
+            "patterns": [
+                "*.sh"
+            ],
+            "chmod": "root::rwxr-xr-x"
+        }
+    }
+]

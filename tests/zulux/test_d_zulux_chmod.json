@@ -1,0 +1,18 @@
+[
+    {
+        "files": {
+            "patterns": [
+                "*.py"
+            ],
+            "chmod": "alice:devs:rw-r--r--"
+        }
+    },
+    {
+        "directories": {
+            "patterns": [
+                "*/"
+            ],
+            "chmod": "alice:devs:rwxr-xr-x"
+        }
+    }
+]

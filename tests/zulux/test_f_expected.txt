@@ -1,0 +1,3 @@
+log : log : rw------- access.log
+log : log : rw------- deep/a/app.log
+dev : dev : rw-r--r-- src/main.py

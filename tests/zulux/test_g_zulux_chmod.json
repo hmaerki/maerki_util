@@ -1,0 +1,18 @@
+[
+    {
+        "files": {
+            "patterns": [
+                "file[0-9].txt"
+            ],
+            "chmod": "a:b:rw-r--r--"
+        }
+    },
+    {
+        "files": {
+            "patterns": [
+                "?.py"
+            ],
+            "chmod": "x:y:rwxr-xr-x"
+        }
+    }
+]

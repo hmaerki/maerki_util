@@ -1,0 +1,2 @@
+root :  : rwxr-xr-x deploy.sh
+ : staff : rw-r--r-- server.conf

@@ -16,6 +16,7 @@ def _matches_patterns(patterns: list[str], name: str, rel_path: str) -> bool:
     """
     Single ordered patterns list; first matching pattern decides.
     A pattern starting with '!' means exclude; without '!' means include.
+    A trailing '/' marks a directory pattern and is stripped before matching.
     A pattern containing '/' (other than trailing) is matched against rel_path;
     otherwise against name only.
     Default (no match): not selected.
@@ -23,6 +24,10 @@ def _matches_patterns(patterns: list[str], name: str, rel_path: str) -> bool:
     for raw in patterns:
         exclude = raw.startswith("!")
         pattern = raw[1:] if exclude else raw
+
+        # Strip trailing / (directory marker, not part of the fnmatch glob)
+        if pattern.endswith("/"):
+            pattern = pattern[:-1]
 
         if "/" in pattern:
             matched = fnmatch.fnmatch(rel_path, pattern)
@@ -66,11 +71,27 @@ class _FilesEntry:
 @dataclasses.dataclass(frozen=True)
 class _ZuluxJsonEntry:
     files: _FilesEntry | None
+    directories: _FilesEntry | None
+    directory_self_chmod: _ChmodSpec | None
 
     @staticmethod
     def from_dict(data: dict) -> _ZuluxJsonEntry:
         files = _FilesEntry.from_dict(data["files"]) if "files" in data else None
-        return _ZuluxJsonEntry(files=files)
+        directories = (
+            _FilesEntry.from_dict(data["directories"])
+            if "directories" in data
+            else None
+        )
+        directory_self_chmod = (
+            _ChmodSpec.parse(data["directory_self"]["chmod"])
+            if "directory_self" in data
+            else None
+        )
+        return _ZuluxJsonEntry(
+            files=files,
+            directories=directories,
+            directory_self_chmod=directory_self_chmod,
+        )
 
 
 class Zulux(abc.ABC):
@@ -120,6 +141,40 @@ class Zulux(abc.ABC):
                     self.chmod_file(filename, spec.mode)
                 return  # first match wins
 
+    def apply_directory(self, directory: pathlib.Path) -> None:
+        """
+        Evaluate directory against all 'directories' entries (top to bottom).
+        directory must be a relative path without trailing slash.
+        If no entry matches, permissions are NOT changed.
+        """
+        name = directory.name
+        rel_path = directory.as_posix()
+
+        for entry in self._entries:
+            if entry.directories is None:
+                continue
+            if _matches_patterns(entry.directories.patterns, name, rel_path):
+                spec = entry.directories.chmod_spec
+                if spec.user or spec.group:
+                    self.chown_file(directory, spec.user, spec.group)
+                if spec.mode:
+                    self.chmod_file(directory, spec.mode)
+                return  # first match wins
+
+    def apply_directory_self(self) -> None:
+        """
+        Apply the 'directory_self' entry (if present) to the directory that
+        contains *zulux_chmod.json.  Uses pathlib.Path('.') as the target path.
+        """
+        for entry in self._entries:
+            if entry.directory_self_chmod is not None:
+                spec = entry.directory_self_chmod
+                if spec.user or spec.group:
+                    self.chown_file(pathlib.Path("."), spec.user, spec.group)
+                if spec.mode:
+                    self.chmod_file(pathlib.Path("."), spec.mode)
+                return
+
 
 class ZuluxTest(Zulux):
     """
@@ -128,6 +183,7 @@ class ZuluxTest(Zulux):
     chmod_file() and chown_file() accumulate results in memory.
     Call write_expected() to write the golden output file in the format:
         <user> : <group> : <mode> <rel_path>
+    Directories are written with a trailing /.
     """
 
     def __init__(
@@ -139,6 +195,8 @@ class ZuluxTest(Zulux):
         self._filename_expected = filename_expected
         # rel_path -> (user, group, mode)
         self._results: dict[str, tuple[str, str, str]] = {}
+        # keys of paths that are directories (written with trailing / in output)
+        self._dir_keys: set[str] = set()
 
     def chmod_file(self, filename: pathlib.Path, mode: str) -> None:
         key = filename.as_posix()
@@ -150,10 +208,18 @@ class ZuluxTest(Zulux):
         _, _, mode = self._results.get(key, ("", "", ""))
         self._results[key] = (user, group, mode)
 
+    def apply_directory(self, directory: pathlib.Path) -> None:
+        self._dir_keys.add(directory.as_posix())
+        super().apply_directory(directory)
+
+    def apply_directory_self(self) -> None:
+        self._dir_keys.add(".")
+        super().apply_directory_self()
+
     def write_expected(self) -> None:
         """Write accumulated results to the expected output file."""
         lines = [
-            f"{user} : {group} : {mode} {rel_path}\n"
+            f"{user} : {group} : {mode} {rel_path + '/' if rel_path in self._dir_keys else rel_path}\n"
             for rel_path, (user, group, mode) in sorted(self._results.items())
         ]
         self._filename_expected.write_text("".join(lines))

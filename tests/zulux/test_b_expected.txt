@@ -1,0 +1,2 @@
+www-data : users : rwxr-xr-x docs/
+www-data : users : rwxr-xr-x src/

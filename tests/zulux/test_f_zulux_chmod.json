@@ -1,0 +1,18 @@
+[
+    {
+        "files": {
+            "patterns": [
+                "src/*.py"
+            ],
+            "chmod": "dev:dev:rw-r--r--"
+        }
+    },
+    {
+        "files": {
+            "patterns": [
+                "*.log"
+            ],
+            "chmod": "log:log:rw-------"
+        }
+    }
+]

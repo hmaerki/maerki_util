@@ -1,0 +1,11 @@
+[
+    {
+        "directories": {
+            "patterns": [
+                "!build/output/",
+                "build/*/"
+            ],
+            "chmod": "ci:staff:rwx------"
+        }
+    }
+]

@@ -1,0 +1,4 @@
+alice : devs : rw-r--r-- main.py
+alice : devs : rwxr-xr-x src/
+alice : devs : rwxr-xr-x tests/
+alice : devs : rw-r--r-- utils.py

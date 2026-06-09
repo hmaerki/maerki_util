@@ -1,0 +1,11 @@
+[
+    {
+        "directories": {
+            "patterns": [
+                "!.git/",
+                "*/"
+            ],
+            "chmod": "www-data:users:rwxr-xr-x"
+        }
+    }
+]

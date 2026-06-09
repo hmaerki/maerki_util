@@ -1,0 +1,2 @@
+x : y : rwxr-xr-x a.py
+a : b : rw-r--r-- file3.txt
