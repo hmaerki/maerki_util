@@ -1,0 +1,4 @@
+# Directories: path-based patterns and ! path exclude (build/output/ excluded)
+build/output/
+build/src/
+other/output/

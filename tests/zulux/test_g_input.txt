@@ -1,4 +1,0 @@
-file3.txt
-fileA.txt
-a.py
-ab.py

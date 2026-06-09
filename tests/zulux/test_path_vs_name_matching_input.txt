@@ -1,0 +1,5 @@
+# Pattern containing / matches rel_path; pattern without / matches name only
+src/main.py
+lib/main.py
+deep/a/app.log
+access.log

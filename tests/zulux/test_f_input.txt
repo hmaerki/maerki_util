@@ -1,4 +1,0 @@
-src/main.py
-lib/main.py
-deep/a/app.log
-access.log

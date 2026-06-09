@@ -1,0 +1,5 @@
+# ? matches exactly one character; [seq] matches a character in the set
+file3.txt
+fileA.txt
+a.py
+ab.py

@@ -1,0 +1,3 @@
+# Empty user or group fields in the chmod string are skipped
+server.conf
+deploy.sh

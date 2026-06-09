@@ -1,0 +1,4 @@
+# Directories: name-only patterns with ! exclude (.git/ is excluded)
+docs/
+.git/
+src/

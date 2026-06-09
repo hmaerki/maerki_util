@@ -2,77 +2,12 @@ from __future__ import annotations
 
 import json
 import pathlib
-import subprocess
 
 import pytest
 
 from zulux.util_zulux import ZuluxTest
 
 DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
-
-
-def _run_golden_test(test_name: str) -> None:
-    """Apply ZuluxTest over all paths in <test_name>_input.txt and verify
-    the output matches the committed golden file <test_name>_expected.txt.
-    Input lines ending with '/' are treated as directories."""
-    zt = ZuluxTest(
-        filename_zulux_chmod_json=DIRECTORY_OF_THIS_FILE
-        / f"{test_name}_zulux_chmod.json",
-        filename_expected=DIRECTORY_OF_THIS_FILE / f"{test_name}_expected.txt",
-    )
-    input_file = DIRECTORY_OF_THIS_FILE / f"{test_name}_input.txt"
-    for line in input_file.read_text().splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        if line.endswith("/"):
-            zt.apply_directory(pathlib.Path(line.rstrip("/")))
-        else:
-            zt.apply_file(pathlib.Path(line))
-    zt.write_expected()
-
-    result = subprocess.run(
-        ["git", "diff", "--quiet", f"{test_name}_expected.txt"],
-        cwd=DIRECTORY_OF_THIS_FILE,
-    )
-    assert result.returncode == 0, (
-        f"{test_name}_expected.txt differs from committed version."
-    )
-
-
-# ---------------------------------------------------------------------------
-# Golden-file tests — one per documented feature area
-# ---------------------------------------------------------------------------
-
-
-def test_b_directory_name_patterns() -> None:
-    """Directories: name-only patterns with ! exclude (.git/ is excluded)."""
-    _run_golden_test("test_b")
-
-
-def test_c_directory_path_patterns() -> None:
-    """Directories: path-based patterns and ! path exclude (build/output/ excluded)."""
-    _run_golden_test("test_c")
-
-
-def test_d_mixed_files_and_directories() -> None:
-    """Files and directories in the same config, each matched by their section."""
-    _run_golden_test("test_d")
-
-
-def test_e_partial_chmod_empty_fields() -> None:
-    """Empty user or group fields in the chmod string are skipped."""
-    _run_golden_test("test_e")
-
-
-def test_f_path_vs_name_matching() -> None:
-    """Pattern containing / matches rel_path; pattern without / matches name only."""
-    _run_golden_test("test_f")
-
-
-def test_g_single_char_and_char_class_patterns() -> None:
-    """? matches exactly one character; [seq] matches a character in the set."""
-    _run_golden_test("test_g")
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,5 @@
+# Files and directories in the same config, each matched by their section
+main.py
+utils.py
+src/
+tests/

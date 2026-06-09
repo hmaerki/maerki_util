@@ -1,5 +1,0 @@
-wikiwiki/run.cgi
-wikiwiki/secret.cgi
-wikiwiki/other.cgi
-main.py
-README.md
