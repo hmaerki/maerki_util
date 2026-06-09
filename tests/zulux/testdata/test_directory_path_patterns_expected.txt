@@ -1,2 +1,2 @@
-chown ci:staff build/src/
-chmod rwx------ build/src/
+chown ci:staff           build/src/
+chmod rwx------          build/src/

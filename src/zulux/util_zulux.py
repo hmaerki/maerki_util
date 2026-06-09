@@ -208,13 +208,16 @@ class ZuluxTest(Zulux):
         self._f_expected = f_expected
 
     def chmod_file(self, filename: pathlib.Path, mode: str) -> None:
-        self._f_expected.write(f"chmod {mode} {filename.as_posix()}\n")
+        self._write(f"chmod {mode}", filename)
 
     def chown_file(self, filename: pathlib.Path, user: str, group: str) -> None:
-        self._f_expected.write(f"chown {user}:{group} {filename.as_posix()}\n")
+        self._write(f"chown {user}:{group}", filename)
 
     def chmod_directory(self, directory: pathlib.Path, mode: str) -> None:
-        self._f_expected.write(f"chmod {mode} {directory.as_posix()}/\n")
+        self._write(f"chmod {mode}", directory)
 
     def chown_directory(self, directory: pathlib.Path, user: str, group: str) -> None:
-        self._f_expected.write(f"chown {user}:{group} {directory.as_posix()}/\n")
+        self._write(f"chown {user}:{group}", directory)
+
+    def _write(self, method: str, filename: pathlib.Path) -> None:
+        self._f_expected.write(f"{method:<24s} {filename.as_posix()}/\n")

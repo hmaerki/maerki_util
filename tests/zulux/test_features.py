@@ -40,7 +40,7 @@ def test_directory_self_applies_chmod() -> None:
         f_expected=f,
     )
     zt.apply_directory_self()
-    assert f.getvalue() == "chown root:root ./\nchmod rwx------ ./\n"
+    assert f.getvalue() == "chown root:root          ./\nchmod rwx------          ./\n"
 
 
 def test_no_match_produces_no_output() -> None:
@@ -76,7 +76,10 @@ def test_first_entry_wins_not_second() -> None:
         f_expected=f,
     )
     zt.apply_file(pathlib.Path("main.py"))
-    assert f.getvalue() == "chown first:first main.py\nchmod rw------- main.py\n"
+    assert (
+        f.getvalue()
+        == "chown first:first        main.py/\nchmod rw-------          main.py/\n"
+    )
 
 
 def test_directory_not_matched_by_files_section() -> None:
