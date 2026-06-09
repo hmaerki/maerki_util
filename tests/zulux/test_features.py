@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 import pathlib
 
@@ -19,10 +20,7 @@ def test_prefixed_filename_accepted(tmp_path: pathlib.Path) -> None:
     """Any prefix before zulux_chmod.json in the filename must be accepted."""
     config = tmp_path / "A_zulux_chmod.json"
     config.write_text(json.dumps([{"files": {"patterns": [], "chmod": "::"}}]))
-    zt = ZuluxTest(
-        filename_zulux_chmod_json=config,
-        filename_expected=tmp_path / "out.txt",
-    )
+    zt = ZuluxTest(zulux_json=config, f_expected=io.StringIO())
     assert zt is not None
 
 
@@ -31,77 +29,62 @@ def test_invalid_filename_rejected(tmp_path: pathlib.Path) -> None:
     config = tmp_path / "permissions.json"
     config.write_text(json.dumps([]))
     with pytest.raises(AssertionError):
-        ZuluxTest(
-            filename_zulux_chmod_json=config,
-            filename_expected=tmp_path / "out.txt",
-        )
+        ZuluxTest(zulux_json=config, f_expected=io.StringIO())
 
 
-def test_directory_self_applies_chmod(tmp_path: pathlib.Path) -> None:
+def test_directory_self_applies_chmod() -> None:
     """apply_directory_self() applies directory_self chmod, written as './'."""
-    config = tmp_path / "zulux_chmod.json"
-    config.write_text(
-        json.dumps([{"directory_self": {"chmod": "root:root:rwx------"}}])
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[{"directory_self": {"chmod": "root:root:rwx------"}}],
+        f_expected=f,
     )
-    expected = tmp_path / "expected.txt"
-    zt = ZuluxTest(filename_zulux_chmod_json=config, filename_expected=expected)
     zt.apply_directory_self()
-    zt.write_expected()
-    assert expected.read_text() == "chown root:root ./\nchmod rwx------ ./\n"
+    assert f.getvalue() == "chown root:root ./\nchmod rwx------ ./\n"
 
 
-def test_no_match_produces_no_output(tmp_path: pathlib.Path) -> None:
+def test_no_match_produces_no_output() -> None:
     """A file matching no patterns must produce no output entry."""
-    config = tmp_path / "zulux_chmod.json"
-    config.write_text(
-        json.dumps([{"files": {"patterns": ["*.py"], "chmod": "a:b:rwx------"}}])
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[{"files": {"patterns": ["*.py"], "chmod": "a:b:rwx------"}}],
+        f_expected=f,
     )
-    expected = tmp_path / "expected.txt"
-    zt = ZuluxTest(filename_zulux_chmod_json=config, filename_expected=expected)
     zt.apply_file(pathlib.Path("README.md"))
-    zt.write_expected()
-    assert expected.read_text() == ""
+    assert f.getvalue() == ""
 
 
-def test_missing_patterns_key_treated_as_empty(tmp_path: pathlib.Path) -> None:
+def test_missing_patterns_key_treated_as_empty() -> None:
     """An entry missing the 'patterns' key behaves as an empty list (no matches)."""
-    config = tmp_path / "zulux_chmod.json"
-    config.write_text(json.dumps([{"files": {"chmod": "a:b:rwx------"}}]))
-    expected = tmp_path / "expected.txt"
-    zt = ZuluxTest(filename_zulux_chmod_json=config, filename_expected=expected)
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[{"files": {"chmod": "a:b:rwx------"}}],
+        f_expected=f,
+    )
     zt.apply_file(pathlib.Path("any.txt"))
-    zt.write_expected()
-    assert expected.read_text() == ""
+    assert f.getvalue() == ""
 
 
-def test_first_entry_wins_not_second(tmp_path: pathlib.Path) -> None:
+def test_first_entry_wins_not_second() -> None:
     """When two entries both match, only the first entry is applied."""
-    config = tmp_path / "zulux_chmod.json"
-    config.write_text(
-        json.dumps(
-            [
-                {"files": {"patterns": ["*.py"], "chmod": "first:first:rw-------"}},
-                {"files": {"patterns": ["*.py"], "chmod": "second:second:rwxrwxrwx"}},
-            ]
-        )
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[
+            {"files": {"patterns": ["*.py"], "chmod": "first:first:rw-------"}},
+            {"files": {"patterns": ["*.py"], "chmod": "second:second:rwxrwxrwx"}},
+        ],
+        f_expected=f,
     )
-    expected = tmp_path / "expected.txt"
-    zt = ZuluxTest(filename_zulux_chmod_json=config, filename_expected=expected)
     zt.apply_file(pathlib.Path("main.py"))
-    zt.write_expected()
-    assert (
-        expected.read_text() == "chown first:first main.py\nchmod rw------- main.py\n"
-    )
+    assert f.getvalue() == "chown first:first main.py\nchmod rw------- main.py\n"
 
 
-def test_directory_not_matched_by_files_section(tmp_path: pathlib.Path) -> None:
+def test_directory_not_matched_by_files_section() -> None:
     """A directory path must not be matched by the 'files' section, and vice versa."""
-    config = tmp_path / "zulux_chmod.json"
-    config.write_text(
-        json.dumps([{"files": {"patterns": ["*"], "chmod": "a:b:rwx------"}}])
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[{"files": {"patterns": ["*"], "chmod": "a:b:rwx------"}}],
+        f_expected=f,
     )
-    expected = tmp_path / "expected.txt"
-    zt = ZuluxTest(filename_zulux_chmod_json=config, filename_expected=expected)
     zt.apply_directory(pathlib.Path("docs"))  # files section must NOT match this
-    zt.write_expected()
-    assert expected.read_text() == ""
+    assert f.getvalue() == ""

@@ -6,6 +6,7 @@ import fnmatch
 import json
 import logging
 import pathlib
+import typing
 
 from zulux.util_constants import ZULUX_CHMOD_JSON_SUFFIX
 
@@ -102,12 +103,15 @@ class Zulux(abc.ABC):
     permission change (production) or record results (testing).
     """
 
-    def __init__(self, filename_zulux_chmod_json: pathlib.Path) -> None:
-        assert filename_zulux_chmod_json.name.endswith(ZULUX_CHMOD_JSON_SUFFIX), (
-            f"Filename must end with '{ZULUX_CHMOD_JSON_SUFFIX}', "
-            f"got: {filename_zulux_chmod_json.name!r}"
-        )
-        data = json.loads(filename_zulux_chmod_json.read_text())
+    def __init__(self, zulux_json: pathlib.Path | list[typing.Any]) -> None:
+        if isinstance(zulux_json, pathlib.Path):
+            assert zulux_json.name.endswith(ZULUX_CHMOD_JSON_SUFFIX), (
+                f"Filename must end with '{ZULUX_CHMOD_JSON_SUFFIX}', "
+                f"got: {zulux_json.name!r}"
+            )
+            data = json.loads(zulux_json.read_text())
+        else:
+            data = zulux_json
         self._entries: list[_ZuluxJsonEntry] = [
             _ZuluxJsonEntry.from_dict(entry) for entry in data
         ]
@@ -188,8 +192,7 @@ class ZuluxTest(Zulux):
     """
     Test implementation of Zulux.
 
-    Each chmod/chown call appends one line to an internal list.
-    Call write_expected() to flush the list to the golden output file.
+    Each chmod/chown call is written immediately to f_expected.
     Output format - one command per line:
         chown user:group path
         chmod mode path
@@ -198,25 +201,20 @@ class ZuluxTest(Zulux):
 
     def __init__(
         self,
-        filename_zulux_chmod_json: pathlib.Path,
-        filename_expected: pathlib.Path,
+        zulux_json: pathlib.Path | list[typing.Any],
+        f_expected: typing.IO[str],
     ) -> None:
-        super().__init__(filename_zulux_chmod_json)
-        self._filename_expected = filename_expected
-        self._lines: list[str] = []
+        super().__init__(zulux_json)
+        self._f_expected = f_expected
 
     def chmod_file(self, filename: pathlib.Path, mode: str) -> None:
-        self._lines.append(f"chmod {mode} {filename.as_posix()}\n")
+        self._f_expected.write(f"chmod {mode} {filename.as_posix()}\n")
 
     def chown_file(self, filename: pathlib.Path, user: str, group: str) -> None:
-        self._lines.append(f"chown {user}:{group} {filename.as_posix()}\n")
+        self._f_expected.write(f"chown {user}:{group} {filename.as_posix()}\n")
 
     def chmod_directory(self, directory: pathlib.Path, mode: str) -> None:
-        self._lines.append(f"chmod {mode} {directory.as_posix()}/\n")
+        self._f_expected.write(f"chmod {mode} {directory.as_posix()}/\n")
 
     def chown_directory(self, directory: pathlib.Path, user: str, group: str) -> None:
-        self._lines.append(f"chown {user}:{group} {directory.as_posix()}/\n")
-
-    def write_expected(self) -> None:
-        """Write accumulated lines to the expected output file."""
-        self._filename_expected.write_text("".join(self._lines))
+        self._f_expected.write(f"chown {user}:{group} {directory.as_posix()}/\n")
