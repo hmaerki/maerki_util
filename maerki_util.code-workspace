@@ -21,6 +21,11 @@
 		"python.testing.cwd": "${workspaceFolder}",
 		"python.testing.unittestEnabled": false,
 		"python.testing.pytestEnabled": true,
+		"pylint.path": [
+			"~/.env/python",
+			"-m",
+			"pylint"
+		],
 		"search.exclude": {
 			"**/.venv": true
 		},

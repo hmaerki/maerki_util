@@ -49,6 +49,7 @@ httpupload = "httpupload.httpupload:app"
 alpuma = "alpuma.alpuma:main"
 zulu = "zulu.zulu:main"
 zulup = "zulup.zulup:app"
+zulux = "zulux.zulux:app"
 klangspiel_rechnung2026 = "klangspiel_rechnung2026.klangspiel_rechnung2026:app"
 
 [project.urls]

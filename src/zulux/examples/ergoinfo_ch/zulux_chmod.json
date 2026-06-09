@@ -1,0 +1,19 @@
+[
+    {
+        "directory_self": {
+            "chmod": "www-data:users:rwxr-xr-x"
+        },
+        "files": {
+            "patterns": [
+                "wikiwiki/*.cgi"
+            ],
+            "chmod": "www-data:users:rwxrwx---"
+        },
+        "directories": {
+            "patterns": [
+                "*/"
+            ],
+            "chmod": "www-data:users:rwxr-xr-x"
+        }
+    }
+]
