@@ -72,6 +72,20 @@ Patterns in `"files"` must NOT end with `/`; patterns in `"directories"` MUST en
   ```
   `secret.cgi` matches the first pattern (`!` = exclude) and is rejected immediately; all other `.cgi` files fall through to the second pattern and are included.
 
+### Difference between `zulux_chmod.json` and `http_zulux_chmod.json`
+
+The prefix before `zulux_chmod.json` determines which directory the rules are applied to:
+
+* `zulux_chmod.json` (no prefix):
+
+  Rules are applied to the directory that contains the file itself.
+
+* `http_zulux_chmod.json` (prefix `http`):
+
+  The prefix must match the name of a sibling directory located next to the file.
+  Rules are applied to that sibling directory (`http/`) as if the file were placed inside it.
+  It is an error if the sibling directory does not exist.
+
 ### `"chmod": "www-data:users:rwxr-xr-x"`:
 
 * `www-data` is the user name to apply.
