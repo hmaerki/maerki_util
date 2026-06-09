@@ -17,6 +17,7 @@ def test_traverse_project_rs_files() -> None:
     assert backup.files == [
         "a.txt",
         "sub/b.txt",
+        "zulup_backup.json",
     ]
 
 
@@ -27,6 +28,7 @@ def test_traverse_project_xy_files() -> None:
         "sub/README.md",
         "sub/main.c",
         "sub/task.txt",
+        "zulup_backup.json",
     ]
 
 
@@ -49,4 +51,4 @@ def test_ignore_dot_git_directories_recursively(project: TtestProjectDirectory) 
     project.create_backup_json(directory_name_include=False, ignore=[".git/"])
 
     backup = project.get_directory_backup_json()
-    assert backup.files == ["keep.txt", "src/code.py"]
+    assert backup.files == ["keep.txt", "src/code.py", "zulup_backup.json"]

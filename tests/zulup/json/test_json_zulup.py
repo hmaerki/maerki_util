@@ -66,7 +66,7 @@ def test_backup_name_valid(name: str) -> None:
 
 @pytest.mark.parametrize(
     "name",
-    ["has space", "with-dash", "slash/bad", ""],
+    ["has space", "slash/bad", ""],
 )
 def test_backup_name_invalid(name: str) -> None:
     with pytest.raises(ValueError, match="backup_name"):

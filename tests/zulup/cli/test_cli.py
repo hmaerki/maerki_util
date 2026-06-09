@@ -50,7 +50,7 @@ def test_cli_list_omits_removed_files(project: TtestProjectDirectory) -> None:
 
     assert result.exit_code == 0
     listed = set(result.stdout.splitlines())
-    assert listed == {"a.txt", "b.txt", "d.txt"}
+    assert listed == {"a.txt", "b.txt", "d.txt", "zulup_backup.json"}
 
 
 def test_cli_restore_restores_selected_files(

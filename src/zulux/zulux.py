@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import pathlib
 import sys
 import typing
@@ -14,8 +15,6 @@ logger = logging.getLogger(__file__)
 
 
 app = typer.Typer(
-    invoke_without_command=True,
-    rich_markup_mode="markdown",
     help=f"Zulux set permissions tool. Documentation: {util_constants.README_URL}",
 )
 
@@ -30,11 +29,15 @@ def _find_chmod_json_files(
     """
     results: list[tuple[pathlib.Path, pathlib.Path]] = []
 
-    def _walk(current: pathlib.Path) -> None:
-        json_files = sorted(current.glob(f"*{util_constants.ZULUX_CHMOD_JSON_SUFFIX}"))
+    for dirpath, dirnames, filenames in os.walk(directory):
+        current = pathlib.Path(dirpath)
+        json_files = sorted(
+            current / f
+            for f in filenames
+            if f.endswith(util_constants.ZULUX_CHMOD_JSON_SUFFIX)
+        )
         if json_files:
             for json_file in json_files:
-                # Determine the governed root directory.
                 # A plain 'zulux_chmod.json' governs current itself.
                 # A prefixed 'http_zulux_chmod.json' governs the sibling 'http/' directory.
                 prefix = json_file.name[: -len(util_constants.ZULUX_CHMOD_JSON_SUFFIX)]
@@ -52,12 +55,10 @@ def _find_chmod_json_files(
                 else:
                     results.append((json_file, current))
             # Do not recurse deeper once a config file is found at this level.
-            return
-        for child in sorted(current.iterdir()):
-            if child.is_dir():
-                _walk(child)
+            dirnames.clear()
+        else:
+            dirnames.sort()
 
-    _walk(directory)
     return results
 
 
@@ -67,7 +68,8 @@ def _apply_json(
     if dry_run:
         print(json_file)
         zulux: ZuluxReal | ZuluxTest = ZuluxTest(
-            zulux_json=json_file, f_expected=sys.stdout
+            zulux_json=json_file,
+            f_expected=sys.stdout,
         )
     else:
         logger.info("Applying %s to %s", json_file.name, directory_root)
@@ -75,17 +77,18 @@ def _apply_json(
 
     zulux.apply_directory_self()
 
-    for entry in sorted(directory_root.rglob("*")):
-        rel = entry.relative_to(directory_root)
-        if entry.is_file():
-            zulux.apply_file(rel)
-        elif entry.is_dir():
-            zulux.apply_directory(rel)
+    for dirpath, dirnames, filenames in os.walk(directory_root):
+        dirnames.sort()
+        current = pathlib.Path(dirpath)
+        rel_dir = current.relative_to(directory_root)
+        if rel_dir != pathlib.Path("."):
+            zulux.apply_directory(rel_dir)
+        for filename in sorted(filenames):
+            zulux.apply_file(rel_dir / filename)
 
 
 @app.callback()
 def main(
-    ctx: typer.Context,
     debug: typing.Annotated[
         bool,
         typer.Option("--debug", help="Set log level to DEBUG (default: INFO)"),
@@ -99,8 +102,6 @@ def main(
     )
     for handler in logging.getLogger().handlers:
         handler.setLevel(console_level)
-    if ctx.invoked_subcommand is None:
-        ctx.invoke(apply)
 
 
 @app.command()
