@@ -1,0 +1,10 @@
+[
+    {
+        "files": {
+            "patterns": [
+                "/*.py"
+            ],
+            "chmod": "nobody:staff:rw-r--r--"
+        }
+    }
+]

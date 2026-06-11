@@ -4,6 +4,8 @@ zulux resets access permissions for files and directories.
 
 ## User Miniguide
 
+For details see [AGENTS.md](AGENTS.md).
+
 ### Preparation
 
 Place `run_zulux.sh` into a folder with a `zulux_chmod.json` or top folders of such.

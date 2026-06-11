@@ -4,3 +4,6 @@ wikiwiki/secret.cgi
 wikiwiki/other.cgi
 main.py
 README.md
+home/a.txt
+home/b.txt
+home/c.py

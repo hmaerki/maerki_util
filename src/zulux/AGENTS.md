@@ -53,12 +53,16 @@ Patterns in `"files"` must NOT end with `/`; patterns in `"directories"` MUST en
   * A pattern starting with `!` means exclude.
   * A pattern without `!` means include.
   * By default, no files or directories are selected.
-  * A pattern containing `/` (other than a trailing `/`) is matched against the relative path. Otherwise, it is matched against the file or directory name only.
-  * If `"patterns"` is missing, an empty list is assumed.
+  * A pattern starting with `/` is anchored to the top level: it only matches entries directly in the governed directory (no `/` in the relative path). The leading `/` is stripped before matching.
+  * A pattern containing `/` (other than a leading or trailing `/`) is matched against the relative path.
+  * Otherwise (no `/` at all) it is matched against the file or directory name only — at any depth.
+  * If `"patterns"` is missing, all files/directories match (catch-all default).
+  * If `"patterns"` is an empty list `[]`, nothing matches.
 
   Examples:
-  * `"*.log"` - include all `.log` files.
-  * `"!private.log"` - exclude `private.log`.
+  * `"*.log"` - include all `.log` files at any depth.
+  * `"/*.log"` - include only `.log` files directly in the governed directory (top level).
+  * `"!private.log"` - exclude `private.log` at any depth.
   * `".git/"` - include every directory named `.git` (top folder and all subfolders).
   * `"!build/output/"` - exclude the `output` directory under `build` (path match).
 

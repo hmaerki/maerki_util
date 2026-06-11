@@ -18,7 +18,8 @@ def _matches_patterns(patterns: list[str], name: str, rel_path: str) -> bool:
     Single ordered patterns list; first matching pattern decides.
     A pattern starting with '!' means exclude; without '!' means include.
     A trailing '/' marks a directory pattern and is stripped before matching.
-    A pattern containing '/' (other than trailing) is matched against rel_path;
+    A leading '/' anchors the match to the top level (no '/' in rel_path after stripping).
+    A pattern containing '/' (other than leading/trailing) is matched against rel_path;
     otherwise against name only.
     Default (no match): not selected.
     """
@@ -30,7 +31,11 @@ def _matches_patterns(patterns: list[str], name: str, rel_path: str) -> bool:
         if pattern.endswith("/"):
             pattern = pattern[:-1]
 
-        if "/" in pattern:
+        # Leading / anchors to top level: strip it and require no / in rel_path
+        if pattern.startswith("/"):
+            pattern = pattern[1:]
+            matched = "/" not in rel_path and fnmatch.fnmatch(rel_path, pattern)
+        elif "/" in pattern:
             matched = fnmatch.fnmatch(rel_path, pattern)
         else:
             matched = fnmatch.fnmatch(name, pattern)
@@ -59,12 +64,12 @@ class _ChmodSpec:
 
 @dataclasses.dataclass(frozen=True)
 class _FilesEntry:
-    patterns: list[str]
+    patterns: list[str] | None  # None means match-all (no 'patterns' key in JSON)
     chmod_spec: _ChmodSpec
 
     @staticmethod
     def from_dict(data: dict) -> _FilesEntry:
-        patterns = data.get("patterns", [])
+        patterns = data["patterns"] if "patterns" in data else None
         chmod_spec = _ChmodSpec.parse(data["chmod"])
         return _FilesEntry(patterns=patterns, chmod_spec=chmod_spec)
 
@@ -145,7 +150,9 @@ class Zulux(abc.ABC):
         for entry in self._entries:
             if entry.files is None:
                 continue
-            if _matches_patterns(entry.files.patterns, name, rel_path):
+            if entry.files.patterns is None or _matches_patterns(
+                entry.files.patterns, name, rel_path
+            ):
                 spec = entry.files.chmod_spec
                 if spec.user or spec.group:
                     self.chown_file(filename, spec.user, spec.group)
@@ -165,7 +172,9 @@ class Zulux(abc.ABC):
         for entry in self._entries:
             if entry.directories is None:
                 continue
-            if _matches_patterns(entry.directories.patterns, name, rel_path):
+            if entry.directories.patterns is None or _matches_patterns(
+                entry.directories.patterns, name, rel_path
+            ):
                 spec = entry.directories.chmod_spec
                 if spec.user or spec.group:
                     self.chown_directory(directory, spec.user, spec.group)

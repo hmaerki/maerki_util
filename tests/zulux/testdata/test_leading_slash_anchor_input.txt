@@ -1,0 +1,5 @@
+# Leading / anchors to top level: only top-level .py files match
+main.py
+sub/main.py
+sub/util.py
+README.md
