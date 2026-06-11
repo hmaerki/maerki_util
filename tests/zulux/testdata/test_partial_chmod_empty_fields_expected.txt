@@ -1,4 +1,4 @@
-chown :staff             server.conf/
-chmod rw-r--r--          server.conf/
-chown root:              deploy.sh/
-chmod rwxr-xr-x          deploy.sh/
+chown :staff             server.conf
+chmod rw-r--r--          server.conf
+chown root:              deploy.sh
+chmod rwxr-xr-x          deploy.sh

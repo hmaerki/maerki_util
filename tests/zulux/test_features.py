@@ -78,7 +78,7 @@ def test_first_entry_wins_not_second() -> None:
     zt.apply_file(pathlib.Path("main.py"))
     assert (
         f.getvalue()
-        == "chown first:first        main.py/\nchmod rw-------          main.py/\n"
+        == "chown first:first        main.py\nchmod rw-------          main.py\n"
     )
 
 
@@ -128,7 +128,7 @@ def test_exclude_pattern_does_not_suppress_non_matching_file() -> None:
     zt.apply_file(pathlib.Path("public.txt"))
     assert (
         f.getvalue()
-        == "chown a:b                public.txt/\nchmod rw-r--r--          public.txt/\n"
+        == "chown a:b                public.txt\nchmod rw-r--r--          public.txt\n"
     )
 
 

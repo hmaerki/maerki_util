@@ -1,6 +1,6 @@
-chown dev:dev            src/main.py/
-chmod rw-r--r--          src/main.py/
-chown log:log            deep/a/app.log/
-chmod rw-------          deep/a/app.log/
-chown log:log            access.log/
-chmod rw-------          access.log/
+chown dev:dev            src/main.py
+chmod rw-r--r--          src/main.py
+chown log:log            deep/a/app.log
+chmod rw-------          deep/a/app.log
+chown log:log            access.log
+chmod rw-------          access.log
