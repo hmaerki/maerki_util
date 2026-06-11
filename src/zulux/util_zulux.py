@@ -5,12 +5,19 @@ import dataclasses
 import fnmatch
 import json
 import logging
+import os
 import pathlib
 import typing
 
 from zulux.util_constants import ZULUX_CHMOD_JSON_SUFFIX
 
 logger = logging.getLogger(__file__)
+
+
+class ZuluxError(Exception):
+    @staticmethod
+    def factory(filename: pathlib.Path, command: str, e: Exception) -> ZuluxError:
+        return ZuluxError(f"{filename}: Failed to {command}: {e}!")
 
 
 def _matches_patterns(patterns: list[str], name: str, rel_path: str) -> bool:
@@ -260,6 +267,11 @@ class ZuluxReal(Zulux):
 
     def _mode_to_int(self, mode: str) -> int:
         """Convert 'rwxr-xr-x' (9-char) to an integer mode."""
+        assert len(mode) == 9, f"Expect mode '{mode}' to be nine characters long!"
+        for expected, ch in zip("rwxrwxrwx", mode, strict=True):
+            if ch != "-":
+                if ch != expected:
+                    raise ValueError(f"Expected a string 'rwxrwxrwx' but got '{mode}'!")
         bits = [
             0o400,
             0o200,
@@ -272,7 +284,7 @@ class ZuluxReal(Zulux):
             0o001,
         ]
         result = 0
-        for bit, ch in zip(bits, mode):
+        for bit, ch in zip(bits, mode, strict=True):
             if ch != "-":
                 result |= bit
         return result
@@ -280,25 +292,37 @@ class ZuluxReal(Zulux):
     def chmod_file(self, filename: pathlib.Path, mode: str) -> None:
         path = self._directory_root / filename
         logger.debug("chmod %s %s", mode, path)
-        path.chmod(self._mode_to_int(mode))
+
+        try:
+            path.chmod(self._mode_to_int(mode))
+        except Exception as e:
+            raise ZuluxError.factory(path, "chmod", e) from e
 
     def chown_file(self, filename: pathlib.Path, user: str, group: str) -> None:
         path = self._directory_root / filename
         uid, gid = self._resolve_ids(user, group)
         logger.debug("chown %s:%s %s", user, group, path)
-        import os
 
-        os.chown(path, uid, gid)
+        try:
+            os.chown(path, uid, gid)
+        except Exception as e:
+            raise ZuluxError.factory(path, "chmod", e) from e
 
     def chmod_directory(self, directory: pathlib.Path, mode: str) -> None:
         path = self._directory_root / directory
         logger.debug("chmod %s %s/", mode, path)
-        path.chmod(self._mode_to_int(mode))
+
+        try:
+            path.chmod(self._mode_to_int(mode))
+        except Exception as e:
+            raise ZuluxError.factory(path, "chmod", e) from e
 
     def chown_directory(self, directory: pathlib.Path, user: str, group: str) -> None:
         path = self._directory_root / directory
         uid, gid = self._resolve_ids(user, group)
         logger.debug("chown %s:%s %s/", user, group, path)
-        import os
 
-        os.chown(path, uid, gid)
+        try:
+            os.chown(path, uid, gid)
+        except Exception as e:
+            raise ZuluxError.factory(path, "chmod", e) from e

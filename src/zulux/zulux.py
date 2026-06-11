@@ -8,8 +8,7 @@ import typing
 
 import typer
 
-from . import util_constants
-from .util_zulux import ZuluxReal, ZuluxTest
+from . import util_constants, util_zulux
 
 logger = logging.getLogger(__file__)
 
@@ -67,13 +66,15 @@ def _apply_json(
 ) -> None:
     if dry_run:
         print(json_file)
-        zulux: ZuluxReal | ZuluxTest = ZuluxTest(
+        zulux: util_zulux.ZuluxReal | util_zulux.ZuluxTest = util_zulux.ZuluxTest(
             zulux_json=json_file,
             f_expected=sys.stdout,
         )
     else:
         logger.info("Applying %s to %s", json_file.name, directory_root)
-        zulux = ZuluxReal(zulux_json=json_file, directory_root=directory_root)
+        zulux = util_zulux.ZuluxReal(
+            zulux_json=json_file, directory_root=directory_root
+        )
 
     zulux.apply_directory_self()
 
@@ -136,7 +137,7 @@ def zulux(
         for json_file, root in found:
             try:
                 _apply_json(json_file, root, dry_run=dry_run)
-            except Exception as e:
+            except util_zulux.ZuluxError as e:
                 logger.error(f"Processing {json_file}\n{e!r}")
 
 
