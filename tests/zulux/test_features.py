@@ -91,3 +91,82 @@ def test_directory_not_matched_by_files_section() -> None:
     )
     zt.apply_directory(pathlib.Path("docs"))  # files section must NOT match this
     assert f.getvalue() == ""
+
+
+def test_exclude_pattern_suppresses_match() -> None:
+    """A '!' pattern that matches a file must suppress it (return False)."""
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[
+            {
+                "files": {
+                    "patterns": ["!secret.txt", "*.txt"],
+                    "chmod": "a:b:rw-r--r--",
+                }
+            }
+        ],
+        f_expected=f,
+    )
+    zt.apply_file(pathlib.Path("secret.txt"))
+    assert f.getvalue() == "", "excluded file must produce no output"
+
+
+def test_exclude_pattern_does_not_suppress_non_matching_file() -> None:
+    """A '!' pattern that does NOT match must leave other files unaffected."""
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[
+            {
+                "files": {
+                    "patterns": ["!secret.txt", "*.txt"],
+                    "chmod": "a:b:rw-r--r--",
+                }
+            }
+        ],
+        f_expected=f,
+    )
+    zt.apply_file(pathlib.Path("public.txt"))
+    assert (
+        f.getvalue()
+        == "chown a:b                public.txt/\nchmod rw-r--r--          public.txt/\n"
+    )
+
+
+def test_exclude_pattern_by_path_suppresses_match() -> None:
+    """A '!' pattern with a path component suppresses the exact path only."""
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[
+            {
+                "files": {
+                    "patterns": ["!wikiwiki/secret.cgi", "wikiwiki/*.cgi"],
+                    "chmod": "a:b:rwxrwx---",
+                }
+            }
+        ],
+        f_expected=f,
+    )
+    zt.apply_file(pathlib.Path("wikiwiki/secret.cgi"))
+    assert f.getvalue() == "", "path-excluded file must produce no output"
+    zt.apply_file(pathlib.Path("wikiwiki/run.cgi"))
+    assert "wikiwiki/run.cgi" in f.getvalue(), "non-excluded .cgi must still match"
+
+
+def test_exclude_directory_pattern_suppresses_match() -> None:
+    """A '!dir/' pattern must suppress the named directory."""
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[
+            {
+                "directories": {
+                    "patterns": ["!.git/", "*/"],
+                    "chmod": "a:b:rwxr-xr-x",
+                }
+            }
+        ],
+        f_expected=f,
+    )
+    zt.apply_directory(pathlib.Path(".git"))
+    assert f.getvalue() == "", "excluded directory must produce no output"
+    zt.apply_directory(pathlib.Path("src"))
+    assert "src" in f.getvalue(), "non-excluded directory must still match"
