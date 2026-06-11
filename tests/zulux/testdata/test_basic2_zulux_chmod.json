@@ -4,7 +4,7 @@
             "patterns": [
                 "wikiwiki/secret.cgi"
             ],
-            "chmod": "www-data:users:r--------"
+            "chmod": "www-data:rule1:r--------"
         }
     },
     {
@@ -12,7 +12,7 @@
             "patterns": [
                 "wikiwiki/*.cgi"
             ],
-            "chmod": "www-data:users:rwxrwx---"
+            "chmod": "www-data:rule2:rwxrwx---"
         }
     },
     {
@@ -20,7 +20,20 @@
             "patterns": [
                 "*.py"
             ],
-            "chmod": "nobody:staff:rw-r--r--"
+            "chmod": "www-data:rule3:rw-r--r--"
+        }
+    },
+    {
+        "files": {
+            "patterns": [
+                "*/.git/*"
+            ],
+            "chmod": "nobody:rule4:"
+        }
+    },
+    {
+        "files": {
+            "chmod": "nobody:rule5:rw-r--r--"
         }
     }
 ]

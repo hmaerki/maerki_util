@@ -4,6 +4,8 @@ zulux resets access permissions for files and directories.
 
 ## User Miniguide
 
+For details see [AGENTS.md](AGENTS.md).
+
 ### Preparation
 
 Place `run_zulux.sh` into a folder with a `zulux_chmod.json` or top folders of such.
@@ -46,6 +48,22 @@ Patterns use `.gitignore`-style syntax:
 * `*` matches everything except `/`
 * A pattern starting with `!` means exclude.
 * Patterns in `"directories"` MUST end with `/`.
+
+### Pattern reference
+
+Patterns are always matched against the **relative path** of the file or directory (e.g. `wikiwiki/run.cgi` or `src/`).
+
+| Pattern | Matches | Does NOT match |
+|---|---|---|
+| `*.cgi` | `run.cgi`, `wikiwiki/run.cgi`, `a/b/run.cgi` | `run.py` |
+| `wikiwiki/*.cgi` | `wikiwiki/run.cgi` | `run.cgi`, `a/wikiwiki/run.cgi` |
+| `wikiwiki/secret.cgi` | `wikiwiki/secret.cgi` only | `secret.cgi`, `a/wikiwiki/secret.cgi` |
+| `*/.git/*` | `sub/.git/config`, `a/b/.git/HEAD` | `.git/config` (top level) |
+| `*/` | `src/`, `wikiwiki/`, any directory at any depth | (nothing, it's a catch-all for dirs) |
+| `!secret.cgi` | — (exclude pattern, suppresses `secret.cgi` at any depth) | |
+| `!wikiwiki/secret.cgi` | — (exclude pattern, suppresses exact path only) | |
+| *(no `"patterns"` key)* | every file or directory (catch-all default) | |
+| `[]` (empty list) | nothing | |
 
 ### Filename prefix
 

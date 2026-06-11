@@ -54,15 +54,18 @@ def test_no_match_produces_no_output() -> None:
     assert f.getvalue() == ""
 
 
-def test_missing_patterns_key_treated_as_empty() -> None:
-    """An entry missing the 'patterns' key behaves as an empty list (no matches)."""
+def test_missing_patterns_key_is_catch_all() -> None:
+    """An entry missing the 'patterns' key matches any file (catch-all default)."""
     f = io.StringIO()
     zt = ZuluxTest(
         zulux_json=[{"files": {"chmod": "a:b:rwx------"}}],
         f_expected=f,
     )
     zt.apply_file(pathlib.Path("any.txt"))
-    assert f.getvalue() == ""
+    assert (
+        f.getvalue()
+        == "chown a:b                any.txt\nchmod rwx------          any.txt\n"
+    )
 
 
 def test_first_entry_wins_not_second() -> None:
@@ -170,3 +173,15 @@ def test_exclude_directory_pattern_suppresses_match() -> None:
     assert f.getvalue() == "", "excluded directory must produce no output"
     zt.apply_directory(pathlib.Path("src"))
     assert "src" in f.getvalue(), "non-excluded directory must still match"
+
+
+def test_plain_glob_matches_at_any_depth() -> None:
+    """A pattern without '/' must match files at any depth."""
+    f = io.StringIO()
+    zt = ZuluxTest(
+        zulux_json=[{"files": {"patterns": ["*.py"], "chmod": "a:b:rw-r--r--"}}],
+        f_expected=f,
+    )
+    zt.apply_file(pathlib.Path("main.py"))
+    zt.apply_file(pathlib.Path("sub/main.py"))
+    assert f.getvalue().count("\n") == 4, "both files must match (2 lines each)"

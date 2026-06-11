@@ -59,12 +59,19 @@ class _ChmodSpec:
 
 @dataclasses.dataclass(frozen=True)
 class _FilesEntry:
-    patterns: list[str]
+    patterns: list[str] | None
+    """
+    None means match-all (no 'patterns' key in JSON)
+    """
     chmod_spec: _ChmodSpec
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.patterns, list | None)
+        assert isinstance(self.chmod_spec, _ChmodSpec)
 
     @staticmethod
     def from_dict(data: dict) -> _FilesEntry:
-        patterns = data.get("patterns", [])
+        patterns = data["patterns"] if "patterns" in data else None
         chmod_spec = _ChmodSpec.parse(data["chmod"])
         return _FilesEntry(patterns=patterns, chmod_spec=chmod_spec)
 
@@ -145,7 +152,9 @@ class Zulux(abc.ABC):
         for entry in self._entries:
             if entry.files is None:
                 continue
-            if _matches_patterns(entry.files.patterns, name, rel_path):
+            if entry.files.patterns is None or _matches_patterns(
+                entry.files.patterns, name, rel_path
+            ):
                 spec = entry.files.chmod_spec
                 if spec.user or spec.group:
                     self.chown_file(filename, spec.user, spec.group)
@@ -165,7 +174,9 @@ class Zulux(abc.ABC):
         for entry in self._entries:
             if entry.directories is None:
                 continue
-            if _matches_patterns(entry.directories.patterns, name, rel_path):
+            if entry.directories.patterns is None or _matches_patterns(
+                entry.directories.patterns, name, rel_path
+            ):
                 spec = entry.directories.chmod_spec
                 if spec.user or spec.group:
                     self.chown_directory(directory, spec.user, spec.group)
