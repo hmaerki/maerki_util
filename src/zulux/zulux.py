@@ -93,6 +93,8 @@ def _apply_json(
         for filename in sorted(filenames):
             zulux.apply_file(rel_dir / filename)
 
+    logger.info("Applied %s", zulux.stats)
+
 
 @app.command()
 def zulux(
@@ -138,7 +140,7 @@ def zulux(
             try:
                 _apply_json(json_file, root, dry_run=dry_run)
             except util_zulux.ZuluxError as e:
-                logger.error(f"Processing {json_file}\n{e!r}")
+                logger.error(f"Processing {json_file}\n    {e!r}")
 
 
 if __name__ == "__main__":

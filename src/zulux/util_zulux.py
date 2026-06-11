@@ -129,6 +129,17 @@ class Zulux(abc.ABC):
         self._entries: list[_ZuluxJsonEntry] = [
             _ZuluxJsonEntry.from_dict(entry) for entry in data
         ]
+        self._count_dir_chown = 0
+        self._count_dir_chmod = 0
+        self._count_file_chown = 0
+        self._count_file_chmod = 0
+
+    @property
+    def stats(self) -> str:
+        return (
+            f"dir: {self._count_dir_chown} chown, {self._count_dir_chmod} chmod"
+            f", file: {self._count_file_chown} chown, {self._count_file_chmod} chmod"
+        )
 
     @abc.abstractmethod
     def chmod_file(self, filename: pathlib.Path, mode: str) -> None:
@@ -165,8 +176,10 @@ class Zulux(abc.ABC):
                 spec = entry.files.chmod_spec
                 if spec.user or spec.group:
                     self.chown_file(filename, spec.user, spec.group)
+                    self._count_file_chown += 1
                 if spec.mode:
                     self.chmod_file(filename, spec.mode)
+                    self._count_file_chmod += 1
                 return  # first match wins
 
     def apply_directory(self, directory: pathlib.Path) -> None:
@@ -187,8 +200,10 @@ class Zulux(abc.ABC):
                 spec = entry.directories.chmod_spec
                 if spec.user or spec.group:
                     self.chown_directory(directory, spec.user, spec.group)
+                    self._count_dir_chown += 1
                 if spec.mode:
                     self.chmod_directory(directory, spec.mode)
+                    self._count_dir_chmod += 1
                 return  # first match wins
 
     def apply_directory_self(self) -> None:
@@ -201,8 +216,10 @@ class Zulux(abc.ABC):
                 spec = entry.directory_self_chmod
                 if spec.user or spec.group:
                     self.chown_directory(pathlib.Path("."), spec.user, spec.group)
+                    self._count_dir_chown += 1
                 if spec.mode:
                     self.chmod_directory(pathlib.Path("."), spec.mode)
+                    self._count_dir_chmod += 1
                 return
 
 
