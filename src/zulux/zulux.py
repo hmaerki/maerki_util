@@ -81,7 +81,13 @@ def _apply_json(
         dirnames.sort()
         current = pathlib.Path(dirpath)
         rel_dir = current.relative_to(directory_root)
+        # Stop descending into subdirectories that have their own config file.
         if rel_dir != pathlib.Path("."):
+            if any(
+                f.endswith(util_constants.ZULUX_CHMOD_JSON_SUFFIX) for f in filenames
+            ):
+                dirnames.clear()
+                continue
             zulux.apply_directory(rel_dir)
         for filename in sorted(filenames):
             zulux.apply_file(rel_dir / filename)
