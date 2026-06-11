@@ -25,7 +25,15 @@
     },
     {
         "files": {
-            "chmod": "nobody:rule4:rw-r--r--"
+            "patterns": [
+                "/.git/*"
+            ],
+            "chmod": "nobody:rule4:"
+        }
+    },
+    {
+        "files": {
+            "chmod": "nobody:rule5:rw-r--r--"
         }
     }
 ]

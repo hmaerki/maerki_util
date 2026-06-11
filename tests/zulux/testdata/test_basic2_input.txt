@@ -7,3 +7,6 @@ README.md
 home/a.txt
 home/b.txt
 home/c.py
+.git/inside_git1.txt
+xy/.git/inside_git2.txt
+xy/.git/rs/inside_git3.txt
