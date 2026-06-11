@@ -128,7 +128,10 @@ def zulux(
             )
             continue
         for json_file, root in found:
-            _apply_json(json_file, root, dry_run=dry_run)
+            try:
+                _apply_json(json_file, root, dry_run=dry_run)
+            except Exception as e:
+                logger.error(f"Processing {json_file}\n{e!r}")
 
 
 if __name__ == "__main__":
