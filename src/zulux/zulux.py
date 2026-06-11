@@ -87,25 +87,8 @@ def _apply_json(
             zulux.apply_file(rel_dir / filename)
 
 
-@app.callback()
-def main(
-    debug: typing.Annotated[
-        bool,
-        typer.Option("--debug", help="Set log level to DEBUG (default: INFO)"),
-    ] = False,
-) -> None:
-    console_level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(levelname)s %(message)s",
-        force=True,
-    )
-    for handler in logging.getLogger().handlers:
-        handler.setLevel(console_level)
-
-
 @app.command()
-def apply(
+def zulux(
     directories: typing.Annotated[
         list[pathlib.Path],
         typer.Argument(help="One or more directories to process."),
@@ -117,8 +100,21 @@ def apply(
             help="Discover config files and log what would be done, without changing permissions.",
         ),
     ] = False,
+    debug: typing.Annotated[
+        bool,
+        typer.Option("--debug", help="Set log level to DEBUG (default: INFO)"),
+    ] = False,
 ) -> None:
     """Traverse directories, find *zulux_chmod.json files, and apply permissions."""
+    console_level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(levelname)s %(message)s",
+        force=True,
+    )
+    for handler in logging.getLogger().handlers:
+        handler.setLevel(console_level)
+
     for directory in directories:
         if not directory.is_dir():
             logger.error("Not a directory: %s", directory)
