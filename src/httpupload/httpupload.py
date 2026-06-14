@@ -282,7 +282,11 @@ class HttpUpload:
             response = self.http_upload_file_put(filename, relative_path)
             if response.status in (201, 204):
                 return 0
-        msg = f"{response.status} {response.reason}:   {self.remote_protocol}  ://  {self.remote_host}  {relative_path}"
+        msgs = (
+            f"PUT {response.status} {response.reason}:   {self.remote_protocol}  ://  {self.remote_host} /{self.remote_path} /{relative_path}",
+            f"(user {self.credential.user}/{self.credential.password})",
+        )
+        msg = "\n".join(msgs)
         logger.warning(msg)
         raise UserWarning(msg)
 
@@ -354,12 +358,13 @@ class HttpUpload:
 
         error_count = 0
         for sub_path in current_path.iterdir():
-            if not self.skip_file(sub_path):
-                if sub_path.is_dir():
-                    error_count += self.recurse_folder(sub_path, round)
-                else:
-                    if self.select_file(sub_path, round):
-                        error_count += self.upload_file(sub_path)
+            if self.skip_file(sub_path):
+                continue
+            if sub_path.is_dir():
+                error_count += self.recurse_folder(sub_path, round)
+                continue
+            if self.select_file(sub_path, round):
+                error_count += self.upload_file(sub_path)
         return error_count
 
     def upload_2(self, round: int) -> int:
@@ -407,7 +412,7 @@ class HttpUpload:
         try:
             return self.upload_1(force_upload=force_upload)
         except UserWarning as e:
-            logger.error(f"{UserWarning}: {e}")
+            logger.error(f"UserWarning: {e}")
             return 1
         except socket.gaierror as e:
             logger.error(f'    Error: Host "{self.remote_host}" not found! {e}')
