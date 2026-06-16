@@ -59,6 +59,9 @@ Patterns are always matched against the **relative path** of the file or directo
 | `wikiwiki/*.cgi` | `wikiwiki/run.cgi` | `run.cgi`, `a/wikiwiki/run.cgi` |
 | `wikiwiki/secret.cgi` | `wikiwiki/secret.cgi` only | `secret.cgi`, `a/wikiwiki/secret.cgi` |
 | `*/.git/*` | `sub/.git/config`, `a/b/.git/HEAD` | `.git/config` (top level) |
+| `!.venv/` | — (exclude pattern, suppresses top-level `.venv/`) | `a/.venv/` |
+| `!.venv/*/` | — (exclude pattern, suppresses one-level subdirectories under top-level `.venv/`) | `.venv/bin/activate`, `a/.venv/bin/` |
+| `!.venv/*` | — (exclude pattern, suppresses one-level files under top-level `.venv/`) | `.venv/bin/activate`, `a/.venv/pyvenv.cfg` |
 | `*/` | `src/`, `wikiwiki/`, any directory at any depth | (nothing, it's a catch-all for dirs) |
 | `!secret.cgi` | — (exclude pattern, suppresses `secret.cgi` at any depth) | |
 | `!wikiwiki/secret.cgi` | — (exclude pattern, suppresses exact path only) | |

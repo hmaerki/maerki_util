@@ -1,0 +1,21 @@
+[
+    {
+        "directories": {
+            "patterns": [
+                "!.venv/",
+                "!.venv/*/",
+                "*/"
+            ],
+            "chmod": "alice:devs:rwxr-xr-x"
+        }
+    },
+    {
+        "files": {
+            "patterns": [
+                "!.venv/*",
+                "*"
+            ],
+            "chmod": "alice:devs:rw-r--r--"
+        }
+    }
+]

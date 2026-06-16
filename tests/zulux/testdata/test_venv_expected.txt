@@ -1,0 +1,6 @@
+chown alice:devs         main.py
+chmod rw-r--r--          main.py
+chown alice:devs         src/
+chmod rwxr-xr-x          src/
+chown alice:devs         src/main.py
+chmod rw-r--r--          src/main.py

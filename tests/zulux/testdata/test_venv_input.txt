@@ -1,0 +1,8 @@
+# A top-level .venv directory should be excluded completely
+main.py
+.venv/
+.venv/pyvenv.cfg
+.venv/bin/
+.venv/bin/activate
+src/
+src/main.py
