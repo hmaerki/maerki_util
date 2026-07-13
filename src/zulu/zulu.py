@@ -32,6 +32,7 @@
 #   2022-05-21, Hans Maerki, v4.0.1: Everything is UTF-8. Default encoding was Latin-1..
 #   2025-10-24, Hans Maerki, v4.0.2: Moved to git and uv
 #   2026-04-03, Hans Maerki, v4.0.3: Logfile refactored from html to text console output.
+#   2026-07-13, Hans Maerki, v4.0.4: Improve error messages.
 #
 
 import logging
@@ -49,8 +50,8 @@ logger = logging.getLogger(__file__)
 sys.path.insert(0, os.path.join(os.path.abspath(os.getcwd())))
 
 sCopyright = "Copyright Hans und Peter Maerki. LGPL."
-sVersion = "v4.0.3"
-sDate = "2026-04-03a"
+sVersion = "v4.0.4"
+sDate = "2026-07-13a"
 sProduct = "Zulu Website-Assembler"
 
 
@@ -274,8 +275,11 @@ class Zulu:
         objHandlerTag = HandlerTag(objProcessingState)
         objTemplate.replace_tags(objHandlerTag, objProcessingState)
         strTemplateFilename = objTemplate.strTemplate
-        with open(strTemplateFilename, encoding="utf-8") as f:
-            objTemplate = Template(f.read(), strTemplateFilename)
+        try:
+            with open(strTemplateFilename, encoding="utf-8") as f:
+                objTemplate = Template(f.read(), strTemplateFilename)
+        except UnicodeDecodeError as e:           
+            raise ValueError(f"{os.path.abspath(strTemplateFilename)} ERROR: {e!r}!")
         objProcessingState.dictGlobalTags["ZuluTemplateName"] = strTemplateFilename
         objProcessingState.dictGlobalTags["ZuluFilenameTemplate"] = strTemplateFilename
 
