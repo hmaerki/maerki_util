@@ -279,7 +279,9 @@ class Zulu:
             with open(strTemplateFilename, encoding="utf-8") as f:
                 objTemplate = Template(f.read(), strTemplateFilename)
         except UnicodeDecodeError as e:           
-            raise ValueError(f"{os.path.abspath(strTemplateFilename)} ERROR: {e!r}!")
+            self.objLogger.error(f"{os.path.abspath(strTemplateFilename)}: UnicodeDecodeError {e}")
+            return
+
         objProcessingState.dictGlobalTags["ZuluTemplateName"] = strTemplateFilename
         objProcessingState.dictGlobalTags["ZuluFilenameTemplate"] = strTemplateFilename
 
@@ -310,9 +312,9 @@ class Zulu:
                 with open(strInputFilename, encoding="utf-8") as f:
                     try:
                         text = f.read()
-                    except UnicodeDecodeError as err:
+                    except UnicodeDecodeError as e:
                         self.objLogger.error(
-                            f"{strInputFilename}: UnicodeDecodeError {err}"
+                            f"{os.path.abspath(strInputFilename)}: UnicodeDecodeError {e}"
                         )
                         return
             except OSError as err:
