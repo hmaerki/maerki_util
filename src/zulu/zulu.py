@@ -310,13 +310,12 @@ class Zulu:
 
             try:
                 with open(strInputFilename, encoding="utf-8") as f:
-                    try:
                         text = f.read()
-                    except UnicodeDecodeError as e:
-                        self.objLogger.error(
-                            f"{os.path.abspath(strInputFilename)}: UnicodeDecodeError {e}"
-                        )
-                        return
+            except UnicodeDecodeError as e:
+                self.objLogger.error(
+                    f"{os.path.abspath(strInputFilename)}: UnicodeDecodeError {e}"
+                )
+                return
             except OSError as err:
                 self.objLogger.error(
                     "%s does not exist (%s)" % (strInputFilename, str(err))
