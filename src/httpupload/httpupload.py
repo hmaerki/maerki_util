@@ -168,7 +168,9 @@ class HttpUpload:
             typer.Abort()
 
         self.dict_file_size_cache: dict[str, int] = {}
-        self.objConnection = None
+        self.objConnection: (
+            http.client.HTTPConnection | http.client.HTTPSConnection | None
+        ) = None
         (
             self.remote_protocol,
             self.remote_host,
@@ -208,12 +210,12 @@ class HttpUpload:
                 self.objConnection = http.client.HTTPSConnection(
                     self.remote_host,
                     context=sslContext,
-                    timeout=30,
+                    timeout=90,
                 )
             else:
                 self.objConnection = http.client.HTTPConnection(
                     self.remote_host,
-                    timeout=30,
+                    timeout=90,
                 )
 
         headers = {
