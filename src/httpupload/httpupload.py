@@ -9,6 +9,7 @@ import pathlib
 import re
 import socket
 import ssl
+import time
 import typing
 from urllib import parse as urlparse
 
@@ -210,33 +211,37 @@ class HttpUpload:
                 self.objConnection = http.client.HTTPSConnection(
                     self.remote_host,
                     context=sslContext,
-                    timeout=90,
+                    timeout=180,
                 )
             else:
                 self.objConnection = http.client.HTTPConnection(
                     self.remote_host,
-                    timeout=90,
+                    timeout=180,
                 )
 
-        headers = {
+        headers: dict[str, str] = {
             "Accept": "text/html",
             "User-Agent": "httpupload",
             "Host": self.remote_host,
-            # 'Content-Length': str(len(strPage)),
             "Authorization": self.strAuthorization,
         }
 
+        begin_s = time.monotonic()
         try:
             full_relative_path = f"{self.remote_path}/{relative_path}"
             full_relative_path = full_relative_path.replace(" ", "%20")
+            # self.objConnection.set_debuglevel(logging.DEBUG)
             self.objConnection.request(verb, full_relative_path, f_page, headers)
             response = self.objConnection.getresponse()
             _data = response.read()
         except Exception as e:
+            duration_s = time.monotonic() - begin_s
+            msg = f'"{verb}", "{relative_path}": after {duration_s:0.1f}s: "{e}"'
             self.objConnection.close()
             self.objConnection = None
             logger.exception(e)
-            raise Exception(f'"{verb}", "{relative_path}": "{e}"') from e
+            raise Exception(msg) from e
+        duration_s = time.monotonic() - begin_s
         return response
 
     def http_create_folder(self, relative_path: str) -> http.client.HTTPResponse:
