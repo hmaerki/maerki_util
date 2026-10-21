@@ -260,15 +260,18 @@ libc = ctypes.CDLL("libc.so.6")
 PR_SET_PDEATHSIG = 1
 SIGTERM = 15
 
+
 def set_death_signal():
     # This function runs in the CHILD process just before systemd-inhibit starts
     libc.prctl(PR_SET_PDEATHSIG, SIGTERM)
+
 
 cmd = [
     "systemd-inhibit",
     "--who=zulup",
     "--why=Backup in progress",
-    "sleep", "infinity"
+    "sleep",
+    "infinity",
 ]
 
 # preexec_fn ensures child gets SIGTERM when parent dies

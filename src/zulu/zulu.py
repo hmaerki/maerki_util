@@ -33,6 +33,7 @@
 #   2025-10-24, Hans Maerki, v4.0.2: Moved to git and uv
 #   2026-04-03, Hans Maerki, v4.0.3: Logfile refactored from html to text console output.
 #   2026-07-13, Hans Maerki, v4.0.4: Improve error messages.
+#   2026-10-21, Hans Maerki, v4.0.5: Write sitemap.xml.
 #
 
 import logging
@@ -55,8 +56,8 @@ sDate = "2026-07-13a"
 sProduct = "Zulu Website-Assembler"
 
 
-dictEntries = {}
-dictOutputFiles = {}
+dictEntries: dict[str, str] = {}
+dictOutputFiles: dict[str, str] = {}
 
 
 class ZuluException(Exception):
@@ -131,10 +132,10 @@ class Zulu:
                 opts, args = getopt.getopt(
                     sys.argv[1:], "st:", ["structure=", "template="]
                 )
-            except getopt.GetoptError:
+            except getopt.GetoptError as e:
                 # print(help information and exit:
                 # self.usage()
-                raise ZuluException()
+                raise ZuluException() from e
             for o, a in opts:
                 if o in ("-s", "--structure"):
                     self.sFilenameStructure = a
@@ -149,11 +150,11 @@ class Zulu:
         self.objLogger = Logger(self.sFilenameStructure)
         self.objLogger.info("python version: " + sys.version)
         try:
-            self.objLogger.info('Assembling structure "%s".' % self.sFilenameStructure)
+            self.objLogger.info(f'Assembling structure "{self.sFilenameStructure}".')
             excel = zulu_excel_reader.ExcelReader(self.sFilenameStructure)
         except Exception as e:
-            self.objLogger.error("Failed to open the document. (%s)" % (str(e)))
-            raise ZuluException()
+            self.objLogger.error(f"Failed to open the document. ({e})")
+            raise ZuluException() from e
         if False:
             with open(
                 self.sFilenameStructure.replace(".xlsx", ".dump.txt"), "w"
@@ -177,9 +178,7 @@ class Zulu:
             self.objLogger.error('No keyword "<navigation>" found: Need at least one!')
             raise ZuluException()
 
-        self.objLogger.info(
-            "<navigation>-Keywords found: %d" % len(self.listNavigations)
-        )
+        self.objLogger.info(f"<navigation>-Keywords found: {len(self.listNavigations)}")
 
     def callPython(self, objTemplate, objProcessingState, sText):
         """
@@ -189,50 +188,45 @@ class Zulu:
         """
         try:
             (sModule, sClass, sParameter) = sText.split(":", 2)
-        except ValueError:
+        except ValueError as e:
             self.objLogger.error(
-                'Expected something like "<!--Zulu:Python:MODULE_NAME:CLASS_NAME:PARAMETER-->" but got "<!--Zulu:Python:%s-->".'
-                % sText,
+                f'Expected something like "<!--Zulu:Python:MODULE_NAME:CLASS_NAME:PARAMETER-->" but got "<!--Zulu:Python:{sText}-->".',
                 objTemplate.strTemplateFilename,
             )
-            raise ZuluException()
-        # return 'mod=%s, class=%s, par=%s' % (sModule, sClass, sParameter)
+            raise ZuluException() from e
 
         try:
             mod = __import__(sModule)
-        except ImportError:
+        except ImportError as e:
             self.objLogger.error(
-                'Could not import Module "%s". See "<!--Zulu:Python:%s-->".'
-                % (sModule, sText),
+                f'Could not import Module "{sModule}". See "<!--Zulu:Python:{sText}-->".',
                 objTemplate.strTemplateFilename,
             )
-            raise ZuluException()
+            raise ZuluException() from e
 
         try:
             klass = getattr(mod, sClass)
-        except AttributeError:
+        except AttributeError as e:
             self.objLogger.error(
-                'Could not find Class "%s". See "<!--Zulu:Python:%s-->".'
-                % (sClass, sText),
+                f'Could not find Class "{sClass}". See "<!--Zulu:Python:{sText}-->".',
                 objTemplate.strTemplateFilename,
             )
-            raise ZuluException()
+            raise ZuluException() from e
 
         try:
             if isinstance(klass, type):
                 instance = klass()
                 instance.__init__()
                 return instance.doit(self, objTemplate, objProcessingState, sParameter)
-        except Exception:
+        except Exception as e:
             self.objLogger.error(
-                'Error in call to "<!--Zulu:Python:%s-->". See traceback.' % sText,
+                f'Error in call to "<!--Zulu:Python:{sText}-->". See traceback.',
                 objTemplate.strTemplateFilename,
             )
-            raise ZuluException()
+            raise ZuluException() from e
 
         self.objLogger.error(
-            'Error in call to "<!--Zulu:Python:%s-->". This class is not registered.'
-            % sText,
+            f'Error in call to "<!--Zulu:Python:{sText}-->". This class is not registered.',
             objTemplate.strTemplateFilename,
         )
         raise ZuluException()
@@ -251,7 +245,7 @@ class Zulu:
         for objNavigation in self.listNavigations:
             if sName == objNavigation.strName:
                 return objNavigation
-        raise IndexError('get_navigation_by_name("%s") not found' % sName)
+        raise IndexError(f'get_navigation_by_name("{sName}") not found')
 
     def create_page(self, objProcessingState):
         # Verify if we have to create the file: If Tag 'Folder' containts '-', the page creation may be skipped
@@ -259,8 +253,7 @@ class Zulu:
             for objEntry in objProcessingState.listEntries:
                 if objEntry.dictTags.get(strBaseDirTag) == "-":
                     self.objLogger.info(
-                        'File for "%s" will not be created: Tag "%s" is "-".'
-                        % (objProcessingState.getIdentification(), strBaseDirTag)
+                        f'File for "{objProcessingState.getIdentification()}" will not be created: Tag "{strBaseDirTag}" is "-".'
                     )
                     return
 
@@ -278,8 +271,10 @@ class Zulu:
         try:
             with open(strTemplateFilename, encoding="utf-8") as f:
                 objTemplate = Template(f.read(), strTemplateFilename)
-        except UnicodeDecodeError as e:           
-            self.objLogger.error(f"{os.path.abspath(strTemplateFilename)}: UnicodeDecodeError {e}")
+        except UnicodeDecodeError as e:
+            self.objLogger.error(
+                f"{os.path.abspath(strTemplateFilename)}: UnicodeDecodeError {e}"
+            )
             return
 
         objProcessingState.dictGlobalTags["ZuluTemplateName"] = strTemplateFilename
@@ -310,16 +305,14 @@ class Zulu:
 
             try:
                 with open(strInputFilename, encoding="utf-8") as f:
-                        text = f.read()
+                    text = f.read()
             except UnicodeDecodeError as e:
                 self.objLogger.error(
                     f"{os.path.abspath(strInputFilename)}: UnicodeDecodeError {e}"
                 )
                 return
             except OSError as err:
-                self.objLogger.error(
-                    "%s does not exist (%s)" % (strInputFilename, str(err))
-                )
+                self.objLogger.error(f"{strInputFilename} does not exist ({err})")
                 return
 
             objInputTemplate = Template(text, strInputFilename)
@@ -332,7 +325,7 @@ class Zulu:
 
             # objProcessingState.dictGlobalTags[strInputTag] = objInputTemplate.strTemplate
             objTemplate.strTemplate = objTemplate.strTemplate.replace(
-                "<!--Zulu:Tag:%s-->" % strInputTag, objInputTemplate.strTemplate
+                f"<!--Zulu:Tag:{strInputTag}-->", objInputTemplate.strTemplate
             )
 
         #
@@ -438,8 +431,7 @@ class Zulu:
             except OSError as e:
                 if e.errno == 13:  # Permission denied
                     self.objLogger.error(
-                        'This file is write protected. Please remove the write protection and try again. The error message was "%s"'
-                        % str(e),
+                        f'This file is write protected. Please remove the write protection and try again. The error message was "{e}"',
                         strOutputFilename,
                     )
                     return
@@ -454,37 +446,33 @@ class Zulu:
                 f.write(objTemplate.strTemplate)
         except UnicodeEncodeError as e:
             self.objLogger.error(
-                '%s: %s. Retry with "replace" instead of "strict"'
-                % (strOutputFilename, e)
+                f'{strOutputFilename}: {e}. Retry with "replace" instead of "strict"'
             )
             with open(strOutputFilename, "w", encoding="utf-8", errors="replace") as f:
                 f.write(objTemplate.strTemplate)
         except Exception as e:
-            self.objLogger.error("%s: %s" % (strOutputFilename, e))
+            self.objLogger.error(f"{strOutputFilename}: {e}")
 
     def verifyFilename(self, objProcessingState, strFilename):
         if strFilename.find("//") >= 0:
             self.objLogger.warning(
-                'Filename for "%s" includes double "//": "%s".'
-                % (objProcessingState.getIdentification(), strFilename)
+                f'Filename for "{objProcessingState.getIdentification()}" includes double "//": "{strFilename}".'
             )
         if strFilename.find("...") >= 0:
             self.objLogger.warning(
-                'Filename for "%s" includes tripple "..": "%s".'
-                % (objProcessingState.getIdentification(), strFilename)
+                f'Filename for "{objProcessingState.getIdentification()}" includes tripple "..": "{strFilename}".'
             )
         if strFilename.find("/./") >= 0:
             self.objLogger.warning(
-                'Filename for "%s" includes tripple "/./": "%s".'
-                % (objProcessingState.getIdentification(), strFilename)
+                f'Filename for "{objProcessingState.getIdentification()}" includes tripple "/./": "{strFilename}".'
             )
 
     def getOptionSingle(self, strOption, strDefault=None):
-        if strDefault == None:
+        if strDefault is None:
             return dictEntries[strOption][0]["a"]
         try:
             return dictEntries[strOption][0]["a"]
-        except:
+        except Exception as _:
             return strDefault
 
     def combine(self, listNavigations, listEntries):
@@ -500,7 +488,7 @@ class Zulu:
                     objProcessingState = ProcessingState(self, listEntries + [objEntry])
                     self.create_page(objProcessingState)
                 except Exception as e:
-                    self.objLogger.error("create_page(): %s" % e)
+                    self.objLogger.error(f"create_page(): {e}")
                     raise
             else:
                 self.combine(listNavigations[1:], listEntries + [objEntry])
@@ -517,7 +505,7 @@ class Zulu:
         if os.path.exists(strPath):
             return
         self.objLogger.info(
-            'Creating folder "%s" for file "%s".' % (strPath, strFilename), None
+            f'Creating folder "{strPath}" for file "{strFilename}".', None
         )
         os.makedirs(strPath)
 
@@ -542,7 +530,7 @@ class TransformBaseDir:
         """
         strValue = HandlerTag(objProcessingState).getValue(self.strTag)
         if strValue == "-":
-            raise "Internal programming error"
+            raise ValueError("Internal programming error")
 
         if strValue == "":
             # Special case
@@ -553,15 +541,13 @@ class TransformBaseDir:
 
         if strValue == "/":
             objProcessingState.objZulu.objLogger.error(
-                '"%s": "/" does not make sense. If the file is in the root folder, leave the field empty.'
-                % objProcessingState.getIdentification()
+                f'"{objProcessingState.getIdentification()}": "/" does not make sense. If the file is in the root folder, leave the field empty.'
             )
             return
 
         if not strValue.startswith("/"):
             objProcessingState.objZulu.objLogger.error(
-                '"%s": "%s" is "%s", expected to start with "/".'
-                % (objProcessingState.getIdentification(), self.strTag, strValue)
+                f'"{objProcessingState.getIdentification()}": "{self.strTag}" is "{strValue}", expected to start with "/".'
             )
             return
 
@@ -599,7 +585,7 @@ class Entry:
         # ActualEntry.to_be_displayed(strPathOfPageToBeCreated)
         # true if the parent of 'ActualEntry' is a parent
         # of 'strPathOfPageToBeCreated' or one of its parents.
-        if self.objParent == None:
+        if self.objParent is None:
             # Entries with no parent are always displayed
             if self.bHidden:
                 # This entry is marked as hidden (has '-hidden' in its path).
@@ -608,7 +594,7 @@ class Entry:
             return 1
         iPos = self.strPath.rfind("/")
         if iPos == -1:
-            raise "to_be_displayed(): Internal programming error"
+            raise ValueError("to_be_displayed(): Internal programming error")
         strParent = self.strPath[:iPos]
         if strPathOfPageToBeCreated.find(strParent) == 0:
             if self.bHidden:
@@ -619,7 +605,7 @@ class Entry:
         return 0
 
     def anchester_is_hidden(self):
-        if self.objParent == None:
+        if self.objParent is None:
             return 0
         if self.objParent.bHidden:
             return 1
@@ -643,12 +629,11 @@ class Navigation:
 
         for objEntry in self.listEntries:
             objEntry.objParent = self.get_parent(objEntry.strPath)
-            if objEntry.objParent == None:
+            if objEntry.objParent is None:
                 if objEntry.strPath.find("/", 1) != -1:
                     if not objEntry.bHidden:
                         objZulu.objLogger.warning(
-                            'Navigation "%s": Hidden entry "%s".'
-                            % (self.strName, objEntry.strPath),
+                            f'Navigation "{self.strName}": Hidden entry "{objEntry.strPath}".',
                             objZulu.sFilenameStructure,
                         )
 
@@ -701,8 +686,8 @@ class ProcessingState:
                 return objEntry.dictTags[sTag]
 
     def getIdentification(self):
-        list = map(lambda l: l.strPath, self.listEntries)
-        return " <-> ".join(list)
+        entries = (entry.strPath for entry in self.listEntries)
+        return " <-> ".join(entries)
 
 
 class HandlerTag:
@@ -720,10 +705,9 @@ class HandlerTag:
             return self.objProcessingState.dictGlobalTags[sTag]
         except KeyError:
             error_tag = "ERROR_ACVX"
-            msg = '"%s": Tag <!--Zulu:Tag:%s--> not found. Used "%s" instead.' % (
-                self.objProcessingState.getIdentification(),
-                sTag,
-                error_tag,
+            msg = (
+                f'"{self.objProcessingState.getIdentification()}": '
+                f'Tag <!--Zulu:Tag:{sTag}--> not found. Used "{error_tag}" instead.'
             )
             self.objProcessingState.objZulu.objLogger.error(msg)
             return error_tag
@@ -741,7 +725,7 @@ class HandlerNavTag:
         for objEntry in self.listEntries:
             if sTag in objEntry.dictTags:
                 return objEntry.dictTags[sTag]
-        return "<!--Hidden_Zulu:Tag:%s-->" % sTag
+        return f"<!--Hidden_Zulu:Tag:{sTag}-->"
 
 
 class HandlerPython:
@@ -797,8 +781,7 @@ class Template:
                             if strStart == "^":
                                 break
                             objZulu.objLogger.error(
-                                'After "%s", expected to find "%s".'
-                                % (strStart, strEnd),
+                                f'After "{strStart}", expected to find "{strEnd}".',
                                 self.strTemplateFilename,
                             )
                             raise ZuluException()
@@ -842,10 +825,9 @@ class Template:
                     self.strTemplate = self.strTemplate.replace(
                         dictSubst["a"], dictSubst["b"]
                     )
-        except:
+        except Exception as _:
             objZulu.objLogger.warning(
-                'Subst: "%s"->"%s". No classification ("Template" or "Output").'
-                % (dictSubst["a"], dictSubst["b"]),
+                f'Subst: "{dictSubst["a"]}"->"{dictSubst["b"]}". No classification ("Template" or "Output").',
                 objZulu.sFilenameStructure,
             )
 
@@ -949,13 +931,12 @@ class menu:
 
         try:
             (sNavigation, sOpenAllMenues, sSelectParentEntries) = sParameter.split(":")
-        except ValueError:
+        except ValueError as e:
             objZulu.objLogger.error(
-                'Expected something like "<!--Zulu:Python:MODULE_NAME:CLASS_NAME:NAVIGATION:1:1-->" but got "<!--Zulu:Python:menu:%s-->".'
-                % sParameter,
+                f'Expected something like "<!--Zulu:Python:MODULE_NAME:CLASS_NAME:NAVIGATION:1:1-->" but got "<!--Zulu:Python:menu:{sParameter}-->".',
                 objTemplate.strTemplateFilename,
             )
-            raise ZuluException()
+            raise ZuluException() from e
 
         objNavigation = objZulu.get_navigation_by_name(sNavigation)
         strReturn = ""
@@ -967,14 +948,12 @@ class menu:
                 if sCurrentPath == sPagePath or (
                     sSelectParentEntries == "1" and sPagePath.find(sCurrentPath) == 0
                 ):
-                    strTemplateName = ":Selected:%s:%d" % (
-                        objNavigation.strName,
-                        objEntry.iLevel,
+                    strTemplateName = (
+                        f":Selected:{objNavigation.strName}:{objEntry.iLevel}"
                     )
                 else:
-                    strTemplateName = ":Normal:%s:%d" % (
-                        objNavigation.strName,
-                        objEntry.iLevel,
+                    strTemplateName = (
+                        f":Normal:{objNavigation.strName}:{objEntry.iLevel}"
                     )
                 # Examples ':Normal:Page:0', ':Selected:Page:0'
                 try:
@@ -988,7 +967,7 @@ class menu:
                     strReturn = strReturn + sTmp
                 except KeyError:
                     objZulu.objLogger.warning(
-                        "Template <!--Zulu:Template%s--> not found." % strTemplateName,
+                        f"Template <!--Zulu:Template{strTemplateName}--> not found.",
                         objTemplate.strTemplateFilename,
                     )
         return strReturn
@@ -1010,8 +989,7 @@ class sitemap(menu):
             (sNavigation, sOpenAllMenues, sSelectParentEntries) = sParameter.split(":")
             # Backward-Compatibility
             objZulu.objLogger.warning(
-                'This version of Zulu expects something like "<!--Zulu:Python:sitemap:Page-->" but got "<!--Zulu:Python:sitemap:%s-->".'
-                % (sParameter),
+                f'This version of Zulu expects something like "<!--Zulu:Python:sitemap:Page-->" but got "<!--Zulu:Python:sitemap:{sParameter}-->".',
                 objProcessingState.strInputFilename,
             )
         except ValueError:
@@ -1020,17 +998,12 @@ class sitemap(menu):
 
         objNavigation = objZulu.get_navigation_by_name(sNavigation)
         strReturn = ""
-        sPagePath = objProcessingState.getPath(sNavigation)
         for objEntry in objNavigation.listEntries:
-            sCurrentPath = objEntry.strPath
             if objEntry.bHidden:
                 continue
             if objEntry.anchester_is_hidden():
                 continue
-            strTemplateName = ":Sitemap:%s:%d" % (
-                objNavigation.strName,
-                objEntry.iLevel,
-            )
+            strTemplateName = f":Sitemap:{objNavigation.strName}:{objEntry.iLevel}"
             # Examples ':Sitemap:Page:0', ':Selected:Page:0'
             try:
                 strTemplate = objZulu.dictTemplates[strTemplateName]
@@ -1043,7 +1016,7 @@ class sitemap(menu):
                 strReturn = strReturn + sTmp
             except KeyError:
                 objZulu.objLogger.warning(
-                    "Template <!--Zulu:Template%s--> not found." % strTemplateName,
+                    f"Template <!--Zulu:Template{strTemplateName}--> not found.",
                     objTemplate.strTemplateFilename,
                 )
         return strReturn
@@ -1065,13 +1038,12 @@ class menu_level:
             (sNavigation, sLevelFrom, sLevelTo) = sParameter.split(":")
             iLevelFrom = int(sLevelFrom)
             iLevelTo = int(sLevelTo)
-        except ValueError:
+        except ValueError as e:
             objZulu.objLogger.error(
-                'Expected something like "<!--Zulu:Python:MODULE_NAME:CLASS_NAME:NAVIGATION:1:1-->" but got "<!--Zulu:Python:menu:%s-->".'
-                % sParameter,
+                f'Expected something like "<!--Zulu:Python:MODULE_NAME:CLASS_NAME:NAVIGATION:1:1-->" but got "<!--Zulu:Python:menu:{sParameter}-->".',
                 objProcessingState.strInputFilename,
             )
-            raise ZuluException()
+            raise ZuluException() from e
 
         objNavigation = objZulu.get_navigation_by_name(sNavigation)
         strReturn = ""
@@ -1083,14 +1055,12 @@ class menu_level:
                     if (sCurrentPath == sPagePath) or (
                         sPagePath.find(sCurrentPath) == 0
                     ):
-                        strTemplateName = ":Selected:%s:%d" % (
-                            objNavigation.strName,
-                            objEntry.iLevel,
+                        strTemplateName = (
+                            f":Selected:{objNavigation.strName}:{objEntry.iLevel}"
                         )
                     else:
-                        strTemplateName = ":Normal:%s:%d" % (
-                            objNavigation.strName,
-                            objEntry.iLevel,
+                        strTemplateName = (
+                            f":Normal:{objNavigation.strName}:{objEntry.iLevel}"
                         )
                     # Examples ':Normal:Page:0', ':Selected:Page:0'
                     try:
@@ -1104,8 +1074,7 @@ class menu_level:
                         strReturn = strReturn + sTmp
                     except KeyError:
                         objZulu.objLogger.warning(
-                            "Template <!--Zulu:Template%s--> not found."
-                            % strTemplateName,
+                            f"Template <!--Zulu:Template{strTemplateName}--> not found.",
                             objTemplate.strTemplateFilename,
                         )
         return strReturn
@@ -1126,7 +1095,7 @@ def main_():
     except ZuluException:
         # Error was already logged
         pass
-    except:
+    except:  # noqa: E722
         zulu.objLogger.error("")
     if zulu.objLogger.iErrors > 0:
         return 1

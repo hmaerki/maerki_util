@@ -14,12 +14,12 @@ echo Salamibrot | dmtxwrite -m 12 -d 6 -o barcode_tmp.png
 import treepoem
 
 barcode = treepoem.generate_barcode(
-    barcode_type='datamatrix',
-    data='Gurkenbrot',
-    options={'borderwidth': 100},
+    barcode_type="datamatrix",
+    data="Gurkenbrot",
+    options={"borderwidth": 100},
 )
 
-barcode.convert('1').save('datamatrix.png')
+barcode.convert("1").save("datamatrix.png")
 ```
 
 [Beispielrechnung](../rechnung_verschickt/z_rechnung_vorlage_webshop_excel.beispielbestellung.txt)

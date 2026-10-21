@@ -1,4 +1,4 @@
-if __name__ == "__main__":
-    import zulu
+from . import zulu
 
-    zulu.zulu.main()
+if __name__ == "__main__":
+    zulu.main()

@@ -22,7 +22,7 @@ def _get_cell_value(obj_row, index):
         return ""
 
     v = obj_row[index]
-    if v.value == None:
+    if v.value is None:
         return ""
 
     return str(v.value)
@@ -94,9 +94,7 @@ class Table:
             print(f"row: {self.get_row_as_dict(obj_row)}", file=obj_file)
 
     def raise_exception(self, str_msg):
-        raise ExcelReaderExecption(
-            f'Table "{self.str_table_name}": {str_msg}', file=obj_file
-        )
+        raise ExcelReaderExecption(f'Table "{self.str_table_name}": {str_msg}')
 
 
 class ExcelReader:

@@ -308,9 +308,9 @@ def tabbedDialogFunc(parent, call_fit=True, set_sizer=True):
     )
     item0.Add(item42, 0, wx.GROW | wx.ALIGN_CENTER_VERTICAL, 5)
 
-    if set_sizer == True:
+    if set_sizer:
         parent.SetSizer(item0)
-        if call_fit == True:
+        if call_fit:
             item0.SetSizeHints(parent)
 
     return item0

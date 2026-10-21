@@ -1,3 +1,1 @@
-name = "zulu"
-from .zulu import *
-from .zulu_excel_reader import *
+from .zulu import menu, path  # noqa: F401

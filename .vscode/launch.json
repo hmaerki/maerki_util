@@ -47,7 +47,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "zulu.zulu",
-            "cwd": "/tmp/luetzelsee/luetzelsee.ch/zulu_templates",
+            "cwd": "/home/maerki/work_maerki/privat_svn_hans/www_maerki_com/maerki_informatik/zulu_templates",
             "console": "integratedTerminal",
             "justMyCode": false,
         },
