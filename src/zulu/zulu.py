@@ -42,8 +42,10 @@ import re
 import stat
 import sys
 import time
+import typing
+from xml.etree import ElementTree
 
-from zulu import zulu_excel_reader
+from . import zulu_excel_reader
 
 logger = logging.getLogger(__file__)
 
@@ -51,12 +53,16 @@ logger = logging.getLogger(__file__)
 sys.path.insert(0, os.path.join(os.path.abspath(os.getcwd())))
 
 sCopyright = "Copyright Hans und Peter Maerki. LGPL."
-sVersion = "v4.0.4"
-sDate = "2026-07-13a"
+sVersion = "v4.0.5"
+sDate = "2026-10-21a"
 sProduct = "Zulu Website-Assembler"
 
 
-dictEntries: dict[str, str] = {}
+NAMESPACE_SITEMAPXML = "http://www.sitemaps.org/schemas/sitemap/0.9"
+TAG_SITEMAPXML = "SitemapXml"
+FILENAME_SITEMAPXML = "sitemap.xml"
+
+dictEntries: dict[str, list[dict[str, str]]] = {}
 dictOutputFiles: dict[str, str] = {}
 
 
@@ -247,15 +253,21 @@ class Zulu:
                 return objNavigation
         raise IndexError(f'get_navigation_by_name("{sName}") not found')
 
-    def create_page(self, objProcessingState):
+    def skip_page(self, objProcessingState) -> str | None:
         # Verify if we have to create the file: If Tag 'Folder' containts '-', the page creation may be skipped
         for strBaseDirTag in self.dictBaseDirs.keys():
             for objEntry in objProcessingState.listEntries:
                 if objEntry.dictTags.get(strBaseDirTag) == "-":
-                    self.objLogger.info(
-                        f'File for "{objProcessingState.getIdentification()}" will not be created: Tag "{strBaseDirTag}" is "-".'
-                    )
-                    return
+                    return strBaseDirTag
+        return None
+
+    def create_page(self, objProcessingState):
+        strBaseDirTag = self.skip_page(objProcessingState)
+        if strBaseDirTag is not None:
+            self.objLogger.info(
+                f'File for "{objProcessingState.getIdentification()}" will not be created: Tag "{strBaseDirTag}" is "-".'
+            )
+            return
 
         #
         # get template
@@ -495,7 +507,6 @@ class Zulu:
 
     def zulu(self):
         self.combine(self.listNavigations, [])
-        self.objLogger.close()
 
     def zuluility_get_now(self):
         return time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
@@ -508,6 +519,86 @@ class Zulu:
             f'Creating folder "{strPath}" for file "{strFilename}".', None
         )
         os.makedirs(strPath)
+
+    def write_sitemapxml(self, filename: str, url: str, navigation: str) -> None:
+        def write_element_tree() -> None:
+            def get_list_url() -> typing.Iterator[str]:
+                objNavigation = self.get_navigation_by_name(navigation)
+                for objEntry in objNavigation.listEntries:
+                    if objEntry.bHidden:
+                        continue
+                    # if objEntry.anchester_is_hidden():
+                    #     continue
+
+                    objOutputTemplate = Template(url)
+                    objProcessingState = ProcessingState(self, [objEntry])
+                    strBaseDirTag = self.skip_page(objProcessingState)
+                    if strBaseDirTag is not None:
+                        continue
+                    objOutputTemplate.replace_tags(
+                        HandlerTag(objProcessingState), objProcessingState
+                    )
+                    actual_url = objOutputTemplate.strTemplate
+                    yield actual_url
+
+            ElementTree.register_namespace("", NAMESPACE_SITEMAPXML)
+            urlset = ElementTree.Element(f"{{{NAMESPACE_SITEMAPXML}}}urlset")
+            for _url in get_list_url():
+                url_element = ElementTree.SubElement(
+                    urlset, f"{{{NAMESPACE_SITEMAPXML}}}url"
+                )
+                ElementTree.SubElement(
+                    url_element, f"{{{NAMESPACE_SITEMAPXML}}}loc"
+                ).text = _url
+
+            ElementTree.indent(urlset, space="  ")
+            ElementTree.ElementTree(urlset).write(
+                filename,
+                encoding="UTF-8",
+                xml_declaration=True,
+            )
+
+        write_element_tree()
+        self.objLogger.info(f'Wrote "{filename}".', None)
+
+    def sitemapxml(self):
+        class MyWarning(Exception):
+            pass
+
+        def get_entry(tag: str, subtag: str) -> str:
+            try:
+                entries = dictEntries[tag]
+            except KeyError as e:
+                raise MyWarning(
+                    f'No entry "{TAG_SITEMAPXML}:" found in "{self.sFilenameStructure}": Skip "{FILENAME_SITEMAPXML}".'
+                ) from e
+
+            for entry in entries:
+                try:
+                    actual_tag = entry["tag"]
+                except KeyError as e:
+                    raise MyWarning(
+                        f'Entry "{TAG_SITEMAPXML}:" found in "{self.sFilenameStructure}": Programming error A!'
+                    ) from e
+                if actual_tag == subtag:
+                    try:
+                        value = entry["a"]
+                        return value
+                    except KeyError as e:
+                        raise MyWarning(
+                            f'Entry "{TAG_SITEMAPXML}:" found in "{self.sFilenameStructure}": Programming error B!'
+                        ) from e
+            raise MyWarning(
+                f'Entry "{TAG_SITEMAPXML}:" found in "{self.sFilenameStructure}": Subentry "{subtag}" not found!'
+            )
+
+        try:
+            navigation = get_entry(tag=TAG_SITEMAPXML, subtag="Navigation")
+            filename = get_entry(tag=TAG_SITEMAPXML, subtag="Filename")
+            url = get_entry(tag=TAG_SITEMAPXML, subtag="Url")
+            self.write_sitemapxml(filename=filename, navigation=navigation, url=url)
+        except MyWarning as mywarning:
+            self.objLogger.warning(str(mywarning), self.sFilenameStructure)
 
 
 class TransformBaseDir:
@@ -1086,6 +1177,9 @@ def main_():
         zulu = Zulu()
         zulu.open()
         zulu.zulu()
+        zulu.sitemapxml()
+        zulu.objLogger.close()
+
     return 0
 
     zulu = Zulu()
